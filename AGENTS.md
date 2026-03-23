@@ -12,6 +12,13 @@
 
 Registry names use the pattern `<material>-<surface>`, e.g. `wood-floor`, `fabric-duvet`, `poster-skate`.
 
+## Adding new monitor demos
+
+When adding a new demo to be displayed on the 3D computer monitor:
+1. Create a new directory under `demos/` (e.g., `demos/my-new-demo/`) and place the demo files there.
+2. Ensure the demo functions correctly within an `iframe`.
+3. Update the `navigateComputerScreen` Web MCP tool in `src/main.js`. You must append the new demo's URL path (e.g. `/demos/my-new-demo/`) to the `enum` array in `inputSchema.properties.url`. This strict `enum` ensures the LLM can only navigate the monitor to explicitly supported demo pages.
+
 ## Texture generation via LLM
 
 Use `mcp__mcp-to-llm__prompt` with provider `google-primary` and model `gemini-3.1-pro-preview` or `gemini-3-flash-preview`.

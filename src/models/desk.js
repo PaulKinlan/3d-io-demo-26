@@ -12,7 +12,8 @@ export const buildDesk = ({
   computeFocusZoom,
   focusControlLimits,
   focusLift,
-  defaultView
+  defaultView,
+  registerSpinTarget
 }) => {
   const deskGroup = new THREE.Group();
   scene.add(deskGroup);
@@ -65,32 +66,44 @@ export const buildDesk = ({
   drawer.receiveShadow = true;
   deskGroup.add(drawer);
 
+  const chairGroup = new THREE.Group();
+  chairGroup.position.set(-3.85, 0, -2.3);
+  deskGroup.add(chairGroup);
+
   const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.16, 1), new THREE.MeshStandardMaterial({
     color: '#85606e',
     roughness: 0.9,
   }));
-  chairSeat.position.set(-3.85, 1.28, -2.3);
+  chairSeat.position.set(0, 1.28, 0);
   chairSeat.castShadow = true;
   chairSeat.receiveShadow = true;
-  deskGroup.add(chairSeat);
+  chairGroup.add(chairSeat);
 
   const chairBack = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.05, 0.16), chairSeat.material);
-  chairBack.position.set(-3.85, 1.86, -2.73);
+  chairBack.position.set(0, 1.86, -0.43);
   chairBack.castShadow = true;
   chairBack.receiveShadow = true;
-  deskGroup.add(chairBack);
+  chairGroup.add(chairBack);
 
   const chairStem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 1.12, 16), metalMaterial);
-  chairStem.position.set(-3.85, 0.68, -2.3);
+  chairStem.position.set(0, 0.68, 0);
   chairStem.castShadow = true;
   chairStem.receiveShadow = true;
-  deskGroup.add(chairStem);
+  chairGroup.add(chairStem);
 
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.8, 0.12, 20), metalMaterial);
-  base.position.set(-3.85, 0.06, -2.3);
+  base.position.set(0, 0.06, 0);
   base.castShadow = true;
   base.receiveShadow = true;
-  deskGroup.add(base);
+  chairGroup.add(base);
+
+  const chairParts = [chairSeat, chairBack, chairStem, base];
+  for (const part of chairParts) {
+    part.userData.spinGroup = chairGroup;
+  }
+  if (typeof registerSpinTarget === 'function') {
+    registerSpinTarget(chairParts);
+  }
 
   const monitorShell = new THREE.Mesh(
     new THREE.BoxGeometry(1.35, 1.05, 1.18),

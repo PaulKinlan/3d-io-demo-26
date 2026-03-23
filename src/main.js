@@ -28,12 +28,23 @@ app.innerHTML = `
         <span>Drag to orbit</span>
         <span>Shift-drag to pan</span>
         <span>Double-click monitor to focus</span>
+        <span>Press <kbd>?</kbd> for shortcuts</span>
       </div>
     </section>
     <aside class="caption">
       The monitor renders a same-origin iframe to a hidden canvas and maps that live result
       into the 3D screen, with a fallback HUD when the experimental html-in-canvas APIs are unavailable.
     </aside>
+    <div class="help-panel">
+      <h2>Keyboard Shortcuts</h2>
+      <ul>
+        <li><kbd>C</kbd> - Focus / Unfocus Monitor</li>
+        <li><kbd>B</kbd> - Focus / Unfocus Books</li>
+        <li><kbd>L</kbd> - Toggle Desk Lamp</li>
+        <li><kbd>D</kbd> - Toggle Night Mode</li>
+        <li><kbd>?</kbd> - Toggle UI and Shortcuts</li>
+      </ul>
+    </div>
     <section class="html-canvas-lab" aria-hidden="true">
       <canvas class="monitor-html-canvas" width="960" height="720" layoutsubtree>
         <div class="monitor-html-subtree">
@@ -160,6 +171,11 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const focusTargets = new Map();
 const focusableMeshes = [];
+const spinTargets = [];
+const registerSpinTarget = (meshes) => {
+  spinTargets.push(...meshes);
+};
+const spinningGroups = new Set();
 const tempBox = new THREE.Box3();
 const tempCenter = new THREE.Vector3();
 const tempSize = new THREE.Vector3();
@@ -227,6 +243,8 @@ const easeInOutCubic = (value) => {
 
   return 1 - ((-2 * value + 2) ** 3) / 2;
 };
+
+const easeOutQuart = (value) => 1 - Math.pow(1 - value, 4);
 
 const getBoundsForMeshes = (meshes) => {
   tempBox.makeEmpty();
@@ -359,6 +377,52 @@ const handleSceneDoubleClick = (event) => {
   }
 };
 
+let pointerDownPos = { x: 0, y: 0 };
+
+const hideInstructions = () => {
+  const hud = document.querySelector('.hud');
+  if (hud && !hud.classList.contains('hidden')) {
+    hud.classList.add('hidden');
+  }
+  const caption = document.querySelector('.caption');
+  if (caption && !caption.classList.contains('hidden')) {
+    caption.classList.add('hidden');
+  }
+  const helpPanel = document.querySelector('.help-panel');
+  if (helpPanel && helpPanel.classList.contains('active')) {
+    helpPanel.classList.remove('active');
+  }
+};
+
+renderer.domElement.addEventListener('pointerdown', (event) => {
+  pointerDownPos = { x: event.clientX, y: event.clientY };
+  hideInstructions();
+});
+
+renderer.domElement.addEventListener('wheel', hideInstructions, { passive: true });
+const handleSceneClick = (event) => {
+  const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
+  if (dist > 5) return;
+
+  const bounds = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+  pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+
+  raycaster.setFromCamera(pointer, camera);
+
+  const hit = raycaster.intersectObjects(spinTargets, false).find((h) => h.object.userData.spinGroup);
+
+  if (hit) {
+    const group = hit.object.userData.spinGroup;
+    if (!group.userData.isSpinning) {
+      group.userData.isSpinning = true;
+      group.userData.spinProgress = 0;
+      spinningGroups.add(group);
+    }
+  }
+};
+renderer.domElement.addEventListener('click', handleSceneClick);
+
 const updateCameraTransition = () => {
   if (!cameraTransition) {
     return;
@@ -387,6 +451,7 @@ const updateCameraTransition = () => {
 };
 
 controls.addEventListener('start', () => {
+  hideInstructions();
   if (cameraTransition && cameraTransition.targetControlLimits) {
     applyControlLimits(cameraTransition.targetControlLimits);
   }
@@ -509,6 +574,10 @@ window.addEventListener('keydown', (e) => {
     if (panel) {
       panel.classList.toggle('active');
     }
+    const hud = document.querySelector('.hud');
+    if (hud) hud.classList.toggle('hidden');
+    const caption = document.querySelector('.caption');
+    if (caption) caption.classList.toggle('hidden');
   }
 });
 
@@ -580,7 +649,8 @@ const context = {
   animatedMaterials,
   activityLights,
   networkLights,
-  defaultView
+  defaultView,
+  registerSpinTarget
 };
 
 buildRoom(context);
@@ -671,6 +741,20 @@ const animate = (time = 0) => {
     networkLights[1].emissiveIntensity = greenIntensity;
   }
 
+  for (const group of spinningGroups) {
+    // Increment progress (0 to 1 range), ~1.2s at 60fps
+    group.userData.spinProgress += 0.014;
+    if (group.userData.spinProgress >= 1) {
+      group.userData.spinProgress = 0;
+      group.userData.isSpinning = false;
+      spinningGroups.delete(group);
+      group.rotation.y = 0;
+    } else {
+      // 2 full spins starting very fast and easing to a stop
+      group.rotation.y = easeOutQuart(group.userData.spinProgress) * Math.PI * 4;
+    }
+  }
+
   updateCameraTransition();
   
   // Scale rotate rotation sensitivity depending on orthographic zoom
@@ -708,5 +792,92 @@ const toggleNightMode = () => {
     console.log('Night mode toggled:', !active);
   }
 };
+
+const setupMCP = () => {
+  if (typeof window === 'undefined' || !window.navigator || !window.navigator.modelContext) {
+    return;
+  }
+
+  window.navigator.modelContext.registerTool({
+    execute: () => { toggleLamp(); },
+    name: "toggleDeskLamp",
+    description: "Toggles the desk lamp on or off.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => { toggleNightMode(); },
+    name: "toggleNightMode",
+    description: "Toggles the room's night mode ceiling lights on or off.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => { focusTarget('monitor'); },
+    name: "focusMonitor",
+    description: "Zooms the camera in to focus on the computer monitor.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => { focusTarget('books'); },
+    name: "focusBooks",
+    description: "Zooms the camera in to focus on the bookshelf.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => { resetCameraFocus(); },
+    name: "resetCameraFocus",
+    description: "Zooms the camera out to the default room view, resetting any focus.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => {
+      const chairPart = spinTargets.find(mesh => mesh.userData.spinGroup);
+      if (chairPart) {
+        const group = chairPart.userData.spinGroup;
+        if (!group.userData.isSpinning) {
+          group.userData.isSpinning = true;
+          group.userData.spinProgress = 0;
+          spinningGroups.add(group);
+        }
+      }
+    },
+    name: "spinChair",
+    description: "Spins the desk chair around.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: ({ url }) => {
+      const iframe = document.querySelector('.monitor-html-frame');
+      if (iframe) {
+        iframe.src = url;
+      }
+    },
+    name: "navigateComputerScreen",
+    description: "Navigates the computer monitor's iframe to one of the available demos.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        url: {
+          type: "string",
+          enum: [
+            "/demos/browser/",
+            "/demos/flappy-bird/",
+            "/demos/new-tab/",
+            "/demos/slide-deck/"
+          ],
+          description: "The URL of the demo to navigate to."
+        }
+      },
+      required: ["url"]
+    }
+  });
+};
+
+setupMCP();
 
 animate();
