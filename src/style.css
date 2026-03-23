@@ -140,22 +140,76 @@ body::before {
     bottom: 1rem;
     max-width: none;
   }
+
+  .monitor-debug-panel {
+    left: 1rem;
+    right: 1rem;
+    top: auto;
+    bottom: 12.75rem;
+    width: auto;
+  }
+
+  body.monitor-debug .html-canvas-lab {
+    left: 1rem;
+    bottom: 1rem;
+  }
 }
 
 
 .html-canvas-lab {
-  position: absolute;
-  inset: auto;
-  width: 1px;
-  height: 1px;
+  position: fixed;
+  left: -99999px;
+  top: 0;
+  width: 960px;
+  height: 720px;
   overflow: hidden;
-  opacity: 0;
   pointer-events: none;
 }
 
 .monitor-html-canvas {
+  display: block;
+  width: 960px;
+  height: 720px;
+}
+
+.monitor-debug-panel {
   position: absolute;
-  inset: 0;
+  right: 1.5rem;
+  top: 1.5rem;
+  width: min(22rem, calc(100vw - 3rem));
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(11, 10, 15, 0.76);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
+  z-index: 3;
+}
+
+.monitor-debug-log {
+  margin: 0;
+  font: 0.77rem/1.45 ui-monospace, "SFMono-Regular", "SF Mono", Monaco, Consolas, monospace;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+body.monitor-debug .html-canvas-lab {
+  left: 1.5rem;
+  top: auto;
+  bottom: 1.5rem;
+  width: 240px;
+  height: 180px;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: rgba(11, 10, 15, 0.82);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
+  z-index: 3;
+}
+
+body.monitor-debug .monitor-html-canvas {
+  width: 240px;
+  height: 180px;
 }
 
 .monitor-html-subtree {

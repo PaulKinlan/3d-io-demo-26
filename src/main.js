@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
 
 const app = document.querySelector('#app');
+const monitorDebugEnabled = new URLSearchParams(window.location.search).has('monitorDebug');
 
 app.innerHTML = `
   <main class="scene-shell">
@@ -26,24 +27,44 @@ app.innerHTML = `
       into the 3D screen, with a fallback HUD when the experimental html-in-canvas APIs are unavailable.
     </aside>
     <section class="html-canvas-lab" aria-hidden="true">
-      <canvas class="monitor-html-canvas" width="960" height="720" layoutsubtree></canvas>
-      <div class="monitor-html-subtree">
-        <iframe
-          class="monitor-html-frame"
-          src="/monitor-demos.html"
-          title="Monitor demos"
-          loading="eager"
-        ></iframe>
-      </div>
+      <canvas class="monitor-html-canvas" width="960" height="720" layoutsubtree>
+        <div class="monitor-html-subtree">
+          <iframe
+            class="monitor-html-frame"
+            src="/monitor-demos.html"
+            title="Monitor demos"
+            loading="eager"
+          ></iframe>
+        </div>
+      </canvas>
     </section>
+    ${monitorDebugEnabled ? `
+      <aside class="monitor-debug-panel">
+        <p class="eyebrow">Monitor Debug</p>
+        <pre class="monitor-debug-log"></pre>
+      </aside>
+    ` : ''}
   </main>
 `;
 
+document.body.classList.toggle('monitor-debug', monitorDebugEnabled);
+
 const sceneShell = document.querySelector('.scene-shell');
 const htmlCanvas = document.querySelector('.monitor-html-canvas');
-const htmlSubtree = document.querySelector('.monitor-html-subtree');
-const htmlFrame = document.querySelector('.monitor-html-frame');
+const htmlSubtree = htmlCanvas?.querySelector('.monitor-html-subtree');
+const htmlFrame = htmlCanvas?.querySelector('.monitor-html-frame');
+const debugLog = document.querySelector('.monitor-debug-log');
 const htmlContext = htmlCanvas.getContext('2d');
+const drawMonitorElement = htmlContext && (
+  (typeof htmlContext.drawElementImage === 'function' && htmlContext.drawElementImage.bind(htmlContext))
+  || (typeof htmlContext.drawElement === 'function' && htmlContext.drawElement.bind(htmlContext))
+);
+const requestMonitorPaint = typeof htmlCanvas.requestPaint === 'function'
+  ? htmlCanvas.requestPaint.bind(htmlCanvas)
+  : null;
+const monitorDrawApi = typeof htmlContext?.drawElementImage === 'function'
+  ? 'drawElementImage'
+  : (typeof htmlContext?.drawElement === 'function' ? 'drawElement' : 'unavailable');
 
 const monitorViewport = {
   width: htmlCanvas.width,
@@ -52,10 +73,39 @@ const monitorViewport = {
 
 const monitorState = {
   ready: false,
-  supported: Boolean(htmlContext && typeof htmlContext.drawElement === 'function'),
+  supported: Boolean(drawMonitorElement),
   lastDraw: 0,
+  paintDriven: Boolean(drawMonitorElement && requestMonitorPaint),
+  paintRequested: false,
+  paintEvents: 0,
+  paintRequests: 0,
+  drawCalls: 0,
+  lastError: 'none',
   texture: null,
 };
+
+const syncMonitorDebug = () => {
+  if (!debugLog) {
+    return;
+  }
+
+  debugLog.textContent = [
+    'Enable with ?monitorDebug=1',
+    `draw api: ${monitorDrawApi}`,
+    `draw supported: ${monitorState.supported}`,
+    `paint event support: ${'onpaint' in htmlCanvas}`,
+    `requestPaint support: ${Boolean(requestMonitorPaint)}`,
+    `paint-driven mode: ${monitorState.paintDriven}`,
+    `ready: ${monitorState.ready}`,
+    `paint requests: ${monitorState.paintRequests}`,
+    `paint events: ${monitorState.paintEvents}`,
+    `draw calls: ${monitorState.drawCalls}`,
+    `last error: ${monitorState.lastError}`,
+    `canvas bitmap: ${monitorViewport.width}x${monitorViewport.height}`,
+  ].join('\n');
+};
+
+syncMonitorDebug();
 
 const appResizeObserver = new ResizeObserver(() => {
   if (htmlSubtree) {
@@ -366,29 +416,82 @@ const drawMonitorFallback = () => {
   htmlContext.restore();
 };
 
-const renderMonitorSurface = (time) => {
+const updateMonitorTexture = (time) => {
+  monitorState.lastDraw = time;
+  monitorState.ready = true;
+  monitorState.paintRequested = false;
+  monitorState.texture.needsUpdate = true;
+  syncMonitorDebug();
+};
+
+const renderMonitorFallback = (time = performance.now()) => {
+  drawMonitorFallback();
+  updateMonitorTexture(time);
+};
+
+const drawMonitorSurface = (time = performance.now()) => {
   if (!htmlContext) {
     return;
   }
 
   if (!monitorState.supported) {
     if (!monitorState.ready) {
-      drawMonitorFallback();
-      monitorState.ready = true;
-      monitorState.texture.needsUpdate = true;
+      renderMonitorFallback(time);
     }
     return;
   }
 
+  htmlContext.clearRect(0, 0, monitorViewport.width, monitorViewport.height);
+  monitorState.drawCalls += 1;
+
+  try {
+    drawMonitorElement(htmlSubtree, 0, 0, monitorViewport.width, monitorViewport.height);
+    monitorState.lastError = 'none';
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    monitorState.lastError = message || 'unknown draw error';
+
+    if (message.includes('initial snapshot')) {
+      syncMonitorDebug();
+      return;
+    }
+
+    monitorState.supported = false;
+    monitorState.paintDriven = false;
+    renderMonitorFallback(time);
+    return;
+  }
+
+  updateMonitorTexture(time);
+};
+
+const handleMonitorPaint = () => {
+  monitorState.paintEvents += 1;
+  drawMonitorSurface();
+};
+
+if (monitorState.paintDriven) {
+  htmlCanvas.addEventListener('paint', handleMonitorPaint);
+}
+
+const renderMonitorSurface = (time) => {
   if (time - monitorState.lastDraw < 1000 / 24) {
     return;
   }
 
-  htmlContext.clearRect(0, 0, monitorViewport.width, monitorViewport.height);
-  htmlContext.drawElement(htmlSubtree, 0, 0, monitorViewport.width, monitorViewport.height);
-  monitorState.lastDraw = time;
-  monitorState.ready = true;
-  monitorState.texture.needsUpdate = true;
+  if (monitorState.paintDriven) {
+    if (monitorState.paintRequested) {
+      return;
+    }
+
+    monitorState.paintRequested = true;
+    monitorState.paintRequests += 1;
+    syncMonitorDebug();
+    requestMonitorPaint();
+    return;
+  }
+
+  drawMonitorSurface(time);
 };
 
 const buildRoom = () => {
@@ -499,6 +602,13 @@ const buildDesk = () => {
     color: '#b4a99b',
     roughness: 0.82,
   });
+  const invisibleMonitorFrontMaterial = new THREE.MeshStandardMaterial({
+    color: '#b4a99b',
+    roughness: 0.82,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  });
 
   const deskTop = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.24, 2.2), woodMaterial);
   deskTop.position.set(-4.9, 3.15, -4.25);
@@ -554,11 +664,48 @@ const buildDesk = () => {
   base.receiveShadow = true;
   deskGroup.add(base);
 
-  const monitorShell = new THREE.Mesh(new THREE.BoxGeometry(1.35, 1.05, 1.18), plasticMaterial);
+  const monitorShell = new THREE.Mesh(
+    new THREE.BoxGeometry(1.35, 1.05, 1.18),
+    [
+      plasticMaterial,
+      plasticMaterial,
+      plasticMaterial,
+      plasticMaterial,
+      invisibleMonitorFrontMaterial,
+      plasticMaterial,
+    ],
+  );
   monitorShell.position.set(-5.1, 4.05, -4.45);
   monitorShell.castShadow = true;
   monitorShell.receiveShadow = true;
   deskGroup.add(monitorShell);
+
+  const frontFrameShape = new THREE.Shape();
+  frontFrameShape.moveTo(-0.62, -0.48);
+  frontFrameShape.lineTo(0.62, -0.48);
+  frontFrameShape.lineTo(0.62, 0.48);
+  frontFrameShape.lineTo(-0.62, 0.48);
+  frontFrameShape.lineTo(-0.62, -0.48);
+
+  const frontFrameHole = new THREE.Path();
+  frontFrameHole.moveTo(-0.5, -0.39);
+  frontFrameHole.lineTo(-0.5, 0.39);
+  frontFrameHole.lineTo(0.5, 0.39);
+  frontFrameHole.lineTo(0.5, -0.39);
+  frontFrameHole.lineTo(-0.5, -0.39);
+  frontFrameShape.holes.push(frontFrameHole);
+
+  const frontFrame = new THREE.Mesh(
+    new THREE.ShapeGeometry(frontFrameShape),
+    new THREE.MeshStandardMaterial({
+      color: '#b4a99b',
+      roughness: 0.82,
+      side: THREE.DoubleSide,
+    }),
+  );
+  frontFrame.position.set(-5.1, 4.08, -3.81);
+  frontFrame.renderOrder = 3;
+  deskGroup.add(frontFrame);
 
   monitorState.texture = new THREE.CanvasTexture(htmlCanvas);
   monitorState.texture.colorSpace = THREE.SRGBColorSpace;
@@ -576,21 +723,48 @@ const buildDesk = () => {
   animatedMaterials.push(screenMaterial);
 
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.72), screenMaterial);
-  screen.position.set(-5.1, 4.08, -3.86);
-  screen.rotation.y = Math.PI;
+  screen.position.set(-5.1, 4.08, -3.855);
+  screen.material.side = THREE.DoubleSide;
+  screen.renderOrder = 2;
   deskGroup.add(screen);
 
   const bezel = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.02, 0.82),
+    new THREE.PlaneGeometry(0.98, 0.78),
     new THREE.MeshStandardMaterial({
       color: '#2a2a2f',
       roughness: 0.78,
       metalness: 0.12,
     }),
   );
-  bezel.position.set(-5.1, 4.08, -3.89);
-  bezel.rotation.y = Math.PI;
+  bezel.position.set(-5.1, 4.08, -3.86);
+  bezel.material.side = THREE.DoubleSide;
+  bezel.renderOrder = 1;
   deskGroup.add(bezel);
+
+  if (monitorDebugEnabled) {
+    const monitorGuide = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.08, 0.88),
+      new THREE.MeshBasicMaterial({
+        color: '#80ffd9',
+        wireframe: true,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9,
+      }),
+    );
+    monitorGuide.position.set(-5.1, 4.08, -3.79);
+    deskGroup.add(monitorGuide);
+
+    const monitorNormal = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1),
+      new THREE.Vector3(-5.1, 4.08, -3.79),
+      0.38,
+      0xffb36b,
+      0.1,
+      0.06,
+    );
+    deskGroup.add(monitorNormal);
+  }
 
   const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.45, 16), plasticMaterial);
   stand.position.set(-5.1, 3.3, -4.45);
@@ -598,7 +772,7 @@ const buildDesk = () => {
   stand.receiveShadow = true;
   deskGroup.add(stand);
 
-  registerFocusTarget('monitor', [monitorShell, screen, stand], {
+  registerFocusTarget('monitor', [monitorShell, frontFrame, screen, stand], {
     getView: () => {
       screen.updateWorldMatrix(true, false);
       screen.getWorldPosition(tempCenter);
@@ -1032,12 +1206,17 @@ const resize = () => {
 htmlFrame.addEventListener('load', () => {
   monitorState.ready = false;
   monitorState.lastDraw = 0;
+  monitorState.paintRequested = false;
+  monitorState.lastError = 'none';
+  syncMonitorDebug();
+
   if (!monitorState.supported) {
-    drawMonitorFallback();
-    monitorState.ready = true;
-    if (monitorState.texture) {
-      monitorState.texture.needsUpdate = true;
-    }
+    renderMonitorFallback();
+    return;
+  }
+
+  if (monitorState.paintDriven) {
+    requestMonitorPaint();
   }
 });
 
