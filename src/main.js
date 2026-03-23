@@ -262,7 +262,27 @@ const registerFocusTarget = (id, meshes, options) => {
 };
 
 const startCameraTransition = ({ position, target, zoom, controlLimits, id = null }) => {
-  applyControlLimits(controlLimits);
+  // Save current limits so we can expand them to encompass the tween targets.
+  // This prevents OrbitControls from aggressively clamping our tween to target bounds
+  // before the camera has actually animated there.
+  const startLimits = {
+    enablePan: controls.enablePan,
+    minZoom: controls.minZoom,
+    maxZoom: controls.maxZoom,
+    minPolarAngle: controls.minPolarAngle,
+    maxPolarAngle: controls.maxPolarAngle,
+    minAzimuthAngle: controls.minAzimuthAngle,
+    maxAzimuthAngle: controls.maxAzimuthAngle,
+  };
+
+  controls.enablePan = controlLimits.enablePan;
+  controls.minZoom = Math.min(startLimits.minZoom, controlLimits.minZoom);
+  controls.maxZoom = Math.max(startLimits.maxZoom, controlLimits.maxZoom);
+  controls.minPolarAngle = Math.min(startLimits.minPolarAngle, controlLimits.minPolarAngle);
+  controls.maxPolarAngle = Math.max(startLimits.maxPolarAngle, controlLimits.maxPolarAngle);
+  controls.minAzimuthAngle = Math.min(startLimits.minAzimuthAngle, controlLimits.minAzimuthAngle);
+  controls.maxAzimuthAngle = Math.max(startLimits.maxAzimuthAngle, controlLimits.maxAzimuthAngle);
+
   cameraTransition = {
     startedAt: performance.now(),
     duration: 850,
@@ -272,6 +292,7 @@ const startCameraTransition = ({ position, target, zoom, controlLimits, id = nul
     toPosition: position.clone(),
     toTarget: target.clone(),
     toZoom: zoom,
+    targetControlLimits: controlLimits,
   };
   activeFocusTargetId = id;
 };
@@ -342,15 +363,26 @@ const updateCameraTransition = () => {
 
   camera.position.lerpVectors(cameraTransition.fromPosition, cameraTransition.toPosition, eased);
   controls.target.lerpVectors(cameraTransition.fromTarget, cameraTransition.toTarget, eased);
-  camera.zoom = THREE.MathUtils.lerp(cameraTransition.fromZoom, cameraTransition.toZoom, eased);
+  
+  // Use logarithmic interpolation to provide a perceptually smooth constant-rate zoom 
+  const logZoom = THREE.MathUtils.lerp(
+    Math.log(cameraTransition.fromZoom),
+    Math.log(cameraTransition.toZoom),
+    eased
+  );
+  camera.zoom = Math.exp(logZoom);
   camera.updateProjectionMatrix();
 
   if (progress === 1) {
+    applyControlLimits(cameraTransition.targetControlLimits);
     cameraTransition = null;
   }
 };
 
 controls.addEventListener('start', () => {
+  if (cameraTransition && cameraTransition.targetControlLimits) {
+    applyControlLimits(cameraTransition.targetControlLimits);
+  }
   cameraTransition = null;
 });
 renderer.domElement.addEventListener('dblclick', handleSceneDoubleClick);
@@ -1438,9 +1470,6 @@ const animate = (time = 0) => {
   const elapsed = clock.getElapsedTime();
   const flicker = 0.7 + Math.sin(elapsed * 8.5) * 0.08 + Math.sin(elapsed * 19) * 0.03;
 
-
-  updateMonitorTransform();
-
   for (const material of animatedMaterials) {
     material.emissiveIntensity = flicker;
   }
@@ -1460,7 +1489,11 @@ const animate = (time = 0) => {
   }
 
   updateCameraTransition();
+  
+  // Scale rotate rotation sensitivity depending on orthographic zoom
+  controls.rotateSpeed = 0.6 / Math.max(0.1, camera.zoom);
   controls.update();
+  
   try {
     renderer.render(scene, camera);
   } catch (e) {
@@ -1470,6 +1503,10 @@ const animate = (time = 0) => {
       throw e;
     }
   }
+
+  // Update HTML overlay transform after render guarantees camera matrices are fully up-to-date
+  updateMonitorTransform();
+
   window.requestAnimationFrame(animate);
 };
 
