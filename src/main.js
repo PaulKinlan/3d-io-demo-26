@@ -2,6 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'https://raw.githack.com/mrdoob/three.js/htmltexture/examples/jsm/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
+import createBookSpineTexture from './textures/generators/book-spine.js';
 
 const app = document.querySelector('#app');
 const monitorDebugEnabled = new URLSearchParams(window.location.search).has('monitorDebug');
@@ -146,6 +147,8 @@ const room = {
 
 const clock = new THREE.Clock();
 const animatedMaterials = [];
+const activityLights = [];
+const networkLights = [];
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const focusTargets = new Map();
@@ -444,6 +447,13 @@ window.addEventListener('keydown', (e) => {
       if (typeof resetCameraFocus === 'function') resetCameraFocus();
     } else {
       if (typeof focusTarget === 'function') focusTarget('monitor');
+    }
+  }
+  if (e.key.toLowerCase() === 'b') {
+    if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'books') {
+      if (typeof resetCameraFocus === 'function') resetCameraFocus();
+    } else {
+      if (typeof focusTarget === 'function') focusTarget('books');
     }
   }
   if (e.key.toLowerCase() === 'l') {
@@ -844,6 +854,31 @@ const buildDesk = () => {
   );
   powerLed.position.set(towerX + 0.15, towerY + 0.42, towerZ + towerD / 2 + 0.015);
   deskGroup.add(powerLed);
+  activityLights.push(powerLed.material);
+
+  const netLedYellow = new THREE.Mesh(
+    new THREE.BoxGeometry(0.03, 0.03, 0.02),
+    new THREE.MeshStandardMaterial({
+      color: '#d4cc15',
+      emissive: '#d4cc15',
+      emissiveIntensity: 0.8,
+    }),
+  );
+  netLedYellow.position.set(towerX + 0.1, towerY + 0.4, towerZ - towerD / 2 - 0.01);
+  deskGroup.add(netLedYellow);
+  networkLights.push(netLedYellow.material);
+
+  const netLedGreen = new THREE.Mesh(
+    new THREE.BoxGeometry(0.03, 0.03, 0.02),
+    new THREE.MeshStandardMaterial({
+      color: '#15d435',
+      emissive: '#15d435',
+      emissiveIntensity: 0.8,
+    }),
+  );
+  netLedGreen.position.set(towerX + 0.15, towerY + 0.4, towerZ - towerD / 2 - 0.01);
+  deskGroup.add(netLedGreen);
+  networkLights.push(netLedGreen.material);
 
   const grilleMaterial = new THREE.MeshStandardMaterial({ color: '#8a8070', roughness: 1 });
   for (let i = 0; i < 6; i++) {
@@ -1035,38 +1070,149 @@ const buildTable = () => {
 };
 
 const buildShelf = () => {
+  const shelfMeshes = [];
+  const bookMeshes = [];
+
   const shelfMaterial = new THREE.MeshStandardMaterial({
     color: '#6f4a31',
     roughness: 0.8,
   });
 
-  addMesh(
-    new THREE.BoxGeometry(2.9, 4.2, 0.8),
-    shelfMaterial,
-    {
-      position: new THREE.Vector3(6.1, 2.1, 3.2),
-    },
-  );
+  const shelfWidth = 2.9;
+  const shelfHeight = 4.2;
+  const shelfDepth = 0.8;
+  const shelfX = 6.1;
+  const shelfZ = 3.2;
 
-  const colors = ['#dd8e69', '#7aa0cf', '#f2d36d', '#9fc39f', '#c792c7'];
+  // Bottom panel
+  shelfMeshes.push(addMesh(
+    new THREE.BoxGeometry(shelfWidth, 0.1, shelfDepth),
+    shelfMaterial,
+    { position: new THREE.Vector3(shelfX, 0.05, shelfZ) },
+  ));
+
+  // Top panel
+  shelfMeshes.push(addMesh(
+    new THREE.BoxGeometry(shelfWidth, 0.1, shelfDepth),
+    shelfMaterial,
+    { position: new THREE.Vector3(shelfX, shelfHeight - 0.05, shelfZ) },
+  ));
+
+  // Left panel
+  shelfMeshes.push(addMesh(
+    new THREE.BoxGeometry(0.1, shelfHeight - 0.2, shelfDepth),
+    shelfMaterial,
+    { position: new THREE.Vector3(shelfX - shelfWidth / 2 + 0.05, shelfHeight / 2, shelfZ) },
+  ));
+
+  // Right panel
+  shelfMeshes.push(addMesh(
+    new THREE.BoxGeometry(0.1, shelfHeight - 0.2, shelfDepth),
+    shelfMaterial,
+    { position: new THREE.Vector3(shelfX + shelfWidth / 2 - 0.05, shelfHeight / 2, shelfZ) },
+  ));
+
+  // Intermediate shelves
+  for (let i = 1; i < 4; i++) {
+    const shelfY = i * 1.0;
+    shelfMeshes.push(addMesh(
+      new THREE.BoxGeometry(shelfWidth - 0.2, 0.1, shelfDepth),
+      shelfMaterial,
+      { position: new THREE.Vector3(shelfX, shelfY + 0.05, shelfZ) },
+    ));
+  }
+
+  const colors = ['#dd8e69', '#7aa0cf', '#f2d36d', '#9fc39f', '#c792c7', '#d97b53', '#4a6ea8', '#6b4a58', '#4285F4', '#EA4335', '#FBBC05', '#34A853'];
+  const titles = [
+    'HTML', 'CSS', 'JS', 'WebGL', 'Three.js', 'React', 'Vue', 'Node',
+    'Deno', 'Bun', 'Rust', 'Go', 'Python', 'Java', 'C++', 'C#',
+    'Swift', 'Kotlin', 'Dart', 'Ruby', 'PHP', 'SQL', 'NoSQL', 'Git',
+    'Docker', 'K8s', 'AWS', 'GCP', 'Azure', 'Linux'
+  ];
+
   for (let row = 0; row < 4; row += 1) {
-    for (let book = 0; book < 7; book += 1) {
-      addMesh(
-        new THREE.BoxGeometry(0.24, 0.88, 0.44),
-        new THREE.MeshStandardMaterial({
-          color: colors[(row + book) % colors.length],
-          roughness: 0.92,
-        }),
+    const shelfY = row * 1.0 + 0.1; // bottom of the books
+    let currentX = shelfX - shelfWidth / 2 + 0.15; // start from left panel
+
+    // Place random number of books
+    const numBooks = 6 + Math.floor(Math.random() * 5); // 6 to 10 books per shelf
+    for (let book = 0; book < numBooks; book += 1) {
+      const bookWidth = 0.15 + Math.random() * 0.1;
+      const bookHeight = 0.65 + Math.random() * 0.2;
+      const bookDepth = 0.35 + Math.random() * 0.1;
+      const title = titles[Math.floor(Math.random() * titles.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const spineTexture = createBookSpineTexture(title, color);
+      const bookSpineMaterial = new THREE.MeshStandardMaterial({
+        map: spineTexture,
+        roughness: 0.92,
+      });
+      const bookCoverMaterial = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.92,
+      });
+
+      const materials = [
+        bookCoverMaterial, // right (+x)
+        bookCoverMaterial, // left (-x)
+        bookCoverMaterial, // top (+y)
+        bookCoverMaterial, // bottom (-y)
+        bookSpineMaterial, // front (+z), spine faces us
+        bookCoverMaterial, // back (-z)
+      ];
+
+      bookMeshes.push(addMesh(
+        new THREE.BoxGeometry(bookWidth, bookHeight, bookDepth),
+        materials,
         {
           position: new THREE.Vector3(
-            5.1 + book * 0.28,
-            0.95 + row * 0.95,
-            3.22,
+            currentX + bookWidth / 2,
+            shelfY + bookHeight / 2,
+            shelfZ + (shelfDepth / 2 - bookDepth / 2 - 0.05) // flush towards front
           ),
+          rotation: new THREE.Vector3(
+            (Math.random() - 0.5) * 0.05,
+            (Math.random() - 0.5) * 0.1,
+            (Math.random() - 0.5) * 0.05
+          )
         },
-      );
+      ));
+      
+      currentX += bookWidth + 0.02 + Math.random() * 0.03; // Gap between books
+      if (currentX > shelfX + shelfWidth / 2 - 0.25) {
+        break; // don't push past right panel
+      }
     }
   }
+
+  // Register the shelf and books as a focus target
+  const dummyPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(shelfWidth, shelfHeight),
+    new THREE.MeshBasicMaterial({ visible: false })
+  );
+  dummyPlane.position.set(shelfX, shelfHeight / 2, shelfZ + shelfDepth / 2);
+  scene.add(dummyPlane);
+  
+  registerFocusTarget('books', [...shelfMeshes, ...bookMeshes, dummyPlane], {
+    getView: () => {
+      dummyPlane.updateWorldMatrix(true, false);
+      dummyPlane.getWorldPosition(tempCenter);
+      
+      // Look direction is towards the bookshelf (-z since spines are visible from +z side)
+      // Actually spines face +z, so camera should be at positive Z relative to books.
+      tempDirection.set(0, 0, 1); 
+
+      return {
+        target: tempCenter.clone(),
+        position: tempCenter.clone()
+          .add(tempDirection.multiplyScalar(4.5))
+          .add(focusLift),
+        zoom: computeFocusZoom([dummyPlane], 1.2),
+        controlLimits: focusControlLimits,
+      };
+    },
+  });
 };
 
 const buildDecor = () => {
@@ -1285,6 +1431,20 @@ const animate = (time = 0) => {
 
   for (const material of animatedMaterials) {
     material.emissiveIntensity = flicker;
+  }
+
+  // Disk activity light flicker (random bursts)
+  const activityIntensity = Math.random() > 0.8 ? 0.8 + Math.random() * 0.4 : 0.0;
+  for (const material of activityLights) {
+    material.emissiveIntensity = activityIntensity;
+  }
+
+  // Network lights flicker (fast blinking and solid variants)
+  if (networkLights.length >= 2) {
+    const yellowIntensity = Math.random() > 0.5 ? 0.8 : 0.1;
+    const greenIntensity = Math.random() > 0.1 ? 0.8 : 0.0;
+    networkLights[0].emissiveIntensity = yellowIntensity;
+    networkLights[1].emissiveIntensity = greenIntensity;
   }
 
   updateCameraTransition();
