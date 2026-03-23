@@ -18,6 +18,7 @@ app.innerHTML = `
         <span>Scroll to zoom</span>
         <span>Drag to orbit</span>
         <span>Shift-drag to pan</span>
+        <span>Double-click monitor to focus</span>
       </div>
     </section>
     <aside class="caption">
@@ -52,6 +53,17 @@ const room = {
 
 const clock = new THREE.Clock();
 const animatedMaterials = [];
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const focusTargets = new Map();
+const focusableMeshes = [];
+const tempBox = new THREE.Box3();
+const tempCenter = new THREE.Vector3();
+const tempSize = new THREE.Vector3();
+const tempDirection = new THREE.Vector3();
+const tempPosition = new THREE.Vector3();
+const focusLift = new THREE.Vector3(0, 0.08, 0);
+const frustumSize = 24;
 
 const camera = new THREE.OrthographicCamera();
 camera.position.set(18, 16, 18);
@@ -60,18 +72,192 @@ camera.near = 0.1;
 camera.far = 100;
 
 const controls = new OrbitControls(camera, renderer.domElement);
+const defaultControlLimits = {
+  enablePan: true,
+  minZoom: 0.65,
+  maxZoom: 2.1,
+  minPolarAngle: Math.PI / 4.2,
+  maxPolarAngle: Math.PI / 2.45,
+  minAzimuthAngle: -Math.PI / 2.2,
+  maxAzimuthAngle: Math.PI / 1.6,
+};
+const focusControlLimits = {
+  enablePan: true,
+  minZoom: 1.2,
+  maxZoom: 8,
+  minPolarAngle: Math.PI / 2.8,
+  maxPolarAngle: Math.PI / 1.55,
+  minAzimuthAngle: -Infinity,
+  maxAzimuthAngle: Infinity,
+};
+let activeFocusTargetId = null;
+let cameraTransition = null;
+
+const applyControlLimits = (limits) => {
+  controls.enablePan = limits.enablePan;
+  controls.minZoom = limits.minZoom;
+  controls.maxZoom = limits.maxZoom;
+  controls.minPolarAngle = limits.minPolarAngle;
+  controls.maxPolarAngle = limits.maxPolarAngle;
+  controls.minAzimuthAngle = limits.minAzimuthAngle;
+  controls.maxAzimuthAngle = limits.maxAzimuthAngle;
+};
+
 controls.enableDamping = true;
-controls.enablePan = true;
-controls.minZoom = 0.65;
-controls.maxZoom = 2.1;
 controls.zoomSpeed = 0.75;
 controls.panSpeed = 0.55;
 controls.rotateSpeed = 0.6;
 controls.target.set(0, 2.6, 0);
-controls.minPolarAngle = Math.PI / 4.2;
-controls.maxPolarAngle = Math.PI / 2.45;
-controls.minAzimuthAngle = -Math.PI / 2.2;
-controls.maxAzimuthAngle = Math.PI / 1.6;
+applyControlLimits(defaultControlLimits);
+
+const defaultView = {
+  position: camera.position.clone(),
+  target: controls.target.clone(),
+  zoom: camera.zoom,
+  controlLimits: defaultControlLimits,
+};
+
+const easeInOutCubic = (value) => {
+  if (value < 0.5) {
+    return 4 * value * value * value;
+  }
+
+  return 1 - ((-2 * value + 2) ** 3) / 2;
+};
+
+const getBoundsForMeshes = (meshes) => {
+  tempBox.makeEmpty();
+
+  for (const mesh of meshes) {
+    tempBox.expandByObject(mesh);
+  }
+
+  return tempBox;
+};
+
+const computeFocusZoom = (meshes, padding = 2.6, maxZoom = focusControlLimits.maxZoom) => {
+  const bounds = getBoundsForMeshes(meshes);
+  bounds.getSize(tempSize);
+
+  const aspect = window.innerWidth / window.innerHeight;
+  const framedWidth = Math.max(tempSize.x * padding, 0.75);
+  const framedHeight = Math.max(tempSize.y * padding, 0.75);
+  const zoomForWidth = (frustumSize * aspect) / framedWidth;
+  const zoomForHeight = frustumSize / framedHeight;
+
+  return THREE.MathUtils.clamp(
+    Math.min(zoomForWidth, zoomForHeight),
+    defaultControlLimits.minZoom,
+    maxZoom,
+  );
+};
+
+const registerFocusTarget = (id, meshes, options) => {
+  const meshList = Array.isArray(meshes) ? meshes : [meshes];
+  focusTargets.set(id, {
+    meshes: meshList,
+    getView: options.getView,
+  });
+
+  for (const mesh of meshList) {
+    mesh.userData.focusTargetId = id;
+    focusableMeshes.push(mesh);
+  }
+};
+
+const startCameraTransition = ({ position, target, zoom, controlLimits, id = null }) => {
+  applyControlLimits(controlLimits);
+  cameraTransition = {
+    startedAt: performance.now(),
+    duration: 850,
+    fromPosition: camera.position.clone(),
+    fromTarget: controls.target.clone(),
+    fromZoom: camera.zoom,
+    toPosition: position.clone(),
+    toTarget: target.clone(),
+    toZoom: zoom,
+  };
+  activeFocusTargetId = id;
+};
+
+const focusTarget = (id) => {
+  const target = focusTargets.get(id);
+
+  if (!target) {
+    return;
+  }
+
+  const view = target.getView();
+  startCameraTransition({ ...view, id });
+};
+
+const resetCameraFocus = () => {
+  startCameraTransition(defaultView);
+};
+
+const getFocusTargetId = (object) => {
+  let current = object;
+
+  while (current) {
+    if (current.userData.focusTargetId) {
+      return current.userData.focusTargetId;
+    }
+
+    current = current.parent;
+  }
+
+  return null;
+};
+
+const handleSceneDoubleClick = (event) => {
+  const bounds = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+  pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+
+  raycaster.setFromCamera(pointer, camera);
+
+  const hit = raycaster.intersectObjects(focusableMeshes, false)
+    .map(({ object }) => getFocusTargetId(object))
+    .find(Boolean);
+
+  if (hit) {
+    if (hit === activeFocusTargetId) {
+      resetCameraFocus();
+      return;
+    }
+
+    focusTarget(hit);
+    return;
+  }
+
+  if (activeFocusTargetId) {
+    resetCameraFocus();
+  }
+};
+
+const updateCameraTransition = () => {
+  if (!cameraTransition) {
+    return;
+  }
+
+  const elapsed = performance.now() - cameraTransition.startedAt;
+  const progress = Math.min(elapsed / cameraTransition.duration, 1);
+  const eased = easeInOutCubic(progress);
+
+  camera.position.lerpVectors(cameraTransition.fromPosition, cameraTransition.toPosition, eased);
+  controls.target.lerpVectors(cameraTransition.fromTarget, cameraTransition.toTarget, eased);
+  camera.zoom = THREE.MathUtils.lerp(cameraTransition.fromZoom, cameraTransition.toZoom, eased);
+  camera.updateProjectionMatrix();
+
+  if (progress === 1) {
+    cameraTransition = null;
+  }
+};
+
+controls.addEventListener('start', () => {
+  cameraTransition = null;
+});
+renderer.domElement.addEventListener('dblclick', handleSceneDoubleClick);
 
 const addMesh = (geometry, material, options = {}) => {
   const mesh = new THREE.Mesh(geometry, material);
@@ -282,6 +468,28 @@ const buildDesk = () => {
   stand.castShadow = true;
   stand.receiveShadow = true;
   deskGroup.add(stand);
+
+  registerFocusTarget('monitor', [monitorShell, screen, stand], {
+    getView: () => {
+      screen.updateWorldMatrix(true, false);
+      screen.getWorldPosition(tempCenter);
+      screen.getWorldDirection(tempDirection);
+      tempPosition.copy(defaultView.position).sub(tempCenter);
+
+      if (tempDirection.dot(tempPosition) < 0) {
+        tempDirection.negate();
+      }
+
+      return {
+        target: tempCenter.clone(),
+        position: tempCenter.clone()
+          .add(tempDirection.multiplyScalar(3.1))
+          .add(focusLift),
+        zoom: computeFocusZoom([monitorShell, screen, stand], 2.1),
+        controlLimits: focusControlLimits,
+      };
+    },
+  });
 
   const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.62), plasticMaterial);
   keyboard.position.set(-4.5, 3.3, -3.52);
@@ -694,7 +902,6 @@ const resize = () => {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const aspect = width / height;
-  const frustumSize = 24;
 
   camera.left = (-frustumSize * aspect) / 2;
   camera.right = (frustumSize * aspect) / 2;
@@ -725,6 +932,7 @@ const animate = () => {
     material.emissiveIntensity = flicker;
   }
 
+  updateCameraTransition();
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(animate);
