@@ -1,6 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'https://raw.githack.com/mrdoob/three.js/htmltexture/examples/jsm/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
 
 const app = document.querySelector('#app');
@@ -124,6 +124,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.domElement.className = 'scene-canvas';
+renderer.domElement.setAttribute('layoutsubtree', 'true');
+if (htmlSubtree) {
+  renderer.domElement.appendChild(htmlSubtree);
+}
 sceneShell.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -429,70 +433,11 @@ const renderMonitorFallback = (time = performance.now()) => {
   updateMonitorTexture(time);
 };
 
-const drawMonitorSurface = (time = performance.now()) => {
-  if (!htmlContext) {
-    return;
-  }
 
-  if (!monitorState.supported) {
-    if (!monitorState.ready) {
-      renderMonitorFallback(time);
-    }
-    return;
-  }
 
-  htmlContext.clearRect(0, 0, monitorViewport.width, monitorViewport.height);
-  monitorState.drawCalls += 1;
 
-  try {
-    drawMonitorElement(htmlSubtree, 0, 0, monitorViewport.width, monitorViewport.height);
-    monitorState.lastError = 'none';
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '';
-    monitorState.lastError = message || 'unknown draw error';
 
-    if (message.includes('initial snapshot')) {
-      syncMonitorDebug();
-      return;
-    }
 
-    monitorState.supported = false;
-    monitorState.paintDriven = false;
-    renderMonitorFallback(time);
-    return;
-  }
-
-  updateMonitorTexture(time);
-};
-
-const handleMonitorPaint = () => {
-  monitorState.paintEvents += 1;
-  drawMonitorSurface();
-};
-
-if (monitorState.paintDriven) {
-  htmlCanvas.addEventListener('paint', handleMonitorPaint);
-}
-
-const renderMonitorSurface = (time) => {
-  if (time - monitorState.lastDraw < 1000 / 24) {
-    return;
-  }
-
-  if (monitorState.paintDriven) {
-    if (monitorState.paintRequested) {
-      return;
-    }
-
-    monitorState.paintRequested = true;
-    monitorState.paintRequests += 1;
-    syncMonitorDebug();
-    requestMonitorPaint();
-    return;
-  }
-
-  drawMonitorSurface(time);
-};
 
 const buildRoom = () => {
   const floorMaterial = new THREE.MeshStandardMaterial({
@@ -707,10 +652,8 @@ const buildDesk = () => {
   frontFrame.renderOrder = 3;
   deskGroup.add(frontFrame);
 
-  monitorState.texture = new THREE.CanvasTexture(htmlCanvas);
+  monitorState.texture = new THREE.HTMLTexture(htmlSubtree);
   monitorState.texture.colorSpace = THREE.SRGBColorSpace;
-  monitorState.texture.minFilter = THREE.LinearFilter;
-  monitorState.texture.magFilter = THREE.LinearFilter;
 
   const screenMaterial = new THREE.MeshStandardMaterial({
     color: '#ffffff',
@@ -727,6 +670,7 @@ const buildDesk = () => {
   screen.material.side = THREE.DoubleSide;
   screen.renderOrder = 2;
   deskGroup.add(screen);
+  monitorState.screenMesh = screen; // Store for transform sync
 
   const bezel = new THREE.Mesh(
     new THREE.PlaneGeometry(0.98, 0.78),
@@ -1232,11 +1176,62 @@ resize();
 
 window.addEventListener('resize', resize);
 
+const updateMonitorTransform = () => {
+  if (!monitorState.screenMesh || !htmlSubtree) return;
+
+  const mesh = monitorState.screenMesh;
+  const element = htmlSubtree;
+
+  mesh.updateWorldMatrix(true, false);
+  const mvp = new THREE.Matrix4();
+  mvp.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  mvp.multiply(mesh.matrixWorld);
+
+  const E_W = monitorViewport.width;
+  const E_H = monitorViewport.height;
+  const M_W = 0.92;
+  const M_H = 0.72;
+
+  const localMatrix = new THREE.Matrix4().set(
+    M_W / E_W, 0, 0, -M_W / 2,
+    0, -M_H / E_H, 0, M_H / 2,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  );
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  const C_W = rect.width;
+  const C_H = rect.height;
+  const labRect = htmlCanvas.parentNode.getBoundingClientRect();
+
+  const viewportMatrix = new THREE.Matrix4().set(
+    C_W / 2, 0, 0, C_W / 2 + rect.left - labRect.left,
+    0, -C_H / 2, 0, C_H / 2 + rect.top - labRect.top,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  );
+
+  const fullMatrix = new THREE.Matrix4()
+    .multiplyMatrices(viewportMatrix, mvp)
+    .multiply(localMatrix);
+
+  const elements = fullMatrix.elements;
+  const cssTransform = `matrix3d(
+    ${elements[0]}, ${elements[1]}, ${elements[2]}, ${elements[3]},
+    ${elements[4]}, ${elements[5]}, ${elements[6]}, ${elements[7]},
+    ${elements[8]}, ${elements[9]}, ${elements[10]}, ${elements[11]},
+    ${elements[12]}, ${elements[13]}, ${elements[14]}, ${elements[15]}
+  )`;
+
+  element.style.transform = cssTransform;
+};
+
 const animate = (time = 0) => {
   const elapsed = clock.getElapsedTime();
   const flicker = 0.7 + Math.sin(elapsed * 8.5) * 0.08 + Math.sin(elapsed * 19) * 0.03;
 
-  renderMonitorSurface(time);
+
+  updateMonitorTransform();
 
   for (const material of animatedMaterials) {
     material.emissiveIntensity = flicker;
@@ -1244,7 +1239,15 @@ const animate = (time = 0) => {
 
   updateCameraTransition();
   controls.update();
-  renderer.render(scene, camera);
+  try {
+    renderer.render(scene, camera);
+  } catch (e) {
+    if (e.message && e.message.includes('No cached paint record')) {
+      // Suppress startup race condition where texElementImage2D executes before first paint snapshot
+    } else {
+      throw e;
+    }
+  }
   window.requestAnimationFrame(animate);
 };
 

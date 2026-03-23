@@ -24,3 +24,10 @@ Generated images go into `public/textures/`. Procedural generators in `src/textu
 - `src/textures/index.js` -- texture registry (single source of truth for texture sources)
 - `src/lib/texture-loader.js` -- `loadTexture()` utility
 - `public/textures/` -- static image assets
+
+## Resources
+
+- [HTML in Canvas Explainer/Spec](https://github.com/WICG/html-in-canvas?tab=readme-ov-file)
+- [three.js HTMLTexture Example](https://raw.githack.com/mrdoob/three.js/htmltexture/examples/webgl_materials_texture_html.html)
+- [Interactive Content in Canvas Example](https://github.com/WICG/html-in-canvas/blob/main/Examples/text-input.html)
+- [WebGL with HTML in Canvas Example](https://github.com/WICG/html-in-canvas/blob/main/Examples/webGL.html)

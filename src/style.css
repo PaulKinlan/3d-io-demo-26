@@ -158,12 +158,13 @@ body::before {
 
 .html-canvas-lab {
   position: fixed;
-  left: -99999px;
+  left: 0;
   top: 0;
-  width: 960px;
-  height: 720px;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   pointer-events: none;
+  z-index: 20;
 }
 
 .monitor-html-canvas {
@@ -220,6 +221,8 @@ body.monitor-debug .monitor-html-canvas {
   height: 720px;
   overflow: hidden;
   background: #071017;
+  pointer-events: auto;
+  transform-origin: 0 0;
 }
 
 .monitor-html-frame {
