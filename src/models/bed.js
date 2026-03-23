@@ -37,4 +37,18 @@ export const buildBed = ({ addMesh }) => {
       position: new THREE.Vector3(4.45, 1.55, -4.25),
     },
   );
+
+  const legGeometry = new THREE.BoxGeometry(0.2, 0.4, 0.2);
+  const legPositions = [
+    [4.45 - 1.5, 0.2, -2.2 - 2.9],
+    [4.45 + 1.5, 0.2, -2.2 - 2.9],
+    [4.45 - 1.5, 0.2, -2.2 + 2.9],
+    [4.45 + 1.5, 0.2, -2.2 + 2.9],
+  ];
+
+  legPositions.forEach(([x, y, z]) => {
+    addMesh(legGeometry, frameMaterial, {
+      position: new THREE.Vector3(x, y, z),
+    });
+  });
 };
