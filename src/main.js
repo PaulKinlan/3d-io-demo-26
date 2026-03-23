@@ -791,7 +791,7 @@ const buildDesk = () => {
     plasticMaterial,  // front
     plasticMaterial,  // back
   ];
-  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.62), keyboardMaterials);
+  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.44), keyboardMaterials);
   keyboard.position.set(-4.5, 3.3, -3.52);
   keyboard.castShadow = true;
   keyboard.receiveShadow = true;
