@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --card-bg: #ffffff;
+            --card-hover: #f1f3f4;
+            --accent-color: #1a73e8;
+            --border-color: #dadce0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            margin-top: 10vh;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .logo svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--accent-color);
+        }
+
+        .search-bar {
+            width: 500px;
+            max-width: 90vw;
+            height: 44px;
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            box-shadow: none;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            margin-bottom: 50px;
+            transition: box-shadow 0.2s;
+        }
+
+        .search-bar:hover, .search-bar:focus-within {
+            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+            border-color: rgba(223,225,229,0);
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            fill: #9aa0a6;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            height: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 16px;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
+            justify-content: center;
+        }
+
+        .shortcut {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            padding: 16px 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .shortcut:hover {
+            background-color: var(--card-hover);
+        }
+
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #f1f3f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 20px;
+            font-weight: bold;
+            color: #5f6368;
+        }
+
+        .icon-circle.yellow { background-color: #fbbc04; color: #fff; }
+        .icon-circle.blue { background-color: #4285f4; color: #fff; }
+        .icon-circle.red { background-color: #ea4335; color: #fff; }
+        .icon-circle.green { background-color: #34a853; color: #fff; }
+
+        .shortcut-title {
+            font-size: 13px;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        /* Fake interaction for search input */
+        .search-input:focus::placeholder {
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM11 19.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            Explorer Space
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" class="search-input" placeholder="Search or type a URL" onkeydown="if(event.key === 'Enter' && this.value) { window.location.href = this.value; }">
+    </div>
+
+    <div class="grid-container">
+        <a href="/demos/flappy-bird/" class="shortcut">
+            <div class="icon-circle yellow">F</div>
+            <div class="shortcut-title">Flappy Bird</div>
+        </a>
+        
+        <a href="/demos/browser/" class="shortcut">
+            <div class="icon-circle blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg>
+            </div>
+            <div class="shortcut-title">Browser</div>
+        </a>
+        
+        <a href="https://example.com" class="shortcut">
+            <div class="icon-circle green">Ex</div>
+            <div class="shortcut-title">Example Domain</div>
+        </a>
+    </div>
+
+</body>
+</html>

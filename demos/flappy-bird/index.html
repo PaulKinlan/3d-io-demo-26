@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Clone</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #70c5ce;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        canvas {
+            background-color: #70c5ce;
+            border: 2px solid #333;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state
+        let frames = 0;
+        let score = 0;
+        let bestScore = 0;
+        let gameState = 'start'; // start, play, over
+
+        // Bird object
+        const bird = {
+            x: 50,
+            y: 150,
+            width: 34,
+            height: 24,
+            velocity: 0,
+            gravity: 0.25,
+            jump: -4.6,
+            radius: 12,
+            
+            draw() {
+                ctx.fillStyle = '#ffcc00';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width/2, this.y + this.height/2, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Eye
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width/2 + 5, this.y + this.height/2 - 4, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width/2 + 6, this.y + this.height/2 - 4, 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Beak
+                ctx.fillStyle = '#f00';
+                ctx.fillRect(this.x + this.width/2 + 8, this.y + this.height/2, 10, 6);
+            },
+            
+            update() {
+                this.velocity += this.gravity;
+                this.y += this.velocity;
+                
+                // Floor collision
+                if (this.y + this.height >= canvas.height - fg.height) {
+                    this.y = canvas.height - fg.height - this.height;
+                    gameState = 'over';
+                }
+                
+                // Ceiling collision
+                if (this.y <= 0) {
+                    this.y = 0;
+                    this.velocity = 0;
+                }
+            },
+            
+            flap() {
+                this.velocity = this.jump;
+            }
+        };
+
+        // Pipes object
+        const pipes = {
+            position: [],
+            width: 53,
+            gap: 120,
+            dx: 2,
+            
+            draw() {
+                for (let i = 0; i < this.position.length; i++) {
+                    let p = this.position[i];
+                    let topYPos = p.y;
+                    let bottomYPos = p.y + this.gap;
+                    
+                    // Top pipe
+                    ctx.fillStyle = '#73bf2e';
+                    ctx.fillRect(p.x, 0, this.width, topYPos);
+                    ctx.strokeStyle = '#558022';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x, 0, this.width, topYPos);
+                    
+                    // Bottom pipe
+                    let bottomHeight = canvas.height - fg.height - bottomYPos;
+                    ctx.fillRect(p.x, bottomYPos, this.width, bottomHeight);
+                    ctx.strokeRect(p.x, bottomYPos, this.width, bottomHeight);
+                }
+            },
+            
+            update() {
+                if (frames % 100 === 0) {
+                    this.position.push({
+                        x: canvas.width,
+                        y: Math.max(50, Math.random() * (canvas.height - fg.height - this.gap - 50))
+                    });
+                }
+                
+                for (let i = 0; i < this.position.length; i++) {
+                    let p = this.position[i];
+                    p.x -= this.dx;
+                    
+                    // Collision detection
+                    let bottomYPos = p.y + this.gap;
+                    
+                    if (bird.x + bird.width > p.x && bird.x < p.x + this.width &&
+                        (bird.y < p.y || bird.y + bird.height > bottomYPos)) {
+                        gameState = 'over';
+                    }
+                    
+                    // Remove pipes that passed
+                    if (p.x + this.width <= 0) {
+                        this.position.shift();
+                        score += 1;
+                        bestScore = Math.max(score, bestScore);
+                        i--;
+                    }
+                }
+            },
+            
+            reset() {
+                this.position = [];
+            }
+        };
+
+        // Foreground
+        const fg = {
+            height: 112,
+            width: canvas.width,
+            x: 0,
+            dx: 2,
+            
+            draw() {
+                ctx.fillStyle = '#ded895';
+                ctx.fillRect(this.x, canvas.height - this.height, this.width, this.height);
+                ctx.fillRect(this.x + this.width, canvas.height - this.height, this.width, this.height);
+                
+                ctx.fillStyle = '#73bf2e';
+                ctx.fillRect(this.x, canvas.height - this.height, this.width, 10);
+                ctx.fillRect(this.x + this.width, canvas.height - this.height, this.width, 10);
+            },
+            
+            update() {
+                if (gameState === 'play') {
+                    this.x = (this.x - this.dx) % this.width;
+                }
+            }
+        };
+
+        function drawScore() {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.font = '35px "Courier New"';
+            
+            if (gameState === 'play') {
+                ctx.fillText(score, canvas.width/2 - 10, 50);
+                ctx.strokeText(score, canvas.width/2 - 10, 50);
+            } else if (gameState === 'start') {
+                ctx.font = '24px "Courier New"';
+                ctx.fillText('Click or space to start', canvas.width/2 - 160, canvas.height/2);
+            } else if (gameState === 'over') {
+                ctx.font = '30px "Courier New"';
+                ctx.fillText('Game Over', canvas.width/2 - 80, canvas.height/2 - 40);
+                ctx.fillText(`Score: ${score}`, canvas.width/2 - 70, canvas.height/2);
+                ctx.fillText(`Best: ${bestScore}`, canvas.width/2 - 60, canvas.height/2 + 40);
+                ctx.font = '20px "Courier New"';
+                ctx.fillText('Click or space to restart', canvas.width/2 - 140, canvas.height/2 + 80);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            pipes.draw();
+            fg.draw();
+            bird.draw();
+            drawScore();
+        }
+
+        function update() {
+            fg.update();
+            
+            if (gameState === 'play') {
+                pipes.update();
+                bird.update();
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            frames++;
+            requestAnimationFrame(loop);
+        }
+
+        // Input
+        function handleInput() {
+            switch(gameState) {
+                case 'start':
+                    gameState = 'play';
+                    bird.flap();
+                    break;
+                case 'play':
+                    bird.flap();
+                    break;
+                case 'over':
+                    gameState = 'start';
+                    bird.y = 150;
+                    bird.velocity = 0;
+                    pipes.reset();
+                    score = 0;
+                    break;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+
+        canvas.addEventListener('click', handleInput);
+
+        // Start loop
+        loop();
+    </script>
+</body>
+</html>

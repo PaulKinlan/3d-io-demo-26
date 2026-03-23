@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Browser Demo</title>
+    <style>
+        :root {
+            --bg-window: #e4e4e9;
+            --bg-toolbar: #f0f0f4;
+            --bg-tab-active: #ffffff;
+            --bg-tab-hover: #ebebf0;
+            --bg-input: #e2e2e6;
+            --bg-input-focus: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --border-light: rgba(255, 255, 255, 0.5);
+            --accent-color: #0a84ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .browser-window {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-window);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-radius: 0; /* Assuming it occupies full iframe, no outer border radius needed, but kept flat */
+        }
+
+        /* Top Title & Tab Bar */
+        .title-bar {
+            display: flex;
+            align-items: flex-end;
+            padding: 0 8px;
+            height: 40px;
+            background: linear-gradient(to bottom, #eff0f4, #e4e4e9);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* Mac Window Controls */
+        .window-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 10;
+        }
+
+        .control-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        .dot-close { background-color: #ff5f56; }
+        .dot-minimize { background-color: #ffbd2e; }
+        .dot-maximize { background-color: #27c93f; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            align-items: flex-end;
+            margin-left: 70px; /* Space for window controls */
+            gap: 4px;
+            overflow-x: hidden;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 32px;
+            padding: 0 12px;
+            background-color: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: default;
+            user-select: none;
+            position: relative;
+            min-width: 120px;
+            max-width: 200px;
+            border-radius: 8px 8px 0 0;
+            transition: background-color 0.2s;
+        }
+
+        .tab:hover:not(.active) {
+            background-color: var(--bg-tab-hover);
+        }
+
+        .tab.active {
+            background-color: var(--bg-tab-active);
+            color: var(--text-primary);
+            box-shadow: 0 -1px 2px rgba(0,0,0,0.02) inset;
+        }
+
+        /* Tab separators */
+        .tab:not(.active) + .tab:not(.active)::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 16px;
+            width: 1px;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .favicon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .tab-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+        }
+
+        .tab-close {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .tab:hover .tab-close {
+            opacity: 1;
+        }
+
+        .tab-close:hover {
+            background-color: rgba(0,0,0,0.08);
+            color: var(--text-primary);
+        }
+        
+        .tab-close svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            height: 44px;
+            padding: 0 12px;
+            background-color: var(--bg-toolbar);
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .icon-button:hover {
+            background-color: rgba(0,0,0,0.06);
+        }
+
+        .icon-button svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Address Bar */
+        .address-bar {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-input);
+            border-radius: 8px;
+            height: 30px;
+            padding: 0 12px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            gap: 8px;
+        }
+
+        .address-bar:focus-within {
+            background-color: var(--bg-input-focus);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+        }
+
+        .info-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .info-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .address-text-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            cursor: text;
+            overflow: hidden;
+        }
+
+        .url-prefix {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: pre;
+            user-select: none;
+        }
+
+        .url-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-family: inherit;
+            margin-left: 0;
+            padding-left: 0;
+        }
+
+        .url-input::placeholder {
+            color: #a0a0a5;
+        }
+
+        /* Profile/Extensions */
+        .toolbar-end {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-pic {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex-grow: 1;
+            position: relative;
+            background-color: #fff;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="browser-window">
+    
+    <!-- Title Bar & Tabs -->
+    <div class="title-bar">
+        <div class="window-controls">
+            <div class="control-dot dot-close"></div>
+            <div class="control-dot dot-minimize"></div>
+            <div class="control-dot dot-maximize"></div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ffcc00' rx='20'/><circle cx='50' cy='50' r='20' fill='%23fff'/></svg>" class="favicon" alt="Icon">
+                <div class="tab-title">Flappy Bird Demo</div>
+                <div class="tab-close">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </div>
+            </div>
+            <div class="tab">
+                <svg class="favicon" viewBox="0 0 24 24" fill="#8e8e93"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="nav-buttons">
+            <button class="icon-button" id="btn-back" title="Back">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </button>
+            <button class="icon-button" id="btn-forward" title="Forward">
+                <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+            <button class="icon-button" id="btn-refresh" title="Reload">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+        </div>
+
+        <div class="address-bar" id="address-container">
+            <div class="info-icon">
+                <!-- Lock Icon -->
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            </div>
+            <div class="address-text-container">
+                <span id="url-prefix" class="url-prefix"></span>
+                <input type="text" id="url-input" class="url-input" value="/demos/new-tab/" placeholder="path" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+
+        <div class="toolbar-end">
+            <button class="icon-button" title="Extensions">
+                <svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7z"/></svg>
+            </button>
+            <div class="profile-pic">PK</div>
+            <button class="icon-button" title="More">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area">
+        <iframe id="browser-view" src="/demos/new-tab/"></iframe>
+    </div>
+</div>
+
+<script>
+    const urlInput = document.getElementById('url-input');
+    const browserView = document.getElementById('browser-view');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const tabTitle = document.querySelector('.tab-title');
+    const favicon = document.querySelector('.favicon');
+    const urlPrefix = document.getElementById('url-prefix');
+    const addressTextContainer = document.querySelector('.address-text-container');
+    
+    urlPrefix.textContent = window.location.origin;
+
+    addressTextContainer.addEventListener('click', () => {
+        urlInput.focus();
+    });
+    
+    function updateTabInfo(url, titleStr) {
+        // Basic heuristic for title
+        let displayTitle = titleStr || url;
+        if(url.includes('flappy-bird')) {
+            displayTitle = 'Flappy Bird Demo';
+            favicon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ffcc00' rx='20'/><circle cx='50' cy='50' r='20' fill='%23fff'/></svg>";
+        } else {
+            // default generic globe
+            favicon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e0e0e0' rx='50'/><path d='M50 10 C25 10 10 30 10 50 C10 70 25 90 50 90 C75 90 90 70 90 50 C90 30 75 10 50 10 Z' fill='none' stroke='%23888' stroke-width='6'/><path d='M20 50 L80 50' stroke='%23888' stroke-width='4'/><path d='M50 10 C35 30 35 70 50 90 C65 70 65 30 50 10' fill='none' stroke='%23888' stroke-width='4'/></svg>";
+        }
+        tabTitle.textContent = displayTitle;
+    }
+
+    function loadUrl(path) {
+        let fullUrl = path;
+        
+        if (!path.startsWith('http://') && !path.startsWith('https://')) {
+            if (!path.startsWith('/')) { path = '/' + path; }
+            fullUrl = window.location.origin + path;
+        } else {
+            try {
+                let parsed = new URL(path);
+                if (parsed.origin === window.location.origin) {
+                    path = parsed.pathname + parsed.search + parsed.hash;
+                }
+            } catch(e) {}
+        }
+        
+        browserView.style.opacity = '0.7';
+        browserView.src = fullUrl;
+        
+        urlInput.value = path;
+        
+        updateTabInfo(path, path);
+    }
+
+    urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            loadUrl(urlInput.value);
+            urlInput.blur();
+        }
+    });
+
+    urlInput.addEventListener('focus', () => {
+        urlInput.select();
+    });
+
+    browserView.addEventListener('load', () => {
+        browserView.style.opacity = '1';
+        try {
+            if (browserView.contentWindow.location.href !== 'about:blank') {
+                const path = browserView.contentWindow.location.pathname + browserView.contentWindow.location.search + browserView.contentWindow.location.hash;
+                urlInput.value = path;
+                updateTabInfo(path, browserView.contentDocument.title);
+            }
+        } catch(e) {
+            updateTabInfo(urlInput.value, urlInput.value);
+        }
+    });
+    
+    btnRefresh.addEventListener('click', () => {
+        browserView.style.opacity = '0.5';
+        browserView.src = browserView.src;
+    });
+    
+    document.getElementById('btn-back').addEventListener('click', () => {
+        try {
+            browserView.contentWindow.history.back();
+        } catch(e) { }
+    });
+    
+    document.getElementById('btn-forward').addEventListener('click', () => {
+         try {
+            browserView.contentWindow.history.forward();
+        } catch(e) { }
+    });
+</script>
+</body>
+</html>

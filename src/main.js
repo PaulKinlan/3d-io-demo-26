@@ -32,7 +32,7 @@ app.innerHTML = `
         <div class="monitor-html-subtree">
           <iframe
             class="monitor-html-frame"
-            src="/monitor-demos.html"
+            src="/demos/browser/"
             title="Monitor demos"
             loading="eager"
           ></iframe>
@@ -402,7 +402,7 @@ const drawMonitorFallback = () => {
   htmlContext.fillStyle = 'rgba(232, 246, 255, 0.9)';
   htmlContext.font = '500 30px system-ui';
   htmlContext.fillText('Experimental API unavailable in this browser.', 72, 188);
-  htmlContext.fillText('Open /monitor-demos.html to view the iframe content directly.', 72, 234);
+  htmlContext.fillText('Open /demos/browser/ to view the iframe content directly.', 72, 234);
 
   const cards = [
     { x: 72, y: 292, label: 'Pie Chart', value: 'Canvas / SVG blend' },
@@ -779,7 +779,19 @@ const buildDesk = () => {
     },
   });
 
-  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.62), plasticMaterial);
+  const keyboardMaterial = new THREE.MeshStandardMaterial({
+    map: loadTexture('misc-keyboard', { repeat: [1, 1] }),
+    roughness: 0.82,
+  });
+  const keyboardMaterials = [
+    plasticMaterial,  // right
+    plasticMaterial,  // left
+    keyboardMaterial, // top
+    plasticMaterial,  // bottom
+    plasticMaterial,  // front
+    plasticMaterial,  // back
+  ];
+  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.62), keyboardMaterials);
   keyboard.position.set(-4.5, 3.3, -3.52);
   keyboard.castShadow = true;
   keyboard.receiveShadow = true;
@@ -790,7 +802,7 @@ const buildDesk = () => {
     roughness: 0.75,
   });
   const mouseBody = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, 0.35), mouseMaterial);
-  mouseBody.position.set(-3.95, 3.31, -3.55);
+  mouseBody.position.set(-3.1, 3.31, -3.55);
   mouseBody.castShadow = true;
   mouseBody.receiveShadow = true;
   deskGroup.add(mouseBody);
@@ -799,14 +811,14 @@ const buildDesk = () => {
     new THREE.BoxGeometry(0.005, 0.085, 0.18),
     new THREE.MeshStandardMaterial({ color: '#7a6e62', roughness: 0.9 }),
   );
-  mouseSeam.position.set(-3.95, 3.315, -3.46);
+  mouseSeam.position.set(-3.1, 3.315, -3.46);
   deskGroup.add(mouseSeam);
 
   const scrollWheel = new THREE.Mesh(
     new THREE.CylinderGeometry(0.02, 0.02, 0.06, 8),
     new THREE.MeshStandardMaterial({ color: '#6a6058', roughness: 0.6 }),
   );
-  scrollWheel.position.set(-3.95, 3.36, -3.48);
+  scrollWheel.position.set(-3.1, 3.36, -3.48);
   scrollWheel.rotation.z = Math.PI / 2;
   deskGroup.add(scrollWheel);
 
@@ -922,9 +934,9 @@ const buildDesk = () => {
 
   const mouseCable = new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-3.95, 3.31, -3.72),
-      new THREE.Vector3(-4.1, 3.29, -3.9),
-      new THREE.Vector3(-4.3, 3.27, -4.0),
+      new THREE.Vector3(-3.1, 3.31, -3.72),
+      new THREE.Vector3(-3.25, 3.29, -3.9),
+      new THREE.Vector3(-3.45, 3.27, -4.0),
       new THREE.Vector3(-4.5, 3.22, -4.1),
     ]),
     12, cableRadius * 0.7, 6,

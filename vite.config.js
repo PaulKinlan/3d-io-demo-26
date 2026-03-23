@@ -13,6 +13,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       external: ['three'],
+      input: {
+        main: './index.html',
+        flappyBird: './demos/flappy-bird/index.html',
+        browser: './demos/browser/index.html',
+        newTab: './demos/new-tab/index.html'
+      },
       output: {
         manualChunks: {
           three: ['three'],

@@ -15,4 +15,5 @@ export const textures = {
   'poster-pixel': { generator: () => createPosterTexture('PIXEL', '#4a6ea8', '#101924') },
   'poster-cat': { generator: createCatPosterTexture },
   'poster-kitten-washing-line': { file: '/textures/posters/kitten-washing-line.png' },
+  'misc-keyboard': { file: '/textures/misc/keyboard.png' },
 };
