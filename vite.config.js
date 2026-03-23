@@ -17,7 +17,8 @@ export default defineConfig({
         main: './index.html',
         flappyBird: './demos/flappy-bird/index.html',
         browser: './demos/browser/index.html',
-        newTab: './demos/new-tab/index.html'
+        newTab: './demos/new-tab/index.html',
+        slideDeck: './demos/slide-deck/index.html'
       },
       output: {
         manualChunks: {

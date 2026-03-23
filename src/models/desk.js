@@ -142,8 +142,8 @@ export const buildDesk = ({
     color: '#111111',
     map: monitorState.texture,
     emissiveMap: monitorState.texture,
-    emissive: '#2cbf95',
-    emissiveIntensity: 0.8,
+    emissive: '#ffffff',
+    emissiveIntensity: 1.2,
     roughness: 0.16,
     metalness: 0.08,
   });

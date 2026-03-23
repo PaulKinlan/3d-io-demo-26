@@ -75,3 +75,13 @@ Workflow:
 - `addMesh(geometry, material, options)` helper for adding meshes with shadow defaults
 - Materials use `MeshStandardMaterial` throughout
 - CRT monitor screen has animated emissive flicker via `animatedMaterials` array
+
+## Managing Demos
+
+New demos that run inside the 3D monitor should be managed as follows:
+
+1. Create a new directory for the demo in `demos/` (e.g., `demos/my-new-demo/`)
+2. Make sure the demo works standalone as a standard HTML page.
+3. Register the demo in the Vite config (`vite.config.js`) under `build.rollupOptions.input` so it's built properly.
+4. Add a link to the new demo inside the New Tab Page (NTP) located at `demos/new-tab/index.html`.
+5. **Always keep the `browser` demo as the default on page load** in `src/main.js` (`src="/demos/browser/"`). The browser demo acts as the wrapper that initially loads the NTP.

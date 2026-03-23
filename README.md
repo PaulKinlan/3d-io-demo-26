@@ -4,9 +4,10 @@ An interactive, fully procedural 3D scene of a childhood bedroom rendered with T
 
 ## Features
 
-- **Procedural geometry** -- every object (desk, chair, bed, bookshelf, CRT monitor, lamps, posters) is constructed from Three.js primitives
-- **Canvas-generated textures** -- wood grain and poster art created at runtime via the Canvas API
-- **Animated CRT glow** -- the monitor screen flickers with a subtle emissive pulse
+- **Interactive HTML Textures** -- fully functional iframe web applications mapped onto the 3D CRT monitor screen (play Flappy Bird, view slide decks, browse sites inside the 3D scene)
+- **Procedural & Static geometry** -- objects (desk, chair, bed, bookshelf, CRT monitor, lamps, posters) are carefully constructed and pieced together in code
+- **Canvas & Image textures** -- custom textures generated procedurally at runtime via the Canvas API with seamless fallbacks to static images
+- **Animated CRT glow & Lights** -- the monitor screen flickers with a subtle emissive pulse and system lights blink dynamically
 - **Isometric camera** -- orthographic projection with constrained orbit controls
 - **Shadows and fog** -- PCF soft shadow maps and distance fog for depth
 - **Responsive** -- adapts to any viewport size
@@ -43,12 +44,22 @@ Open the local URL printed by Vite (usually `http://localhost:5173`).
 
 ## Project structure
 
-```
-index.html          Entry point
+```text
+index.html              Entry point for the 3D scene
 src/
-  main.js           Scene setup, geometry, lighting, animation loop
-  style.css         HUD overlay and layout styles
-designs/            Visual direction, moodboards, and reference material
+  main.js               Scene setup, animation loop, and main orchestrator
+  style.css             HUD overlay and layout styles
+  models/               3D model builder components (desk, bed, shelf, etc.)
+  textures/             Texture registry and procedural Canvas generators
+  lib/                  Utility functions and wrappers
+demos/                  Internal iframe HTML apps for the 3D computer monitor
+  browser/              Chrome-like browser clone
+  flappy-bird/          Flappy Bird clone
+  slide-deck/           Markdown-based slide presentation framework
+  new-tab/              New Tab page clone
+public/                 Static assets
+  textures/             Static texture images (wood, fabric, posters, etc.)
+designs/                Visual direction, moodboards, and reference material
 ```
 
 ## License

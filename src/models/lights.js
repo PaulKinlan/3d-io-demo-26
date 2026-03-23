@@ -16,9 +16,6 @@ export const buildLights = ({ scene }) => {
   keyLight.shadow.camera.bottom = -18;
   scene.add(keyLight);
 
-  const monitorGlow = new THREE.PointLight('#7affd2', 1.5, 7, 2);
-  monitorGlow.position.set(-5.1, 4, -3.4);
-  scene.add(monitorGlow);
 
   const deskLamp = new THREE.PointLight('#ffb36b', 2.8, 8, 2);
   deskLamp.position.set(-6.15, 4.2, -3.2);
