@@ -1,6 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'https://raw.githack.com/mrdoob/three.js/htmltexture/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
 import { buildRoom } from './models/room.js';
 import { buildRug } from './models/rug.js';

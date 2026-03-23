@@ -1,30 +1,29 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+const threeProxyPath = fileURLToPath(new URL('./src/lib/three-proxy.js', import.meta.url));
+const threeAddonsProxyPrefix = `${fileURLToPath(new URL('./src/lib/three-addons/', import.meta.url))}/`;
+
+export default defineConfig(({ command }) => ({
   resolve: {
-    alias: {
-      three: '/Users/paulkinlan/Code/3d-io-demo-26/src/lib/three-proxy.js',
-    }
-  },
-  optimizeDeps: {
-    exclude: ['three'],
+    // Vite dev needs concrete files for import analysis, but production should
+    // keep the bare specifiers so the browser import map remains authoritative.
+    alias: command === 'serve' ? [
+      { find: /^three\/addons\//, replacement: threeAddonsProxyPrefix },
+      { find: /^three$/, replacement: threeProxyPath },
+    ] : undefined,
   },
   build: {
     chunkSizeWarningLimit: 700,
     rollupOptions: {
-      external: ['three'],
+      external: ['three', /^three\/addons\//],
       input: {
         main: './index.html',
         flappyBird: './demos/flappy-bird/index.html',
         browser: './demos/browser/index.html',
         newTab: './demos/new-tab/index.html',
-        slideDeck: './demos/slide-deck/index.html'
-      },
-      output: {
-        manualChunks: {
-          three: ['three'],
-        },
+        slideDeck: './demos/slide-deck/index.html',
       },
     },
   },
-});
+}));
