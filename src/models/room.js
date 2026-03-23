@@ -62,4 +62,22 @@ export const buildRoom = ({ room, addMesh }) => {
       castShadow: false,
     },
   );
+
+  const graffitiMaterial = new THREE.MeshStandardMaterial({
+    map: loadTexture('misc-graffiti-paul'),
+    transparent: true,
+    depthWrite: false, // Prevents depth fighting with transparent objects
+    roughness: 1,
+  });
+
+  addMesh(
+    new THREE.PlaneGeometry(2.0, 2.0),
+    graffitiMaterial,
+    {
+      position: new THREE.Vector3(-room.width / 2 - 0.185, 4.5, 0),
+      rotation: new THREE.Euler(0, -Math.PI / 2, 0),
+      castShadow: false,
+    }
+  );
 };
+

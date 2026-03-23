@@ -1,6 +1,9 @@
 import createWoodTexture from './generators/wood.js';
 import createPosterTexture from './generators/poster.js';
 import createCatPosterTexture from './generators/poster-cat.js';
+import { createCDTexture } from './generators/cd.js';
+import { createCDStackLabelTexture } from './generators/stack-label.js';
+import createGraffitiTexture from './generators/graffiti.js';
 
 /**
  * Texture registry. Each entry maps a name to either:
@@ -16,4 +19,9 @@ export const textures = {
   'poster-cat': { generator: createCatPosterTexture },
   'poster-kitten-washing-line': { file: '/textures/posters/kitten-washing-line.png' },
   'misc-keyboard': { file: '/textures/misc/keyboard.png' },
+  'misc-graffiti-paul': { generator: () => createGraffitiTexture('/textures/misc/graffiti-paul.png') },
+  'cd-photoshop': { generator: () => createCDTexture('Photoshop', '#e0e8f0', '#0a3066') },
+  'cd-pirated': { generator: () => createCDTexture('Pirated Software', '#e8e8e8', '#222222') },
+  'cd-blank': { generator: () => createCDTexture('', '#e8e8e8', '#222222') },
+  'cd-stack-label': { generator: createCDStackLabelTexture },
 };

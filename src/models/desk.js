@@ -272,14 +272,14 @@ export const buildDesk = ({
     new THREE.BoxGeometry(0.005, 0.085, 0.18),
     new THREE.MeshStandardMaterial({ color: '#7a6e62', roughness: 0.9 }),
   );
-  mouseSeam.position.set(-3.1, 3.315, -3.46);
+  mouseSeam.position.set(-3.1, 3.315, -3.64);
   deskGroup.add(mouseSeam);
 
   const scrollWheel = new THREE.Mesh(
     new THREE.CylinderGeometry(0.02, 0.02, 0.06, 8),
     new THREE.MeshStandardMaterial({ color: '#6a6058', roughness: 0.6 }),
   );
-  scrollWheel.position.set(-3.1, 3.36, -3.48);
+  scrollWheel.position.set(-3.1, 3.36, -3.62);
   scrollWheel.rotation.z = Math.PI / 2;
   deskGroup.add(scrollWheel);
 
@@ -404,6 +404,81 @@ export const buildDesk = ({
   );
   const mouseCableMesh = new THREE.Mesh(mouseCable, cableMaterial);
   deskGroup.add(mouseCableMesh);
+
+  // --- CD Stack and loose CDs ---
+  const cdRadius = 0.16;
+  const cdGeometry = new THREE.CylinderGeometry(cdRadius, cdRadius, 0.005, 32);
+  const cdMaterialPhotoshop = new THREE.MeshStandardMaterial({
+    map: loadTexture('cd-photoshop'),
+    roughness: 0.3,
+    metalness: 0.8,
+  });
+  const cdMaterialPirated = new THREE.MeshStandardMaterial({
+    map: loadTexture('cd-pirated'),
+    roughness: 0.4,
+    metalness: 0.6,
+  });
+  const cdMaterialBlank = new THREE.MeshStandardMaterial({
+    map: loadTexture('cd-blank'),
+    roughness: 0.3,
+    metalness: 0.8,
+  });
+  const cdBottomMaterial = new THREE.MeshStandardMaterial({
+    color: '#a0a0ff',
+    roughness: 0.1,
+    metalness: 1.0,
+  });
+  const cdEdgeMaterial = new THREE.MeshStandardMaterial({
+    color: '#c0c0c0',
+    roughness: 0.4,
+    metalness: 0.8,
+  });
+  const getCDMaterials = (topMat) => [cdEdgeMaterial, topMat, cdBottomMaterial];
+
+  const stackHeight = 0.16;
+  const stackGeometry = new THREE.CylinderGeometry(cdRadius, cdRadius, stackHeight, 32);
+  const stackEdgeMaterial = new THREE.MeshStandardMaterial({
+    color: '#d0d0d0',
+    roughness: 0.6,
+    metalness: 0.4,
+  });
+  const cdStack = new THREE.Mesh(stackGeometry, [
+    stackEdgeMaterial, 
+    cdMaterialBlank, 
+    cdBottomMaterial
+  ]);
+  cdStack.position.set(-4.0, 3.27 + stackHeight / 2, -4.8); 
+  cdStack.castShadow = true;
+  cdStack.receiveShadow = true;
+  deskGroup.add(cdStack);
+
+  const cdLabelGeometry = new THREE.PlaneGeometry(0.24, 0.12);
+  const cdLabelMaterial = new THREE.MeshStandardMaterial({
+    map: loadTexture('cd-stack-label'),
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+  });
+  const cdLabel = new THREE.Mesh(cdLabelGeometry, cdLabelMaterial);
+  cdLabel.position.set(-4.0, 3.27 + stackHeight + 0.002, -4.8);
+  cdLabel.rotation.x = -Math.PI / 2;
+  cdLabel.rotation.z = Math.PI / 6;
+  deskGroup.add(cdLabel);
+
+  const cd1 = new THREE.Mesh(cdGeometry, getCDMaterials(cdMaterialPhotoshop));
+  cd1.position.set(-3.5, 3.27 + 0.0025, -4.2);
+  cd1.rotation.y = Math.PI / 3;
+  cd1.castShadow = true;
+  cd1.receiveShadow = true;
+  deskGroup.add(cd1);
+
+  const cd2 = new THREE.Mesh(cdGeometry, getCDMaterials(cdMaterialPirated));
+  cd2.position.set(-4.2, 3.27 + 0.0025, -3.95);
+  cd2.rotation.y = -Math.PI / 8;
+  cd2.castShadow = true;
+  cd2.receiveShadow = true;
+  deskGroup.add(cd2);
+
+  // --- End CDs ---
 
   const lampStem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.2, 12), metalMaterial);
   lampStem.position.set(-6.25, 3.75, -3.6);
