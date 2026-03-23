@@ -50,3 +50,7 @@ src/
   style.css         HUD overlay and layout styles
 designs/            Visual direction, moodboards, and reference material
 ```
+
+## License
+
+Apache License 2.0. See [LICENSE](./LICENSE).
