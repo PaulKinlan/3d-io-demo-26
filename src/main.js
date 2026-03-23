@@ -177,7 +177,7 @@ const defaultControlLimits = {
 const focusControlLimits = {
   enablePan: true,
   minZoom: 1.2,
-  maxZoom: 8,
+  maxZoom: 40,
   minPolarAngle: Math.PI / 2.8,
   maxPolarAngle: Math.PI / 1.55,
   minAzimuthAngle: -Infinity,
@@ -656,11 +656,11 @@ const buildDesk = () => {
   deskGroup.add(monitorShell);
 
   const frontFrameShape = new THREE.Shape();
-  frontFrameShape.moveTo(-0.62, -0.48);
-  frontFrameShape.lineTo(0.62, -0.48);
-  frontFrameShape.lineTo(0.62, 0.48);
-  frontFrameShape.lineTo(-0.62, 0.48);
-  frontFrameShape.lineTo(-0.62, -0.48);
+  frontFrameShape.moveTo(-0.675, -0.525);
+  frontFrameShape.lineTo(0.675, -0.525);
+  frontFrameShape.lineTo(0.675, 0.525);
+  frontFrameShape.lineTo(-0.675, 0.525);
+  frontFrameShape.lineTo(-0.675, -0.525);
 
   const frontFrameHole = new THREE.Path();
   frontFrameHole.moveTo(-0.5, -0.39);
@@ -678,7 +678,7 @@ const buildDesk = () => {
       side: THREE.DoubleSide,
     }),
   );
-  frontFrame.position.set(-5.1, 4.08, -3.81);
+  frontFrame.position.set(-5.1, 4.05, -3.86);
   frontFrame.renderOrder = 3;
   deskGroup.add(frontFrame);
 
@@ -686,31 +686,32 @@ const buildDesk = () => {
   monitorState.texture.colorSpace = THREE.SRGBColorSpace;
 
   const screenMaterial = new THREE.MeshStandardMaterial({
-    color: '#ffffff',
+    color: '#111111',
     map: monitorState.texture,
+    emissiveMap: monitorState.texture,
     emissive: '#2cbf95',
-    emissiveIntensity: 0.72,
+    emissiveIntensity: 0.8,
     roughness: 0.16,
     metalness: 0.08,
   });
   animatedMaterials.push(screenMaterial);
 
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.72), screenMaterial);
-  screen.position.set(-5.1, 4.08, -3.855);
+  screen.position.set(-5.1, 4.05, -3.86);
   screen.material.side = THREE.DoubleSide;
   screen.renderOrder = 2;
   deskGroup.add(screen);
   monitorState.screenMesh = screen; // Store for transform sync
 
   const bezel = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.98, 0.78),
+    new THREE.PlaneGeometry(1.02, 0.8),
     new THREE.MeshStandardMaterial({
       color: '#2a2a2f',
       roughness: 0.78,
       metalness: 0.12,
     }),
   );
-  bezel.position.set(-5.1, 4.08, -3.86);
+  bezel.position.set(-5.1, 4.05, -3.865);
   bezel.material.side = THREE.DoubleSide;
   bezel.renderOrder = 1;
   deskGroup.add(bezel);
@@ -726,12 +727,12 @@ const buildDesk = () => {
         opacity: 0.9,
       }),
     );
-    monitorGuide.position.set(-5.1, 4.08, -3.79);
+    monitorGuide.position.set(-5.1, 4.05, -3.85);
     deskGroup.add(monitorGuide);
 
     const monitorNormal = new THREE.ArrowHelper(
       new THREE.Vector3(0, 0, 1),
-      new THREE.Vector3(-5.1, 4.08, -3.79),
+      new THREE.Vector3(-5.1, 4.05, -3.85),
       0.38,
       0xffb36b,
       0.1,
@@ -762,7 +763,7 @@ const buildDesk = () => {
         position: tempCenter.clone()
           .add(tempDirection.multiplyScalar(3.1))
           .add(focusLift),
-        zoom: computeFocusZoom([monitorShell, screen, stand], 2.1),
+        zoom: computeFocusZoom([frontFrame], 1.15),
         controlLimits: focusControlLimits,
       };
     },
@@ -1156,7 +1157,7 @@ const buildLights = () => {
   keyLight.shadow.camera.bottom = -18;
   scene.add(keyLight);
 
-  const monitorGlow = new THREE.PointLight('#7affd2', 4, 7, 2);
+  const monitorGlow = new THREE.PointLight('#7affd2', 1.5, 7, 2);
   monitorGlow.position.set(-5.1, 4, -3.4);
   scene.add(monitorGlow);
 
