@@ -186,7 +186,7 @@ const frustumSize = 24;
 
 const camera = new THREE.OrthographicCamera();
 camera.position.set(18, 16, 18);
-camera.zoom = 0.95;
+camera.zoom = 1.3;
 camera.near = 0.1;
 camera.far = 100;
 
