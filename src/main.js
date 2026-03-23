@@ -71,6 +71,10 @@ const monitorViewport = {
   height: htmlCanvas.height,
 };
 
+let deskLampRef;
+let hemiLightRef;
+let keyLightRef;
+
 const monitorState = {
   ready: false,
   supported: Boolean(drawMonitorElement),
@@ -432,6 +436,32 @@ const renderMonitorFallback = (time = performance.now()) => {
   drawMonitorFallback();
   updateMonitorTexture(time);
 };
+
+window.addEventListener('keydown', (e) => {
+  console.log('Key pressed:', e.key);
+  if (e.key.toLowerCase() === 'c') {
+    if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
+      if (typeof resetCameraFocus === 'function') resetCameraFocus();
+    } else {
+      if (typeof focusTarget === 'function') focusTarget('monitor');
+    }
+  }
+  if (e.key.toLowerCase() === 'l') {
+    console.log('Pressing L - Toggle Lamp');
+    if (typeof toggleLamp === 'function') toggleLamp();
+  }
+  if (e.key.toLowerCase() === 'd') {
+    console.log('Pressing D - Toggle NightMode');
+    if (typeof toggleNightMode === 'function') toggleNightMode();
+  }
+  if (e.key === '?') {
+    console.log('Pressing ? - Toggle Help');
+    const panel = document.querySelector('.help-panel');
+    if (panel) {
+      panel.classList.toggle('active');
+    }
+  }
+});
 
 
 
@@ -1111,10 +1141,12 @@ const buildDecor = () => {
 const buildLights = () => {
   const hemiLight = new THREE.HemisphereLight('#ffcfa8', '#34253b', 1.6);
   scene.add(hemiLight);
+  hemiLightRef = hemiLight;
 
   const keyLight = new THREE.DirectionalLight('#ffd19d', 1.85);
   keyLight.position.set(8, 14, 8);
   keyLight.castShadow = true;
+  keyLightRef = keyLight;
   keyLight.shadow.mapSize.set(2048, 2048);
   keyLight.shadow.camera.near = 0.5;
   keyLight.shadow.camera.far = 40;
@@ -1131,6 +1163,7 @@ const buildLights = () => {
   const deskLamp = new THREE.PointLight('#ffb36b', 2.8, 8, 2);
   deskLamp.position.set(-6.15, 4.2, -3.2);
   scene.add(deskLamp);
+  deskLampRef = deskLamp;
 };
 
 const resize = () => {
@@ -1153,6 +1186,22 @@ htmlFrame.addEventListener('load', () => {
   monitorState.paintRequested = false;
   monitorState.lastError = 'none';
   syncMonitorDebug();
+
+  try {
+    htmlFrame.contentWindow.addEventListener('keydown', (e) => {
+       window.dispatchEvent(new KeyboardEvent('keydown', {
+          key: e.key,
+          keyCode: e.keyCode,
+          code: e.code,
+          ctrlKey: e.ctrlKey,
+          altKey: e.altKey,
+          shiftKey: e.shiftKey,
+          metaKey: e.metaKey
+       }));
+    });
+  } catch (e) {
+     console.warn('Forward overlays trigger restrictions:', e);
+  }
 
   if (!monitorState.supported) {
     renderMonitorFallback();
@@ -1249,6 +1298,22 @@ const animate = (time = 0) => {
     }
   }
   window.requestAnimationFrame(animate);
+};
+
+const toggleLamp = () => {
+  if (deskLampRef) {
+    deskLampRef.visible = !deskLampRef.visible;
+    console.log('Lamp toggled:', deskLampRef.visible);
+  }
+};
+
+const toggleNightMode = () => {
+  if (hemiLightRef && keyLightRef) {
+    const active = !hemiLightRef.visible;
+    hemiLightRef.visible = active;
+    keyLightRef.visible = active;
+    console.log('Night mode toggled:', !active);
+  }
 };
 
 animate();
