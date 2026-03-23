@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bedroom Monitor Demos</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        --bg: #071017;
+        --panel: rgba(12, 24, 32, 0.92);
+        --line: rgba(142, 255, 203, 0.16);
+        --text: #ecf8ff;
+        --muted: rgba(236, 248, 255, 0.72);
+        --accent: #8effcb;
+        --accent-warm: #ffb36b;
+        --accent-cool: #7dc6ff;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+      body {
+        padding: 18px;
+        background:
+          radial-gradient(circle at top right, rgba(125, 198, 255, 0.14), transparent 24%),
+          radial-gradient(circle at left, rgba(142, 255, 203, 0.12), transparent 28%),
+          linear-gradient(180deg, #0a141c, #05090d 70%);
+      }
+      .shell {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        gap: 14px;
+        min-height: calc(100vh - 36px);
+      }
+      .hero, .ticker, .card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 40px rgba(0,0,0,0.24);
+      }
+      .hero {
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: end;
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 11px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 0.95;
+      }
+      .hero p, .ticker, .meta { color: var(--muted); }
+      .hero p { margin: 10px 0 0; max-width: 540px; font-size: 14px; line-height: 1.45; }
+      .meta {
+        display: grid;
+        gap: 6px;
+        min-width: 180px;
+        font-size: 12px;
+        text-align: right;
+      }
+      .ticker {
+        padding: 10px 16px;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+        font-size: 12px;
+      }
+      .ticker-track {
+        display: inline-block;
+        padding-left: 100%;
+        animation: ticker 16s linear infinite;
+      }
+      @keyframes ticker {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr 1fr;
+        gap: 14px;
+      }
+      .card { padding: 16px; display: grid; gap: 12px; align-content: start; }
+      .card h2 { margin: 0; font-size: 16px; }
+      .label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+      .pie-wrap { display: grid; place-items: center; min-height: 220px; }
+      .pie-svg { width: 190px; height: 190px; filter: drop-shadow(0 14px 30px rgba(0,0,0,0.32)); }
+      .legend { display: grid; gap: 8px; font-size: 12px; }
+      .legend-row { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; }
+      .swatch { width: 14px; height: 14px; border-radius: 999px; }
+      .text-demo {
+        min-height: 220px;
+        display: grid;
+        align-content: space-between;
+      }
+      .headline {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 0.94;
+        background: linear-gradient(90deg, var(--accent), var(--accent-cool), var(--accent-warm));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .bidi {
+        display: grid;
+        gap: 10px;
+        font-size: 15px;
+        line-height: 1.4;
+      }
+      .rtl {
+        direction: rtl;
+        text-align: right;
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.03);
+      }
+      .webgl-canvas {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 16px;
+        background: radial-gradient(circle at center, rgba(125,198,255,0.22), rgba(10,12,18,0.4));
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Monitor Feed</p>
+          <h1>Canvas-native web demos</h1>
+          <p>
+            A same-origin page intended for iframe capture on the bedroom monitor, inspired by the
+            html-in-canvas pie chart, complex text, WebGL, and WebGPU sample gallery.
+          </p>
+        </div>
+        <div class="meta">
+          <span>Source ideas: WICG/html-in-canvas</span>
+          <span>Mode: iframe → drawElement → CanvasTexture</span>
+          <span id="clock">--:--:-- UTC</span>
+        </div>
+      </section>
+
+      <section class="ticker">
+        <div class="ticker-track">
+          PIE CHART DEMO • COMPLEX BIDIRECTIONAL TEXT • WEBGL SHADER ORB • WEBGPU-STYLE CONTROL STRIP • SAME-ORIGIN IFRAME FOR HTML-IN-CANVAS •
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="label">Pie chart study</div>
+          <h2>Segment breakdown</h2>
+          <div class="pie-wrap">
+            <svg class="pie-svg" viewBox="0 0 120 120" aria-label="pie chart">
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#17303b" stroke-width="22"></circle>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#8effcb" stroke-width="22" stroke-dasharray="92 276" stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#7dc6ff" stroke-width="22" stroke-dasharray="68 300" stroke-dashoffset="-97" stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#ffb36b" stroke-width="22" stroke-dasharray="42 326" stroke-dashoffset="-170" stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+              <text x="60" y="57" text-anchor="middle" fill="#ecf8ff" font-size="12" font-weight="700">Demo Mix</text>
+              <text x="60" y="72" text-anchor="middle" fill="rgba(236,248,255,0.68)" font-size="8">live ui on a 3D monitor</text>
+            </svg>
+          </div>
+          <div class="legend">
+            <div class="legend-row"><span class="swatch" style="background:#8effcb"></span><span>UI shell</span><strong>38%</strong></div>
+            <div class="legend-row"><span class="swatch" style="background:#7dc6ff"></span><span>Typography</span><strong>29%</strong></div>
+            <div class="legend-row"><span class="swatch" style="background:#ffb36b"></span><span>Shaders</span><strong>18%</strong></div>
+            <div class="legend-row"><span class="swatch" style="background:#d06bff"></span><span>Motion</span><strong>15%</strong></div>
+          </div>
+        </article>
+
+        <article class="card text-demo">
+          <div>
+            <div class="label">Complex text study</div>
+            <h2>Gradient + bidi layout</h2>
+          </div>
+          <div class="headline">Rendered like a tiny exhibit wall inside the CRT.</div>
+          <div class="bidi">
+            <div>Latin text, emoji ✦, and layered UI styling in a same-origin frame.</div>
+            <div class="rtl">مرحبًا من الشاشة الصغيرة — mixed-direction text stays crisp in the capture path.</div>
+          </div>
+          <div class="footer">
+            <span>Ligatures enabled</span>
+            <span>Variable weight styling</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="label">WebGL study</div>
+          <h2>Shader orb</h2>
+          <canvas class="webgl-canvas" width="280" height="280"></canvas>
+          <div class="footer">
+            <span>Animated fragment shader</span>
+            <span>Runs inside the iframe page</span>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const clockNode = document.getElementById('clock');
+      const canvas = document.querySelector('.webgl-canvas');
+      const gl = canvas.getContext('webgl');
+
+      const updateClock = () => {
+        clockNode.textContent = new Date().toLocaleTimeString('en-US', {
+          hour12: false,
+          timeZone: 'UTC',
+        }) + ' UTC';
+      };
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      if (gl) {
+        const vertexSource = `
+          attribute vec2 position;
+          varying vec2 vUv;
+          void main() {
+            vUv = position * 0.5 + 0.5;
+            gl_Position = vec4(position, 0.0, 1.0);
+          }
+        `;
+
+        const fragmentSource = `
+          precision mediump float;
+          varying vec2 vUv;
+          uniform float time;
+          void main() {
+            vec2 uv = vUv * 2.0 - 1.0;
+            float radius = length(uv);
+            float ring = smoothstep(0.72, 0.2, radius);
+            float pulse = 0.5 + 0.5 * sin(time * 1.7 - radius * 8.0);
+            vec3 base = mix(vec3(0.05, 0.10, 0.18), vec3(0.49, 0.78, 1.0), pulse * ring);
+            vec3 accent = vec3(0.56, 1.0, 0.80) * smoothstep(0.52, 0.18, radius);
+            float sweep = smoothstep(0.02, 0.0, abs(uv.y + sin(time + uv.x * 4.0) * 0.15));
+            vec3 color = base + accent + vec3(1.0, 0.7, 0.42) * sweep * 0.25;
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `;
+
+        const compile = (type, source) => {
+          const shader = gl.createShader(type);
+          gl.shaderSource(shader, source);
+          gl.compileShader(shader);
+          return shader;
+        };
+
+        const program = gl.createProgram();
+        gl.attachShader(program, compile(gl.VERTEX_SHADER, vertexSource));
+        gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSource));
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+          -1, -1,
+           1, -1,
+          -1,  1,
+           1,  1,
+        ]), gl.STATIC_DRAW);
+
+        const positionLocation = gl.getAttribLocation(program, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const timeLocation = gl.getUniformLocation(program, 'time');
+
+        const render = (now) => {
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.uniform1f(timeLocation, now * 0.001);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          requestAnimationFrame(render);
+        };
+        requestAnimationFrame(render);
+      }
+    </script>
+  </body>
+</html>

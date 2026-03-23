@@ -12,7 +12,7 @@ app.innerHTML = `
       <h1>Childhood Bedroom</h1>
       <p>
         A warm, slightly dreamy isometric room with a corner desk, stacked clutter,
-        and a glowing CRT monitor as the focal point.
+        and a CRT monitor that now embeds an in-room demos page using html-in-canvas.
       </p>
       <div class="legend">
         <span>Scroll to zoom</span>
@@ -22,13 +22,48 @@ app.innerHTML = `
       </div>
     </section>
     <aside class="caption">
-      This version is fully procedural, so we can swap in your reference images later
-      and restyle the room furniture, posters, fabrics, and wall details without changing the stack.
+      The monitor renders a same-origin iframe to a hidden canvas and maps that live result
+      into the 3D screen, with a fallback HUD when the experimental html-in-canvas APIs are unavailable.
     </aside>
+    <section class="html-canvas-lab" aria-hidden="true">
+      <canvas class="monitor-html-canvas" width="960" height="720" layoutsubtree></canvas>
+      <div class="monitor-html-subtree">
+        <iframe
+          class="monitor-html-frame"
+          src="/monitor-demos.html"
+          title="Monitor demos"
+          loading="eager"
+        ></iframe>
+      </div>
+    </section>
   </main>
 `;
 
 const sceneShell = document.querySelector('.scene-shell');
+const htmlCanvas = document.querySelector('.monitor-html-canvas');
+const htmlSubtree = document.querySelector('.monitor-html-subtree');
+const htmlFrame = document.querySelector('.monitor-html-frame');
+const htmlContext = htmlCanvas.getContext('2d');
+
+const monitorViewport = {
+  width: htmlCanvas.width,
+  height: htmlCanvas.height,
+};
+
+const monitorState = {
+  ready: false,
+  supported: Boolean(htmlContext && typeof htmlContext.drawElement === 'function'),
+  lastDraw: 0,
+  texture: null,
+};
+
+const appResizeObserver = new ResizeObserver(() => {
+  if (htmlSubtree) {
+    htmlSubtree.style.width = `${monitorViewport.width}px`;
+    htmlSubtree.style.height = `${monitorViewport.height}px`;
+  }
+});
+appResizeObserver.observe(sceneShell);
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -280,6 +315,82 @@ const addMesh = (geometry, material, options = {}) => {
   return mesh;
 };
 
+const drawMonitorFallback = () => {
+  if (!htmlContext) {
+    return;
+  }
+
+  htmlContext.save();
+  htmlContext.fillStyle = '#0c1118';
+  htmlContext.fillRect(0, 0, monitorViewport.width, monitorViewport.height);
+
+  const gradient = htmlContext.createLinearGradient(0, 0, monitorViewport.width, monitorViewport.height);
+  gradient.addColorStop(0, '#18283c');
+  gradient.addColorStop(1, '#091117');
+  htmlContext.fillStyle = gradient;
+  htmlContext.fillRect(24, 24, monitorViewport.width - 48, monitorViewport.height - 48);
+
+  htmlContext.strokeStyle = 'rgba(125, 255, 210, 0.45)';
+  htmlContext.lineWidth = 4;
+  htmlContext.strokeRect(24, 24, monitorViewport.width - 48, monitorViewport.height - 48);
+
+  htmlContext.fillStyle = '#89ffd8';
+  htmlContext.font = '700 56px system-ui';
+  htmlContext.fillText('html-in-canvas', 72, 116);
+
+  htmlContext.fillStyle = 'rgba(232, 246, 255, 0.9)';
+  htmlContext.font = '500 30px system-ui';
+  htmlContext.fillText('Experimental API unavailable in this browser.', 72, 188);
+  htmlContext.fillText('Open /monitor-demos.html to view the iframe content directly.', 72, 234);
+
+  const cards = [
+    { x: 72, y: 292, label: 'Pie Chart', value: 'Canvas / SVG blend' },
+    { x: 332, y: 292, label: 'Complex Text', value: 'RTL + gradient type' },
+    { x: 592, y: 292, label: 'WebGL', value: 'Shader-driven orb' },
+  ];
+
+  htmlContext.font = '600 28px system-ui';
+  cards.forEach((card, index) => {
+    htmlContext.fillStyle = 'rgba(14, 26, 34, 0.9)';
+    htmlContext.fillRect(card.x, card.y, 220, 230);
+    htmlContext.strokeStyle = 'rgba(137, 255, 216, 0.2)';
+    htmlContext.strokeRect(card.x, card.y, 220, 230);
+    htmlContext.fillStyle = ['#ffb36b', '#7dc6ff', '#8effcb'][index];
+    htmlContext.fillText(card.label, card.x + 20, card.y + 48);
+    htmlContext.fillStyle = 'rgba(232, 246, 255, 0.84)';
+    htmlContext.font = '500 22px system-ui';
+    htmlContext.fillText(card.value, card.x + 20, card.y + 90);
+    htmlContext.font = '600 28px system-ui';
+  });
+
+  htmlContext.restore();
+};
+
+const renderMonitorSurface = (time) => {
+  if (!htmlContext) {
+    return;
+  }
+
+  if (!monitorState.supported) {
+    if (!monitorState.ready) {
+      drawMonitorFallback();
+      monitorState.ready = true;
+      monitorState.texture.needsUpdate = true;
+    }
+    return;
+  }
+
+  if (time - monitorState.lastDraw < 1000 / 24) {
+    return;
+  }
+
+  htmlContext.clearRect(0, 0, monitorViewport.width, monitorViewport.height);
+  htmlContext.drawElement(htmlSubtree, 0, 0, monitorViewport.width, monitorViewport.height);
+  monitorState.lastDraw = time;
+  monitorState.ready = true;
+  monitorState.texture.needsUpdate = true;
+};
+
 const buildRoom = () => {
   const floorMaterial = new THREE.MeshStandardMaterial({
     color: '#b3835d',
@@ -449,12 +560,18 @@ const buildDesk = () => {
   monitorShell.receiveShadow = true;
   deskGroup.add(monitorShell);
 
+  monitorState.texture = new THREE.CanvasTexture(htmlCanvas);
+  monitorState.texture.colorSpace = THREE.SRGBColorSpace;
+  monitorState.texture.minFilter = THREE.LinearFilter;
+  monitorState.texture.magFilter = THREE.LinearFilter;
+
   const screenMaterial = new THREE.MeshStandardMaterial({
-    color: '#8effcb',
-    emissive: '#1f8f67',
-    emissiveIntensity: 1.4,
-    roughness: 0.18,
-    metalness: 0.1,
+    color: '#ffffff',
+    map: monitorState.texture,
+    emissive: '#2cbf95',
+    emissiveIntensity: 0.72,
+    roughness: 0.16,
+    metalness: 0.08,
   });
   animatedMaterials.push(screenMaterial);
 
@@ -462,6 +579,18 @@ const buildDesk = () => {
   screen.position.set(-5.1, 4.08, -3.86);
   screen.rotation.y = Math.PI;
   deskGroup.add(screen);
+
+  const bezel = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.02, 0.82),
+    new THREE.MeshStandardMaterial({
+      color: '#2a2a2f',
+      roughness: 0.78,
+      metalness: 0.12,
+    }),
+  );
+  bezel.position.set(-5.1, 4.08, -3.89);
+  bezel.rotation.y = Math.PI;
+  deskGroup.add(bezel);
 
   const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.45, 16), plasticMaterial);
   stand.position.set(-5.1, 3.3, -4.45);
@@ -497,7 +626,6 @@ const buildDesk = () => {
   keyboard.receiveShadow = true;
   deskGroup.add(keyboard);
 
-  // Mouse on the desk
   const mouseMaterial = new THREE.MeshStandardMaterial({
     color: '#a89888',
     roughness: 0.75,
@@ -508,7 +636,6 @@ const buildDesk = () => {
   mouseBody.receiveShadow = true;
   deskGroup.add(mouseBody);
 
-  // Mouse button seam
   const mouseSeam = new THREE.Mesh(
     new THREE.BoxGeometry(0.005, 0.085, 0.18),
     new THREE.MeshStandardMaterial({ color: '#7a6e62', roughness: 0.9 }),
@@ -516,7 +643,6 @@ const buildDesk = () => {
   mouseSeam.position.set(-3.95, 3.315, -3.46);
   deskGroup.add(mouseSeam);
 
-  // Mouse scroll wheel
   const scrollWheel = new THREE.Mesh(
     new THREE.CylinderGeometry(0.02, 0.02, 0.06, 8),
     new THREE.MeshStandardMaterial({ color: '#6a6058', roughness: 0.6 }),
@@ -525,7 +651,6 @@ const buildDesk = () => {
   scrollWheel.rotation.z = Math.PI / 2;
   deskGroup.add(scrollWheel);
 
-  // Desktop tower PC under the desk (right side, to avoid the drawer on left)
   const towerMaterial = new THREE.MeshStandardMaterial({
     color: '#c8beb4',
     roughness: 0.8,
@@ -543,7 +668,6 @@ const buildDesk = () => {
   towerCase.receiveShadow = true;
   deskGroup.add(towerCase);
 
-  // Front panel detail - drive bays
   const driveBayMaterial = new THREE.MeshStandardMaterial({ color: '#a09888', roughness: 0.9 });
   const driveBay1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.14, 0.02), driveBayMaterial);
   driveBay1.position.set(towerX, towerY + 0.55, towerZ + towerD / 2 + 0.01);
@@ -553,7 +677,6 @@ const buildDesk = () => {
   driveBay2.position.set(towerX, towerY + 0.35, towerZ + towerD / 2 + 0.01);
   deskGroup.add(driveBay2);
 
-  // Power button
   const powerBtn = new THREE.Mesh(
     new THREE.CylinderGeometry(0.05, 0.05, 0.02, 12),
     new THREE.MeshStandardMaterial({ color: '#e8e0d0', roughness: 0.5 }),
@@ -562,7 +685,6 @@ const buildDesk = () => {
   powerBtn.rotation.x = Math.PI / 2;
   deskGroup.add(powerBtn);
 
-  // Power LED
   const powerLed = new THREE.Mesh(
     new THREE.BoxGeometry(0.04, 0.04, 0.02),
     new THREE.MeshStandardMaterial({
@@ -574,7 +696,6 @@ const buildDesk = () => {
   powerLed.position.set(towerX + 0.15, towerY + 0.42, towerZ + towerD / 2 + 0.015);
   deskGroup.add(powerLed);
 
-  // Ventilation grille on front lower area
   const grilleMaterial = new THREE.MeshStandardMaterial({ color: '#8a8070', roughness: 1 });
   for (let i = 0; i < 6; i++) {
     const slat = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.02, 0.02), grilleMaterial);
@@ -582,12 +703,10 @@ const buildDesk = () => {
     deskGroup.add(slat);
   }
 
-  // Cables — use TubeGeometry with CatmullRomCurve3
   const cableMaterial = new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 0.9 });
   const cableRadius = 0.035;
   const cableSegments = 20;
 
-  // Cable: tower back → up behind desk → monitor back
   const monitorCable = new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3([
       new THREE.Vector3(towerX, towerY + 0.5, towerZ - towerD / 2),
@@ -602,7 +721,6 @@ const buildDesk = () => {
   monitorCableMesh.castShadow = true;
   deskGroup.add(monitorCableMesh);
 
-  // Cable: tower back → up → keyboard (runs along back of desk then forward)
   const kbCable = new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3([
       new THREE.Vector3(towerX, towerY + 0.3, towerZ - towerD / 2),
@@ -618,7 +736,6 @@ const buildDesk = () => {
   kbCableMesh.castShadow = true;
   deskGroup.add(kbCableMesh);
 
-  // Cable: mouse → merges with keyboard cable area
   const mouseCable = new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3([
       new THREE.Vector3(-3.95, 3.31, -3.72),
@@ -912,6 +1029,18 @@ const resize = () => {
   renderer.setSize(width, height);
 };
 
+htmlFrame.addEventListener('load', () => {
+  monitorState.ready = false;
+  monitorState.lastDraw = 0;
+  if (!monitorState.supported) {
+    drawMonitorFallback();
+    monitorState.ready = true;
+    if (monitorState.texture) {
+      monitorState.texture.needsUpdate = true;
+    }
+  }
+});
+
 buildRoom();
 buildRug();
 buildDesk();
@@ -924,9 +1053,11 @@ resize();
 
 window.addEventListener('resize', resize);
 
-const animate = () => {
+const animate = (time = 0) => {
   const elapsed = clock.getElapsedTime();
-  const flicker = 1.15 + Math.sin(elapsed * 8.5) * 0.1 + Math.sin(elapsed * 19) * 0.05;
+  const flicker = 0.7 + Math.sin(elapsed * 8.5) * 0.08 + Math.sin(elapsed * 19) * 0.03;
+
+  renderMonitorSurface(time);
 
   for (const material of animatedMaterials) {
     material.emissiveIntensity = flicker;
