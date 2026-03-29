@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wahoo! Wail - You've Got Wail!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            background: #d4d0c8;
+            color: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: linear-gradient(to bottom, #400090, #300070);
+            color: #fff;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar .logo {
+            font-family: "Arial Black", sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+        }
+        .toolbar .logo span { color: #ffcc00; }
+        .toolbar-links {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+        }
+        .toolbar-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 11px;
+            padding: 2px 8px;
+            border: 1px outset #7755aa;
+            background: #5500aa;
+        }
+        .toolbar-links a:hover { background: #7722cc; }
+
+        /* Main layout */
+        .mail-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar folders */
+        .folders {
+            width: 140px;
+            background: #ece9d8;
+            border-right: 2px groove #fff;
+            padding: 4px 0;
+            flex-shrink: 0;
+        }
+        .folder {
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .folder:hover { background: #316ac5; color: #fff; }
+        .folder.active { background: #316ac5; color: #fff; font-weight: bold; }
+        .folder .count {
+            margin-left: auto;
+            font-size: 10px;
+            background: #cc0000;
+            color: #fff;
+            border-radius: 2px;
+            padding: 0 4px;
+            font-weight: bold;
+        }
+
+        /* Mail area */
+        .mail-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Action bar */
+        .action-bar {
+            background: #ece9d8;
+            border-bottom: 1px solid #999;
+            padding: 3px 6px;
+            display: flex;
+            gap: 2px;
+        }
+        .action-btn {
+            border: 1px outset #ddd;
+            background: #ece9d8;
+            padding: 2px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+        }
+        .action-btn:hover { background: #fff; }
+        .action-btn:active { border-style: inset; }
+
+        /* Message list */
+        .message-list {
+            flex: 0 0 auto;
+            max-height: 45%;
+            overflow-y: auto;
+            border-bottom: 2px groove #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th {
+            background: #d4d0c8;
+            border-bottom: 1px solid #999;
+            padding: 3px 6px;
+            text-align: left;
+            font-size: 11px;
+            position: sticky;
+            top: 0;
+            cursor: default;
+        }
+        td { padding: 3px 6px; border-bottom: 1px solid #eee; }
+        tr { cursor: pointer; }
+        tr:hover { background: #e8e8e8; }
+        tr.unread { font-weight: bold; }
+        tr.selected { background: #316ac5; color: #fff; }
+        tr.selected a { color: #fff; }
+        .msg-icon { font-size: 14px; width: 20px; text-align: center; }
+
+        /* Preview pane */
+        .preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff;
+        }
+        .preview-header {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .preview-header h3 { font-size: 14px; color: #400090; margin-bottom: 4px; }
+        .preview-meta { font-size: 11px; color: #666; }
+        .preview-meta b { color: #333; }
+        .preview-body { font-size: 13px; line-height: 1.6; }
+        .preview-body p { margin-bottom: 8px; }
+        .preview-body a { color: #0000cc; }
+
+        /* Status bar */
+        .status-bar {
+            background: #ece9d8;
+            border-top: 1px solid #999;
+            padding: 2px 8px;
+            font-size: 10px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Welcome overlay */
+        .welcome-splash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .welcome-splash.hidden { display: none; }
+        .welcome-box {
+            background: #fff;
+            border: 3px outset #ccc;
+            padding: 20px 30px;
+            text-align: center;
+            max-width: 300px;
+        }
+        .welcome-box h2 {
+            font-family: "Arial Black", sans-serif;
+            color: #400090;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        .welcome-box .envelope { font-size: 40px; margin: 8px 0; }
+        .welcome-box p { font-size: 13px; margin-bottom: 10px; }
+        .welcome-box button {
+            background: #400090;
+            color: #fff;
+            border: 2px outset #7744aa;
+            padding: 6px 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .welcome-box button:active { border-style: inset; }
+
+        .ad-strip {
+            background: #ffffcc;
+            border-bottom: 1px solid #ccc;
+            padding: 3px 8px;
+            font-size: 11px;
+            text-align: center;
+        }
+        .ad-strip a { color: #cc0000; font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome splash -->
+    <div class="welcome-splash" id="welcomeSplash">
+        <div class="welcome-box">
+            <h2>Wahoo! Wail</h2>
+            <div class="envelope">&#128236;</div>
+            <p><b>You've Got Wail!</b></p>
+            <p>3 new messages in your inbox</p>
+            <button onclick="document.getElementById('welcomeSplash').classList.add('hidden')">Open My Wail</button>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="logo">Wahoo<span>!</span> Wail</div>
+        <div class="toolbar-links">
+            <a href="/demos/wahoo/">Wahoo!</a>
+            <a href="/demos/meo-towns/">Meo-Towns</a>
+            <a href="#" onclick="return false;">Sign Out</a>
+        </div>
+    </div>
+
+    <div class="ad-strip">
+        &#127881; <a href="/demos/meo-towns/">Get your FREE Meo-Towns homepage!</a> &#127881; &mdash; Upgrade to Wahoo! Wail Plus for 100MB storage!
+    </div>
+
+    <div class="mail-layout">
+        <!-- Folders -->
+        <div class="folders">
+            <div class="folder active" onclick="showFolder('inbox', this)">
+                &#128229; Inbox <span class="count">3</span>
+            </div>
+            <div class="folder" onclick="showFolder('sent', this)">&#128228; Sent</div>
+            <div class="folder" onclick="showFolder('drafts', this)">&#128196; Drafts</div>
+            <div class="folder" onclick="showFolder('trash', this)">&#128465; Trash</div>
+            <div class="folder" onclick="showFolder('spam', this)">&#9940; Bulk Mail <span class="count">47</span></div>
+        </div>
+
+        <!-- Mail area -->
+        <div class="mail-area">
+            <div class="action-bar">
+                <button class="action-btn">&#128196; New</button>
+                <button class="action-btn">&#8617; Reply</button>
+                <button class="action-btn">&#8618; Forward</button>
+                <button class="action-btn">&#128465; Delete</button>
+                <button class="action-btn">&#9940; Spam</button>
+            </div>
+
+            <div class="message-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:20px;"></th>
+                            <th style="width:130px;">From</th>
+                            <th>Subject</th>
+                            <th style="width:75px;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messageList">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="preview" id="previewPane">
+                <div style="text-align:center; color:#999; padding-top:40px;">
+                    &#128236; Select a message to read
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="statusText">Inbox: 3 messages (3 unread)</span>
+        <span>Storage: 2.1MB of 6MB used</span>
+    </div>
+
+    <script>
+        const emails = {
+            inbox: [
+                {
+                    id: 1, unread: true,
+                    from: 'SpaceCadet99',
+                    subject: 'Check out my new homepage!!!',
+                    date: '12/14/98',
+                    body: `<p>Hey!</p>
+<p>I just finished updating my Meo-Towns page with a whole new section about my computer specs. You HAVE to check it out!</p>
+<p><a href="/demos/meo-towns/#siliconhills">Visit my page here!</a></p>
+<p>Also did you see that new Star Wars trailer? Episode I is going to be SO AWESOME. Jar Jar Binks looks really cool!</p>
+<p>Later,<br>Kevin (SpaceCadet99)<br>Meo-Towns / SiliconHills</p>
+<p style="font-size:10px; color:#999;">---<br>Sent from Wahoo! Wail - the Internet's #1 free email!</p>`
+                },
+                {
+                    id: 2, unread: true,
+                    from: 'KittyGurl2000',
+                    subject: 'RE: did u see Titanic yet???',
+                    date: '12/13/98',
+                    body: `<p>OMG OMG OMG!!!</p>
+<p>I saw Titanic AGAIN last weekend (that makes 4 times!!!) and I cried SO MUCH at the end. Leonardo DiCaprio is the cutest person ever!!!</p>
+<p>Anyway, I updated my <a href="/demos/meo-towns/#heartland">Meo-Towns page</a> with a whole Titanic section. Please sign my guestbook!!!</p>
+<p>Also, the Spice Girls concert is next month and I am SOOOO excited!!! Scary Spice is my fave. Who's yours???</p>
+<p>BFF,<br>Katie &#128049;&#128049;&#128049;<br>~*KittyGurl2000*~</p>`
+                },
+                {
+                    id: 3, unread: true,
+                    from: 'Wahoo! Wail Team',
+                    subject: 'Welcome to Wahoo! Wail - Free Email!',
+                    date: '12/10/98',
+                    body: `<p>Welcome to <b>Wahoo! Wail</b> - the Internet's favorite free email service!</p>
+<p>Your new email address: <b>cooluser@wahoo.com</b></p>
+<p>With Wahoo! Wail you get:</p>
+<ul style="padding-left:20px; margin:8px 0;">
+<li>6 whole megabytes of storage!</li>
+<li>Send attachments up to 1MB!</li>
+<li>Access your email from any computer with a web browser!</li>
+<li>FREE for life*!</li>
+</ul>
+<p>Don't forget to check out our other services:</p>
+<p>&#128269; <a href="/demos/wahoo/">Wahoo! Search</a> - Find anything on the Web!<br>
+&#127968; <a href="/demos/meo-towns/">Meo-Towns</a> - Build your own FREE homepage!<br>
+&#127918; <a href="/demos/flappy-bird/">Wahoo! Games</a> - Play free online games!</p>
+<p>Happy surfing!<br>The Wahoo! Wail Team</p>
+<p style="font-size:9px; color:#999;">*Free as long as you log in at least once every 30 days. Inactive accounts will be deleted.</p>`
+                }
+            ],
+            sent: [
+                {
+                    id: 10, unread: false,
+                    from: 'Me',
+                    subject: 'RE: Check out my new homepage!!!',
+                    date: '12/12/98',
+                    body: `<p>Hey Kevin!</p><p>Your page looks awesome! I love the star background. How did you make the text blink like that??</p><p>Talk soon!</p>`
+                }
+            ],
+            spam: [
+                {
+                    id: 20, unread: false,
+                    from: 'FREE MONEY!!!',
+                    subject: 'You have WON $1,000,000!!!',
+                    date: '12/14/98',
+                    body: `<p>CONGRATULATIONS!!! You have been SELECTED to receive ONE MILLION DOLLARS! Click here to claim NOW!!!</p>`
+                },
+                {
+                    id: 21, unread: false,
+                    from: 'WebMaster Pro',
+                    subject: 'Get 1000 visitors to your site GUARANTEED',
+                    date: '12/13/98',
+                    body: `<p>Want more traffic to your homepage? Our revolutionary system will drive 1000 visitors GUARANTEED! Only $19.99!</p>`
+                }
+            ]
+        };
+
+        let currentFolder = 'inbox';
+        let selectedMsg = null;
+
+        function showFolder(name, el) {
+            currentFolder = name;
+            selectedMsg = null;
+
+            // Update folder UI
+            document.querySelectorAll('.folder').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+
+            renderMessages();
+            document.getElementById('previewPane').innerHTML = '<div style="text-align:center; color:#999; padding-top:40px;">&#128236; Select a message to read</div>';
+
+            const msgs = emails[name] || [];
+            const unread = msgs.filter(m => m.unread).length;
+            document.getElementById('statusText').textContent =
+                name.charAt(0).toUpperCase() + name.slice(1) + ': ' + msgs.length + ' messages' + (unread ? ' (' + unread + ' unread)' : '');
+        }
+
+        function renderMessages() {
+            const list = document.getElementById('messageList');
+            const msgs = emails[currentFolder] || [];
+
+            if (msgs.length === 0) {
+                list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px;">No messages</td></tr>';
+                return;
+            }
+
+            list.innerHTML = msgs.map(m => `
+                <tr class="${m.unread ? 'unread' : ''} ${selectedMsg === m.id ? 'selected' : ''}" onclick="selectMessage(${m.id})">
+                    <td class="msg-icon">${m.unread ? '&#128233;' : '&#128232;'}</td>
+                    <td>${m.from}</td>
+                    <td>${m.subject}</td>
+                    <td>${m.date}</td>
+                </tr>
+            `).join('');
+        }
+
+        function selectMessage(id) {
+            const msgs = emails[currentFolder] || [];
+            const msg = msgs.find(m => m.id === id);
+            if (!msg) return;
+
+            selectedMsg = id;
+            msg.unread = false;
+
+            renderMessages();
+
+            document.getElementById('previewPane').innerHTML = `
+                <div class="preview-header">
+                    <h3>${msg.subject}</h3>
+                    <div class="preview-meta">
+                        <b>From:</b> ${msg.from} &nbsp; <b>Date:</b> ${msg.date}
+                    </div>
+                </div>
+                <div class="preview-body">${msg.body}</div>
+            `;
+
+            // Update unread count
+            const unread = msgs.filter(m => m.unread).length;
+            document.getElementById('statusText').textContent =
+                currentFolder.charAt(0).toUpperCase() + currentFolder.slice(1) + ': ' + msgs.length + ' messages' + (unread ? ' (' + unread + ' unread)' : '');
+        }
+
+        // Initial render
+        renderMessages();
+    </script>
+</body>
+</html>

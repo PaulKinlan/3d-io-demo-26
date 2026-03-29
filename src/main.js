@@ -870,6 +870,9 @@ const setupMCP = () => {
             "/demos/maltavista/",
             "/demos/new-tab/",
             "/demos/slide-deck/",
+            "/demos/wahoo/",
+            "/demos/meo-towns/",
+            "/demos/wahoo-wail/",
             "/demos/site-generator/"
           ],
           description: "The URL of the demo to navigate to."

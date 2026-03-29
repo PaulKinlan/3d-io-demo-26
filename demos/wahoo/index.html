@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wahoo!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            background: #fff;
+            color: #000;
+        }
+
+        a { color: #0000cc; }
+        a:visited { color: #663399; }
+        a:hover { color: #cc0000; }
+
+        .topbar {
+            background: #400090;
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .topbar a { color: #ffff00; font-size: 11px; text-decoration: none; }
+        .topbar a:hover { text-decoration: underline; }
+
+        .header {
+            background: linear-gradient(to bottom, #f7f0ff, #e8d5f5);
+            text-align: center;
+            padding: 8px 10px 10px;
+            border-bottom: 2px solid #400090;
+        }
+
+        .logo {
+            font-family: "Arial Black", Impact, sans-serif;
+            font-size: 42px;
+            font-weight: 900;
+            color: #400090;
+            letter-spacing: -2px;
+            text-shadow: 2px 2px 0px #ccc;
+            margin-bottom: 2px;
+        }
+        .logo span { color: #cc0000; font-size: 48px; }
+        .tagline {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .search-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .search-area input[type="text"] {
+            width: 260px;
+            padding: 3px 6px;
+            border: 2px inset #ccc;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+        }
+        .search-area button {
+            background: #400090;
+            color: #fff;
+            border: 2px outset #7744aa;
+            padding: 3px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .search-area button:active { border-style: inset; }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            font-size: 11px;
+            flex-wrap: wrap;
+        }
+        .nav-links a { color: #400090; font-weight: bold; text-decoration: none; }
+        .nav-links a:hover { text-decoration: underline; }
+        .nav-links .sep { color: #999; }
+
+        .main {
+            display: flex;
+            padding: 8px;
+            gap: 10px;
+        }
+
+        .directory { flex: 1; min-width: 0; }
+        .dir-section { margin-bottom: 10px; }
+        .dir-section h3 {
+            font-size: 13px;
+            color: #400090;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 2px;
+            margin-bottom: 4px;
+        }
+        .dir-section ul { list-style: none; padding-left: 4px; }
+        .dir-section li { padding: 1px 0; font-size: 12px; }
+        .dir-section li a { text-decoration: none; }
+        .dir-section li a:hover { text-decoration: underline; }
+        .dir-new { color: #cc0000; font-weight: bold; font-size: 10px; }
+
+        .sidebar { width: 180px; flex-shrink: 0; }
+        .sidebar-box { border: 1px solid #ccc; margin-bottom: 8px; background: #fafafa; }
+        .sidebar-box h4 {
+            background: #400090;
+            color: #fff;
+            font-size: 11px;
+            padding: 3px 6px;
+            margin: 0;
+        }
+        .sidebar-box .content { padding: 6px; font-size: 11px; line-height: 1.5; }
+
+        .news-item { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dotted #ccc; }
+        .news-item:last-child { border-bottom: none; }
+        .news-item .headline { font-weight: bold; }
+        .news-item .time { color: #999; font-size: 10px; }
+
+        .weather { text-align: center; }
+        .weather .temp { font-size: 22px; font-weight: bold; color: #cc6600; }
+        .weather .loc { color: #666; }
+
+        .ad-banner {
+            text-align: center;
+            padding: 6px;
+            margin: 4px 8px;
+            border: 1px solid #ccc;
+            background: #ffffcc;
+            font-size: 11px;
+            animation: blink-border 1.5s infinite;
+        }
+        .ad-banner a { color: #cc0000; font-weight: bold; text-decoration: none; }
+        .ad-banner a:hover { text-decoration: underline; }
+
+        @keyframes blink-border {
+            0%, 100% { border-color: #cc0000; }
+            50% { border-color: #ffcc00; }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 8px;
+            font-size: 10px;
+            color: #999;
+            border-top: 2px solid #400090;
+            margin-top: 6px;
+        }
+        .footer a { color: #666; font-size: 10px; }
+
+        .ticker-wrap {
+            background: #400090;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 3px 0;
+        }
+        .ticker {
+            display: inline-block;
+            animation: ticker 20s linear infinite;
+            color: #ffff00;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .counter {
+            font-family: "Courier New", monospace;
+            background: #000;
+            color: #0f0;
+            padding: 2px 8px;
+            font-size: 11px;
+            display: inline-block;
+            border: 1px inset #333;
+        }
+
+        .dir-columns { display: flex; gap: 16px; }
+        .dir-col { flex: 1; min-width: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div>
+            <a href="/demos/wahoo-wail/">Wail</a> |
+            <a href="/demos/meo-towns/">Meo-Towns</a> |
+            <a href="/demos/flappy-bird/">Games</a> |
+            <a href="#">Chat</a> |
+            <a href="#">Pager</a>
+        </div>
+        <div>
+            <a href="/demos/wahoo-wail/">Sign In</a> |
+            <a href="#">My Wahoo!</a>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="logo">Wahoo<span>!</span></div>
+        <div class="tagline">The Internet's Guide to Everything&trade; &mdash; Since 1996</div>
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="Search the Web...">
+            <button onclick="doSearch()">Search</button>
+        </div>
+        <div class="nav-links">
+            <a href="/demos/wahoo-wail/">Wail</a> <span class="sep">|</span>
+            <a href="/demos/meo-towns/">Meo-Towns</a> <span class="sep">|</span>
+            <a href="#">Messenger</a> <span class="sep">|</span>
+            <a href="#">News</a> <span class="sep">|</span>
+            <a href="#">Sports</a> <span class="sep">|</span>
+            <a href="#">Finance</a> <span class="sep">|</span>
+            <a href="/demos/flappy-bird/">Games</a>
+        </div>
+    </div>
+
+    <div class="ticker-wrap">
+        <span class="ticker">&#9733; BREAKING: Scientists discover the Internet may contain more than 1 million websites! &#9733; STOCK ALERT: Pets.com up 200% this quarter &#9733; Y2K Bug: Should you be worried? Experts say maybe &#9733; FREE AOL trial discs now available at your local grocery store &#9733;</span>
+    </div>
+
+    <div class="ad-banner">
+        &#127881; <a href="/demos/meo-towns/">Build your FREE homepage on Meo-Towns!</a> &#127881;
+        Unlimited space* &mdash; Express yourself on the World Wide Web!
+        <br><span style="font-size:9px">*up to 15MB</span>
+    </div>
+
+    <div class="main">
+        <div class="directory">
+            <div class="dir-columns">
+                <div class="dir-col">
+                    <div class="dir-section">
+                        <h3>&#128193; Arts &amp; Humanities</h3>
+                        <ul>
+                            <li><a href="/demos/meo-towns/">Literature</a></li>
+                            <li><a href="#">Photography</a></li>
+                            <li><a href="/demos/meo-towns/#hollywood">Movies &amp; Film</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#128187; Computers &amp; Internet</h3>
+                        <ul>
+                            <li><a href="/demos/meo-towns/">Homepage Building</a> <span class="dir-new">NEW!</span></li>
+                            <li><a href="#">Web Directories</a></li>
+                            <li><a href="#">Software Downloads</a></li>
+                            <li><a href="/demos/flappy-bird/">Games</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#127911; Entertainment</h3>
+                        <ul>
+                            <li><a href="#">Cool Links</a></li>
+                            <li><a href="/demos/flappy-bird/">Online Games</a> <span class="dir-new">HOT!</span></li>
+                            <li><a href="#">Humor</a></li>
+                            <li><a href="#">Music &amp; MP3s</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#128218; Education</h3>
+                        <ul>
+                            <li><a href="/demos/slide-deck/">Online Courses</a></li>
+                            <li><a href="#">Encyclopedias</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dir-col">
+                    <div class="dir-section">
+                        <h3>&#128240; News &amp; Media</h3>
+                        <ul>
+                            <li><a href="#">Today's Headlines</a></li>
+                            <li><a href="#">Technology News</a></li>
+                            <li><a href="#">World News</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#127970; Business &amp; Economy</h3>
+                        <ul>
+                            <li><a href="#">Shopping</a></li>
+                            <li><a href="#">Classifieds</a></li>
+                            <li><a href="#">Jobs</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#129309; Society &amp; Culture</h3>
+                        <ul>
+                            <li><a href="/demos/meo-towns/">Personal Homepages</a></li>
+                            <li><a href="#">People</a></li>
+                        </ul>
+                    </div>
+                    <div class="dir-section">
+                        <h3>&#128295; Reference</h3>
+                        <ul>
+                            <li><a href="#">Dictionaries</a></li>
+                            <li><a href="#">Maps</a></li>
+                            <li><a href="#">Phone Numbers</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-box">
+                <h4>&#9728;&#65039; Weather</h4>
+                <div class="content weather">
+                    <div class="temp">72&deg;F</div>
+                    <div class="loc">Silicon Valley, CA</div>
+                    <div>Partly Cloudy</div>
+                    <div style="font-size:10px;margin-top:4px;">High: 78&deg; Low: 58&deg;</div>
+                </div>
+            </div>
+
+            <div class="sidebar-box">
+                <h4>&#128228; Wahoo! Wail</h4>
+                <div class="content">
+                    You have <b>3 new messages</b>!
+                    <br><a href="/demos/wahoo-wail/">Check your Wail &raquo;</a>
+                </div>
+            </div>
+
+            <div class="sidebar-box">
+                <h4>&#128196; Top News</h4>
+                <div class="content">
+                    <div class="news-item">
+                        <div class="headline"><a href="#">Furbies Banned From Pentagon</a></div>
+                        <div class="time">2 hours ago</div>
+                    </div>
+                    <div class="news-item">
+                        <div class="headline"><a href="#">New "Google" Search Engine Launches</a></div>
+                        <div class="time">5 hours ago</div>
+                    </div>
+                    <div class="news-item">
+                        <div class="headline"><a href="#">Napster Downloads Hit 1 Million</a></div>
+                        <div class="time">Yesterday</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-box">
+                <h4>&#127918; Fun Stuff</h4>
+                <div class="content">
+                    <a href="/demos/flappy-bird/">&#9654; Play Flappy Bird</a><br>
+                    <a href="/demos/meo-towns/">&#9654; Build a Homepage</a><br>
+                    <a href="#">&#9654; Daily Horoscope</a><br>
+                    <a href="/demos/slide-deck/">&#9654; Presentations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="margin-bottom: 4px;">
+            <a href="#">Privacy Policy</a> |
+            <a href="#">Terms of Service</a> |
+            <a href="#">About Wahoo!</a> |
+            <a href="#">Advertise</a>
+        </div>
+        <div>Visitors: <span class="counter" id="visitorCount">000,000</span></div>
+        <div style="margin-top:4px">
+            &copy; 1998 Wahoo! Inc. All rights reserved.<br>
+            Best viewed in Netscape Navigator 4.0 at 800x600
+        </div>
+    </div>
+
+    <script>
+        const count = 847293 + Math.floor(Math.random() * 100);
+        document.getElementById('visitorCount').textContent = count.toLocaleString('en-US').padStart(7, '0');
+
+        function doSearch() {
+            const q = document.getElementById('searchInput').value.trim();
+            if (q) {
+                alert('Searching the World Wide Web for: "' + q + '"\n\nPlease wait... your 56k modem is working hard!');
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doSearch();
+        });
+    </script>
+</body>
+</html>
