@@ -868,7 +868,8 @@ const setupMCP = () => {
             "/demos/browser/",
             "/demos/flappy-bird/",
             "/demos/new-tab/",
-            "/demos/slide-deck/"
+            "/demos/slide-deck/",
+            "/demos/site-generator/"
           ],
           description: "The URL of the demo to navigate to."
         }

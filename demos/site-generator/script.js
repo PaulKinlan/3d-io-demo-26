@@ -72,6 +72,13 @@ function showLoading(show) {
 async function navigateTo(url) {
   if (!url) return;
 
+  // Wait for service worker to be ready before navigating
+  if (!swReady) {
+    setStatus('loading', 'Waiting for service worker...');
+    await navigator.serviceWorker.ready;
+    swReady = true;
+  }
+
   // Normalize URL
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     if (url.includes('.') && !url.includes(' ')) {
@@ -117,26 +124,6 @@ suggestionBtns.forEach((btn) => {
     const url = btn.dataset.url;
     navigateTo(url);
   });
-});
-
-// Relay keyboard events from iframe to parent (for 3D scene shortcuts)
-contentFrame.addEventListener('load', () => {
-  try {
-    contentFrame.contentWindow.addEventListener('keydown', (e) => {
-      window.parent.dispatchEvent(
-        new KeyboardEvent('keydown', {
-          key: e.key,
-          code: e.code,
-          ctrlKey: e.ctrlKey,
-          shiftKey: e.shiftKey,
-          altKey: e.altKey,
-          metaKey: e.metaKey,
-        })
-      );
-    });
-  } catch {
-    // Cross-origin frame, can't relay events
-  }
 });
 
 // Init

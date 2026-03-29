@@ -8,6 +8,15 @@ const IMAGE_PREFIX = SCOPE_PATH + 'image/';
 // Cache the AI session for reuse
 let aiSession = null;
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function getAISession() {
   if (aiSession) return aiSession;
   if (!self.ai || !self.ai.languageModel) {
@@ -95,6 +104,8 @@ async function generateImage(description) {
 }
 
 function generateFallbackPage(url, errorMsg) {
+  const safeUrl = escapeHtml(url);
+  const safeError = escapeHtml(errorMsg);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -120,8 +131,8 @@ function generateFallbackPage(url, errorMsg) {
 <body>
   <div class="container">
     <h1>Chrome Prompt API Required</h1>
-    <p>Could not generate page for <code>${url}</code></p>
-    <p>Error: <code>${errorMsg}</code></p>
+    <p>Could not generate page for <code>${safeUrl}</code></p>
+    <p>Error: <code>${safeError}</code></p>
     <div class="hint">
       <p><strong>Requirements:</strong></p>
       <p>This demo requires Chrome with the built-in Prompt API enabled:</p>
@@ -137,9 +148,10 @@ function generateFallbackPage(url, errorMsg) {
 function generateFallbackSVG(description) {
   const colors = ['#e94560', '#0f3460', '#533483', '#16213e', '#1a1a2e'];
   const color = colors[Math.abs(hashCode(description)) % colors.length];
+  const safeDescription = escapeHtml(description.slice(0, 30));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
     <rect width="200" height="200" fill="${color}" rx="8"/>
-    <text x="100" y="105" text-anchor="middle" fill="white" font-family="sans-serif" font-size="14">${description.slice(0, 30)}</text>
+    <text x="100" y="105" text-anchor="middle" fill="white" font-family="sans-serif" font-size="14">${safeDescription}</text>
   </svg>`;
 }
 
@@ -168,7 +180,15 @@ self.addEventListener('fetch', (event) => {
 
   // Handle page generation requests
   if (path.startsWith(BROWSE_PREFIX)) {
-    const targetUrl = decodeURIComponent(path.slice(BROWSE_PREFIX.length));
+    let targetUrl;
+    try {
+      targetUrl = decodeURIComponent(path.slice(BROWSE_PREFIX.length));
+    } catch {
+      event.respondWith(
+        new Response('Bad Request: invalid URL encoding', { status: 400 })
+      );
+      return;
+    }
     event.respondWith(
       generatePage(targetUrl).then(
         (html) => new Response(html, {
@@ -184,7 +204,17 @@ self.addEventListener('fetch', (event) => {
 
   // Handle image generation requests
   if (path.startsWith(IMAGE_PREFIX)) {
-    const description = decodeURIComponent(path.slice(IMAGE_PREFIX.length));
+    let description;
+    try {
+      description = decodeURIComponent(path.slice(IMAGE_PREFIX.length));
+    } catch {
+      event.respondWith(
+        new Response('Bad Request: invalid image description encoding', {
+          status: 400,
+        })
+      );
+      return;
+    }
     event.respondWith(
       generateImage(description).then(
         (svg) => new Response(svg, {
