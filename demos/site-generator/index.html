@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Generator</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface-2: #16213e;
+      --accent: #e94560;
+      --accent-dim: #c73650;
+      --text: #eaeaea;
+      --text-dim: #8888a0;
+      --border: #2a2a4a;
+      --radius: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top bar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .brand svg { width: 18px; height: 18px; fill: var(--accent); }
+
+    .url-bar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0 4px 0 12px;
+      height: 32px;
+      transition: border-color 0.2s;
+    }
+
+    .url-bar:focus-within { border-color: var(--accent); }
+
+    .url-bar svg {
+      width: 14px; height: 14px;
+      fill: var(--text-dim);
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+
+    #url-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    #url-input::placeholder { color: var(--text-dim); }
+
+    #go-btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    #go-btn:hover { background: var(--accent-dim); }
+    #go-btn svg { width: 14px; height: 14px; fill: white; }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #666;
+      flex-shrink: 0;
+    }
+
+    .status-dot.ready { background: #34a853; }
+    .status-dot.loading { background: #fbbc04; animation: pulse 1s infinite; }
+    .status-dot.error { background: #ea4335; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      position: relative;
+      background: white;
+    }
+
+    #content-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+
+    .loading-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Welcome screen */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background: var(--bg);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .welcome h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .welcome p {
+      font-size: 13px;
+      color: var(--text-dim);
+      max-width: 400px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 450px;
+    }
+
+    .suggestion {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .suggestion:hover {
+      background: var(--surface);
+      border-color: var(--accent);
+    }
+
+    .powered-by {
+      margin-top: 24px;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .powered-by span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      Fauxmium
+    </div>
+    <div class="url-bar">
+      <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+      <input type="text" id="url-input" placeholder="Type any URL to generate a page..." autocomplete="off" spellcheck="false">
+      <button id="go-btn" title="Generate">
+        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar" id="status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Initializing...</span>
+  </div>
+
+  <!-- Content area -->
+  <div class="content">
+    <div id="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <div class="loading-text">Generating page with Gemini Nano...</div>
+    </div>
+
+    <!-- Welcome screen (shown initially, hidden when navigating) -->
+    <div class="welcome" id="welcome">
+      <h2>The AI-Generated Web</h2>
+      <p>Type any URL in the address bar. A service worker intercepts the request and uses Chrome's built-in Prompt API (Gemini Nano) to generate a complete web page on the fly.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-url="https://en.wikipedia.org/wiki/Artificial_intelligence">Wikipedia</button>
+        <button class="suggestion" data-url="https://news.ycombinator.com">Hacker News</button>
+        <button class="suggestion" data-url="https://www.bbc.co.uk/news">BBC News</button>
+        <button class="suggestion" data-url="https://stackoverflow.com/questions/tagged/javascript">Stack Overflow</button>
+        <button class="suggestion" data-url="https://github.com/nicehash/excavator">GitHub Repo</button>
+        <button class="suggestion" data-url="https://craigslist.org">Craigslist</button>
+      </div>
+      <div class="powered-by">Powered by <span>Chrome Prompt API</span> + Service Workers</div>
+    </div>
+
+    <iframe id="content-frame" style="display:none;" sandbox="allow-scripts allow-forms allow-popups"></iframe>
+  </div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
