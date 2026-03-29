@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meo-Towns - Free Homepages!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+            background: #336699;
+            color: #000;
+        }
+
+        a { color: #0033cc; }
+        a:hover { color: #ff0000; }
+
+        /* Header */
+        .mt-header {
+            background: linear-gradient(to right, #003366, #006699, #003366);
+            text-align: center;
+            padding: 10px;
+            border-bottom: 3px solid #ffcc00;
+        }
+        .mt-logo {
+            font-family: "Comic Sans MS", "Arial Black", sans-serif;
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0px #000;
+            letter-spacing: 2px;
+        }
+        .mt-logo .house { font-size: 32px; }
+        .mt-subtitle {
+            color: #99ccff;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Navigation */
+        .mt-nav {
+            background: #003366;
+            padding: 4px 10px;
+            text-align: center;
+            border-bottom: 2px solid #ffcc00;
+        }
+        .mt-nav a {
+            color: #ffcc00;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 6px;
+        }
+        .mt-nav a:hover { color: #fff; text-decoration: underline; }
+
+        /* Main content area */
+        .mt-body {
+            background: #e8e8e8;
+            max-width: 700px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* Landing / directory page */
+        .landing {
+            padding: 12px;
+        }
+
+        .welcome-box {
+            background: #ffffcc;
+            border: 2px solid #cc9900;
+            padding: 10px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .welcome-box h2 {
+            font-family: "Comic Sans MS", cursive;
+            color: #cc0000;
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .neighborhoods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .hood {
+            background: #fff;
+            border: 2px outset #ccc;
+            padding: 8px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .hood:hover { background: #ffffdd; }
+        .hood h3 {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #003366;
+            margin-bottom: 3px;
+        }
+        .hood p {
+            font-size: 11px;
+            color: #666;
+            margin: 0;
+        }
+        .hood .icon { font-size: 20px; float: left; margin-right: 6px; }
+
+        .stats-bar {
+            background: #003366;
+            color: #99ccff;
+            padding: 6px 10px;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            text-align: center;
+        }
+        .stats-bar b { color: #ffcc00; }
+
+        /* User page styles */
+        .user-page { display: none; }
+        .user-page.active { display: block; }
+
+        /* --- SpaceCadet99 page --- */
+        .page-spacecadet {
+            background: #000033 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><rect width="1" height="1" fill="%23ffffff22"/></svg>') repeat;
+            color: #00ff00;
+            padding: 12px;
+            font-family: "Courier New", monospace;
+            min-height: 400px;
+        }
+        .page-spacecadet h1 {
+            font-family: "Comic Sans MS", cursive;
+            color: #ffff00;
+            text-align: center;
+            font-size: 22px;
+            text-shadow: 0 0 10px #ffff00;
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #ffff00; }
+            50% { text-shadow: 0 0 20px #ffff00, 0 0 30px #ff8800; }
+        }
+        .page-spacecadet .under-construction {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px dashed #ffff00;
+        }
+        .page-spacecadet .under-construction .cone {
+            font-size: 28px;
+            animation: spin 3s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .page-spacecadet a { color: #00ccff; }
+        .page-spacecadet hr { border-color: #00ff00; margin: 10px 0; }
+        .page-spacecadet .blink { animation: blink-text 1s step-end infinite; }
+        @keyframes blink-text { 50% { opacity: 0; } }
+        .page-spacecadet ul { padding-left: 20px; }
+        .page-spacecadet li { margin: 4px 0; }
+
+        /* --- KittyGurl2000 page --- */
+        .page-kittygurl {
+            background: #ffccee;
+            color: #660066;
+            padding: 12px;
+            font-family: "Comic Sans MS", cursive;
+            min-height: 400px;
+        }
+        .page-kittygurl h1 {
+            color: #ff00ff;
+            text-align: center;
+            font-size: 20px;
+        }
+        .page-kittygurl .sparkle { animation: sparkle 0.5s ease-in-out infinite alternate; display: inline-block; }
+        @keyframes sparkle { 0% { transform: scale(1); } 100% { transform: scale(1.3); } }
+        .page-kittygurl .cat-border {
+            border: 3px double #ff66cc;
+            padding: 8px;
+            margin: 8px 0;
+            background: #fff0f8;
+        }
+        .page-kittygurl a { color: #cc00cc; }
+        .page-kittygurl .marquee-text {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .page-kittygurl .marquee-text span {
+            display: inline-block;
+            animation: marquee 8s linear infinite;
+            color: #ff0099;
+            font-weight: bold;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .page-kittygurl .guestbook {
+            background: #fff;
+            border: 2px inset #cc99cc;
+            padding: 8px;
+            margin-top: 8px;
+        }
+        .page-kittygurl .guestbook p {
+            font-size: 12px;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px dotted #cc99cc;
+        }
+        .page-kittygurl .guestbook .author { font-weight: bold; color: #cc00cc; }
+
+        /* --- SurfDude page --- */
+        .page-surfdude {
+            background: linear-gradient(to bottom, #87ceeb, #f0e68c);
+            color: #333;
+            padding: 12px;
+            font-family: "Arial Black", Arial, sans-serif;
+            min-height: 400px;
+        }
+        .page-surfdude h1 {
+            color: #ff6600;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 2px 2px 0 #fff;
+        }
+        .page-surfdude .wave { animation: wave 2s ease-in-out infinite; display: inline-block; }
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
+        }
+        .page-surfdude .cool-links {
+            background: rgba(255,255,255,0.7);
+            border: 2px solid #ff6600;
+            border-radius: 0;
+            padding: 8px;
+            margin: 8px 0;
+        }
+        .page-surfdude a { color: #0066cc; }
+        .page-surfdude .hit-counter {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+        .page-surfdude .counter-display {
+            font-family: "Courier New", monospace;
+            background: #000;
+            color: #0f0;
+            padding: 2px 10px;
+            display: inline-block;
+        }
+
+        /* Back to directory link */
+        .back-link {
+            display: block;
+            padding: 8px 12px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            background: #003366;
+        }
+        .back-link a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+        .back-link a:hover { text-decoration: underline; }
+
+        /* Webring */
+        .webring {
+            background: #ffffcc;
+            border: 2px solid #999;
+            padding: 6px;
+            margin: 10px 12px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+        }
+        .webring b { color: #003366; }
+        .webring a { margin: 0 4px; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="mt-body">
+        <div class="mt-header">
+            <div class="mt-logo">
+                <span class="house">&#127968;</span> Meo-Towns
+            </div>
+            <div class="mt-subtitle">Build Your FREE Homepage on the World Wide Web! &mdash; Est. 1995</div>
+        </div>
+
+        <div class="mt-nav">
+            <a href="#" onclick="showLanding(); return false;">Home</a> |
+            <a href="#" onclick="showPage('spacecadet'); return false;">SiliconHills</a> |
+            <a href="#" onclick="showPage('kittygurl'); return false;">Heartland</a> |
+            <a href="#" onclick="showPage('surfdude'); return false;">Pipeline</a> |
+            <a href="/demos/wahoo/">Wahoo!</a> |
+            <a href="/demos/wahoo-wail/">Wail</a>
+        </div>
+
+        <div class="stats-bar">
+            &#127758; <b id="totalMembers">2,847,391</b> homesteaders &amp; growing!
+            &mdash; <b>47</b> neighborhoods &mdash; Serving the web since 1995
+        </div>
+
+        <!-- Landing / directory -->
+        <div class="landing" id="landingPage">
+            <div class="welcome-box">
+                <h2>&#127758; Welcome to Meo-Towns! &#127758;</h2>
+                <p>The largest community of free home pages on the World Wide Web!</p>
+                <p style="font-size:12px; margin-top:6px;">Click a neighborhood below to visit member pages, or <a href="#" onclick="return false;">sign up FREE</a> to build your own!</p>
+            </div>
+
+            <h3 style="font-family:Arial; font-size:14px; color:#003366; margin-bottom:8px;">&#128205; Explore Our Neighborhoods</h3>
+
+            <div class="neighborhoods">
+                <div class="hood" onclick="showPage('spacecadet')">
+                    <span class="icon">&#128640;</span>
+                    <h3>SiliconHills</h3>
+                    <p>Technology, sci-fi, and computer enthusiasts</p>
+                </div>
+                <div class="hood" onclick="showPage('kittygurl')">
+                    <span class="icon">&#128150;</span>
+                    <h3>Heartland</h3>
+                    <p>Families, pets, and personal journals</p>
+                </div>
+                <div class="hood" onclick="showPage('surfdude')">
+                    <span class="icon">&#127754;</span>
+                    <h3>Pipeline</h3>
+                    <p>Extreme sports, surfing, and the outdoors</p>
+                </div>
+                <div class="hood" onclick="showPage('spacecadet')">
+                    <span class="icon">&#127908;</span>
+                    <h3>Hollywood</h3>
+                    <p>Movies, TV shows, and celebrity fansites</p>
+                </div>
+                <div class="hood" onclick="showPage('kittygurl')">
+                    <span class="icon">&#127925;</span>
+                    <h3>BourbanStreet</h3>
+                    <p>Music, bands, and concert reviews</p>
+                </div>
+                <div class="hood" onclick="showPage('surfdude')">
+                    <span class="icon">&#9917;</span>
+                    <h3>Colosseum</h3>
+                    <p>Sports fans and fantasy leagues</p>
+                </div>
+            </div>
+
+            <div style="text-align:center; font-family:Arial; font-size:12px; color:#666; padding:8px;">
+                <b>New to the Web?</b> Meo-Towns makes it easy!<br>
+                No HTML knowledge required* &mdash; just point and click!<br>
+                <span style="font-size:9px;">*some HTML knowledge actually required</span>
+            </div>
+        </div>
+
+        <!-- User pages -->
+
+        <!-- SpaceCadet99's page -->
+        <div class="user-page page-spacecadet" id="page-spacecadet">
+            <div class="back-link"><a href="#" onclick="showLanding(); return false;">&laquo; Back to Meo-Towns Directory</a></div>
+            <h1>&#128640; SpaceCadet99's Cosmic Corner &#128640;</h1>
+            <p style="text-align:center; font-size:12px;">[ Meo-Towns / SiliconHills / SpaceCadet99 ]</p>
+            <hr>
+            <div class="under-construction">
+                <span class="cone">&#9888;&#65039;</span>
+                <span class="blink"> *** UNDER CONSTRUCTION *** </span>
+                <span class="cone">&#9888;&#65039;</span>
+                <br><span style="font-size:11px;">Last updated: 11/14/1998</span>
+            </div>
+
+            <p>Welcome to my corner of cyberspace! My name is Kevin and I'm 14 years old from Ohio.</p>
+            <p>I like computers, Star Wars, and building model rockets.</p>
+
+            <hr>
+            <h3 style="color:#ffff00;">&#127775; My Cool Links &#127775;</h3>
+            <ul>
+                <li><a href="/demos/wahoo/">Wahoo!</a> - best search engine</li>
+                <li><a href="/demos/flappy-bird/">Flappy Bird</a> - awesome game!!!</li>
+                <li><a href="#" onclick="showPage('kittygurl'); return false;">My friend Katie's page</a></li>
+                <li><a href="#" onclick="showPage('surfdude'); return false;">Jake's Surf Page</a></li>
+            </ul>
+
+            <hr>
+            <h3 style="color:#ffff00;">&#128187; About My Computer</h3>
+            <p>- Pentium II 350MHz<br>
+            - 64MB RAM<br>
+            - 4GB Hard Drive<br>
+            - 56K US Robotics Modem<br>
+            - 15" CRT Monitor<br>
+            - Windows 98 SE</p>
+
+            <hr>
+            <p style="text-align:center;">
+                <span class="blink" style="color:#ff0000;">&#9733; You are visitor #<span id="spaceVisitors">0</span>! &#9733;</span>
+            </p>
+
+            <div class="webring">
+                <b>&#128279; Sci-Fi Fans WebRing</b><br>
+                <a href="#" onclick="showPage('surfdude'); return false;">&laquo; Prev</a> |
+                <a href="#" onclick="return false;">Random</a> |
+                <a href="#" onclick="showPage('kittygurl'); return false;">Next &raquo;</a>
+            </div>
+
+            <p style="text-align:center; font-size:10px; margin-top:8px;">
+                <a href="/demos/wahoo-wail/">Email me!</a> &mdash; spacecadet99@wahoo.com
+            </p>
+        </div>
+
+        <!-- KittyGurl2000's page -->
+        <div class="user-page page-kittygurl" id="page-kittygurl">
+            <div class="back-link"><a href="#" onclick="showLanding(); return false;">&laquo; Back to Meo-Towns Directory</a></div>
+            <h1><span class="sparkle">&#10024;</span> ~*KittyGurl2000's Purr-fect Page*~ <span class="sparkle">&#10024;</span></h1>
+            <p style="text-align:center; font-size:11px; color:#990099;">[ Meo-Towns / Heartland / KittyGurl2000 ]</p>
+
+            <div class="marquee-text">
+                <span>&#128049; Welcome to my page!!! I love cats and glitter and my friends!!! &#128049; Please sign my guestbook!!! &#128049;</span>
+            </div>
+
+            <div class="cat-border">
+                <p style="font-size:13px;">&#128049; Hiii!!! My name is Katie, I'm 13, and I LOVE cats!!! I have 3 cats named Whiskers, Mittens, and Princess Fluffybottom. This is my page where I put all my favorite stuff!!!</p>
+            </div>
+
+            <h3 style="color:#ff00ff; text-align:center;">&#128150; My Favorite Things &#128150;</h3>
+            <div class="cat-border">
+                <p>&#127925; Music: Spice Girls, *NSYNC, Backstreet Boys, Britney!!!</p>
+                <p>&#128250; TV Shows: Sabrina, Buffy, Friends</p>
+                <p>&#127909; Movies: Titanic (I cried SO much!!!)</p>
+                <p>&#128049; Cats: ALL OF THEM!!!</p>
+                <p>&#127790; Food: Pizza, ice cream, gummy bears</p>
+            </div>
+
+            <h3 style="color:#ff00ff; text-align:center;">&#128221; My Friends' Pages</h3>
+            <div class="cat-border">
+                <p>&#128279; <a href="#" onclick="showPage('spacecadet'); return false;">SpaceCadet99</a> - Kevin's cool space page!</p>
+                <p>&#128279; <a href="#" onclick="showPage('surfdude'); return false;">SurfDude_Jake</a> - Jake's awesome surf page!</p>
+                <p>&#128279; <a href="/demos/wahoo/">Wahoo!</a> - I use this for everything!</p>
+            </div>
+
+            <h3 style="color:#ff00ff; text-align:center;">&#128220; Guestbook &#128220;</h3>
+            <div class="guestbook">
+                <p><span class="author">SurfDude_Jake</span> (12/01/1998):<br>Cool page Katie! Love the cats! Check out my page too!</p>
+                <p><span class="author">SpaceCadet99</span> (11/28/1998):<br>Hey Katie! Nice Spice Girls section haha. See you at school!</p>
+                <p><span class="author">xXDarkAngelXx</span> (11/15/1998):<br>Nice page! We should trade links. Visit mine at Meo-Towns/Athens!</p>
+                <p><span class="author">CatLover_Sarah</span> (11/02/1998):<br>OMG I love cats too!!! Princess Fluffybottom is the best name ever!!!</p>
+            </div>
+
+            <div class="webring">
+                <b>&#128049; Cat Lovers WebRing &#128049;</b><br>
+                <a href="#" onclick="showPage('spacecadet'); return false;">&laquo; Prev</a> |
+                <a href="#" onclick="return false;">Random</a> |
+                <a href="#" onclick="showPage('surfdude'); return false;">Next &raquo;</a>
+            </div>
+
+            <p style="text-align:center; font-size:10px; margin-top:8px; color:#990099;">
+                Made with &#128150; in Meo-Towns &mdash; <a href="/demos/wahoo-wail/">kittygurl2000@wahoo.com</a>
+                <br>Best viewed in 800x600 &mdash; Last updated 12/03/1998
+            </p>
+        </div>
+
+        <!-- SurfDude_Jake's page -->
+        <div class="user-page page-surfdude" id="page-surfdude">
+            <div class="back-link"><a href="#" onclick="showLanding(); return false;">&laquo; Back to Meo-Towns Directory</a></div>
+            <h1><span class="wave">&#127940;</span> SurfDude Jake's Radical Page <span class="wave">&#127940;</span></h1>
+            <p style="text-align:center; font-size:12px; color:#996600;">[ Meo-Towns / Pipeline / SurfDude_Jake ]</p>
+
+            <div class="cool-links">
+                <p style="font-size:16px; text-align:center; color:#ff6600; font-weight:bold;">&#127754; WELCOME TO THE GNARLIEST PAGE ON THE WEB! &#127754;</p>
+                <p>Hey dudes and dudettes! I'm Jake, 15, from Huntington Beach, California! This page is all about surfing, skating, and living the radical life!</p>
+            </div>
+
+            <h3 style="color:#ff6600; text-align:center;">&#127754; Surf Report &#127754;</h3>
+            <div class="cool-links">
+                <p><b>Today's Conditions (Huntington Beach):</b></p>
+                <p>&#127754; Wave Height: 4-6 ft<br>
+                &#128168; Wind: Offshore 8mph<br>
+                &#127777;&#65039; Water Temp: 64&deg;F<br>
+                &#9728;&#65039; Air Temp: 75&deg;F<br>
+                <b style="color:green;">RATING: TOTALLY TUBULAR!</b></p>
+            </div>
+
+            <h3 style="color:#ff6600; text-align:center;">&#127929; My Top 5 Albums Right Now</h3>
+            <div class="cool-links">
+                <p>1. Blink-182 - Dude Ranch &#128293;<br>
+                2. Sublime - 40oz. to Freedom<br>
+                3. The Offspring - Americana<br>
+                4. Green Day - Nimrod<br>
+                5. Smash Mouth - Astro Lounge</p>
+            </div>
+
+            <h3 style="color:#ff6600; text-align:center;">&#128279; Rad Links</h3>
+            <div class="cool-links">
+                <p>&#127940; <a href="#" onclick="showPage('spacecadet'); return false;">Kevin's Space Page</a> - my bud from online</p>
+                <p>&#128049; <a href="#" onclick="showPage('kittygurl'); return false;">Katie's Cat Page</a> - she's cool even tho she likes cats lol</p>
+                <p>&#128269; <a href="/demos/wahoo/">Wahoo!</a> - search the web!</p>
+                <p>&#127918; <a href="/demos/flappy-bird/">Flappy Bird</a> - addicting game warning!!</p>
+            </div>
+
+            <div class="hit-counter">
+                Gnarly visitors since 06/1998: <span class="counter-display" id="surfVisitors">0</span>
+            </div>
+
+            <div class="webring">
+                <b>&#127754; Surfers' Paradise WebRing &#127754;</b><br>
+                <a href="#" onclick="showPage('kittygurl'); return false;">&laquo; Prev</a> |
+                <a href="#" onclick="return false;">Random</a> |
+                <a href="#" onclick="showPage('spacecadet'); return false;">Next &raquo;</a>
+            </div>
+
+            <p style="text-align:center; font-size:10px; margin-top:8px; color:#666;">
+                &#127940; Cowabunga! &#127940; &mdash; <a href="/demos/wahoo-wail/">surfdude_jake@wahoo.com</a>
+                <br>Last updated: 12/10/1998
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function showLanding() {
+            document.getElementById('landingPage').style.display = 'block';
+            document.querySelectorAll('.user-page').forEach(p => p.classList.remove('active'));
+            window.scrollTo(0, 0);
+        }
+
+        function showPage(name) {
+            document.getElementById('landingPage').style.display = 'none';
+            document.querySelectorAll('.user-page').forEach(p => p.classList.remove('active'));
+            const page = document.getElementById('page-' + name);
+            if (page) page.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Fake visitor counters
+        document.getElementById('spaceVisitors').textContent = (1247 + Math.floor(Math.random() * 50)).toLocaleString();
+        document.getElementById('surfVisitors').textContent = (3891 + Math.floor(Math.random() * 50)).toLocaleString();
+
+        // Check hash for direct navigation
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'hollywood' || hash === 'siliconhills') showPage('spacecadet');
+        else if (hash === 'heartland' || hash === 'bourbonstreet') showPage('kittygurl');
+        else if (hash === 'pipeline' || hash === 'colosseum') showPage('surfdude');
+    </script>
+</body>
+</html>
