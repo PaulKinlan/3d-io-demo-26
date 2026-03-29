@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaltaVista - The Search Engine of Yesterday</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background: #c0c0c0;
+            color: #000;
+            min-height: 100vh;
+        }
+
+        /* ── Top banner ── */
+        .banner {
+            background: linear-gradient(180deg, #000080 0%, #0000a8 100%);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #808080;
+        }
+
+        .banner-logo {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0;
+            text-shadow: 2px 2px 0 #800;
+            letter-spacing: -1px;
+        }
+
+        .banner-logo span {
+            color: #ff6600;
+        }
+
+        .banner-links {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+        }
+
+        .banner-links a {
+            color: #fff;
+            text-decoration: underline;
+            margin-left: 10px;
+        }
+
+        /* ── Navigation bar ── */
+        .nav-bar {
+            background: #e8e8e8;
+            border-bottom: 2px solid #808080;
+            padding: 4px 12px;
+            display: flex;
+            gap: 2px;
+        }
+
+        .nav-tab {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            padding: 4px 12px;
+            background: #d0d0d0;
+            border: 1px outset #fff;
+            cursor: pointer;
+            color: #000080;
+            font-weight: bold;
+        }
+
+        .nav-tab.active {
+            background: #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        /* ── Search area ── */
+        .search-area {
+            background: #fff;
+            border: 2px inset #808080;
+            margin: 8px 12px;
+            padding: 12px;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .search-row label {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .search-input {
+            flex: 1;
+            font-size: 14px;
+            padding: 3px 4px;
+            border: 2px inset #808080;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            padding: 3px 14px;
+            border: 2px outset #d0d0d0;
+            background: #d0d0d0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn:active {
+            border-style: inset;
+        }
+
+        .options-row {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #333;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        /* ── Results ── */
+        .results-area {
+            margin: 0 12px 12px;
+            font-family: Arial, sans-serif;
+        }
+
+        .result-count {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid #808080;
+        }
+
+        .result-count b { color: #000; }
+
+        .result {
+            margin-bottom: 14px;
+        }
+
+        .result a {
+            color: #0000cc;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .result .url {
+            color: #006600;
+            font-size: 12px;
+            margin: 2px 0;
+        }
+
+        .result .desc {
+            font-size: 12px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .result .date {
+            font-size: 11px;
+            color: #808080;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: #e8e8e8;
+            border-top: 2px solid #808080;
+            padding: 8px 12px;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #0000cc;
+            text-decoration: underline;
+        }
+
+        /* ── Visitor counter ── */
+        .visitor-counter {
+            margin-top: 6px;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            background: #000;
+            color: #0f0;
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px inset #808080;
+        }
+
+        .under-construction {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #cc0000;
+            font-weight: bold;
+            margin: 6px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .under-construction .stripe {
+            display: inline-block;
+            width: 30px;
+            height: 12px;
+            background: repeating-linear-gradient(
+                -45deg,
+                #ff0,
+                #ff0 4px,
+                #000 4px,
+                #000 8px
+            );
+        }
+
+        .marquee-bar {
+            background: #000080;
+            color: #ff0;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            padding: 2px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-bar .scroll-text {
+            display: inline-block;
+            animation: marquee 18s linear infinite;
+        }
+
+        @keyframes marquee {
+            0%   { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .blink {
+            animation: blink-anim 1s step-end infinite;
+        }
+
+        @keyframes blink-anim {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Banner -->
+    <div class="banner">
+        <div class="banner-logo">M<span>alta</span>Vista!</div>
+        <div class="banner-links">
+            <a href="#">Help</a>
+            <a href="#">My MaltaVista</a>
+            <a href="#">Web Directory</a>
+        </div>
+    </div>
+
+    <!-- Marquee -->
+    <div class="marquee-bar">
+        <span class="scroll-text">&#9733; Welcome to MaltaVista! The Internet's Malt-Powered Search Engine &mdash; Over 37 web pages indexed! &#9733; Now with BUILT-IN hit counter! &#9733; Best viewed at 800x600 &#9733;</span>
+    </div>
+
+    <!-- Nav tabs -->
+    <div class="nav-bar">
+        <div class="nav-tab active">Web</div>
+        <div class="nav-tab">Images</div>
+        <div class="nav-tab">Newsgroups</div>
+        <div class="nav-tab">Shopping!</div>
+        <div class="nav-tab">GeoCities</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-area">
+        <div class="search-row">
+            <label>Search:</label>
+            <input type="text" class="search-input" id="searchInput" placeholder="Type your query here..." />
+            <button class="btn" onclick="doSearch()">Search!</button>
+            <button class="btn" onclick="luckySearch()">I'm Feeling Malty</button>
+        </div>
+        <div class="options-row">
+            <label><input type="radio" name="lang" checked> The World Wide Web</label>
+            <label><input type="radio" name="lang"> Just My Bookmarks</label>
+            <label><input type="radio" name="lang"> Ask Jeeves Instead</label>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area" id="resultsArea">
+        <div class="under-construction">
+            <span class="stripe"></span>
+            &#128679; This page is under construction &#128679;
+            <span class="stripe"></span>
+        </div>
+        <p style="font-family: Arial, sans-serif; font-size: 13px; text-align: center; margin: 12px 0;">
+            Welcome to <b>MaltaVista</b> &mdash; the World Wide Web's favorite search engine since 1996!<br>
+            Type a query above to search our index of <b class="blink">37</b> web pages.
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="under-construction">
+            <span class="stripe"></span>
+            More features coming soon!
+            <span class="stripe"></span>
+        </div>
+        &copy; 1996-1999 MaltaVista Technologies, Inc. All rights reserved.<br>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Webmaster Tools</a>
+        <div class="visitor-counter" id="visitorCounter">Visitors: 000000</div>
+    </div>
+
+<script>
+    // Fake search results database
+    const fakeResults = [
+        {
+            title: "Welcome to My Awesome Homepage!!!",
+            url: "http://www.geocities.com/~coolkid99/index.htm",
+            desc: "Hi! My name is Josh and this is my <b>AWESOME</b> homepage! I like skateboarding, Pokémon, and my dog Buster. Sign my guestbook!!",
+            date: "12-Mar-1998"
+        },
+        {
+            title: "FREE Animated GIFs for Your Website!!",
+            url: "http://www.angelfire.com/freegifs/dancing-baby.htm",
+            desc: "The BIGGEST collection of animated GIFs on the web! Dancing babies, spinning globes, mailbox icons, and MORE! All FREE to use on your site!!",
+            date: "05-Jan-1999"
+        },
+        {
+            title: "Hamster Dance - The Original",
+            url: "http://www.hamsterdance.com/",
+            desc: "Dee da dee da dee da doh doh dee da dee da doh... 🐹 The hamsters are DANCING! Turn up your speakers!",
+            date: "28-Aug-1998"
+        },
+        {
+            title: "How To Make Your Own Web Page - HTML Tutorial",
+            url: "http://www.tripod.com/~webmaster101/html-tutorial.htm",
+            desc: "Learn HTML in just 30 minutes! This tutorial covers &lt;FONT&gt; tags, &lt;MARQUEE&gt;, &lt;BLINK&gt;, and how to set a cool background MIDI song.",
+            date: "19-Nov-1997"
+        },
+        {
+            title: "MIDI Files Archive - Over 500 Songs!",
+            url: "http://www.midi-archive.net/songs.htm",
+            desc: "Download MIDI files of your favorite songs! Includes Backstreet Boys, Spice Girls, Titanic theme, and Final Fantasy VII battle music.",
+            date: "22-Feb-1999"
+        },
+        {
+            title: "Ring of Lord of the Rings Fan Sites",
+            url: "http://www.webring.org/hub?ring=lotr-fans",
+            desc: "Join the webring of Lord of the Rings fan pages! Features fan fiction, Elvish translations, and ASCII art of Gandalf.",
+            date: "14-Jul-1998"
+        },
+        {
+            title: "Bob's Encyclopædia of Encyclopædias",
+            url: "http://www.bobsencyclopedia.com/everything.htm",
+            desc: "Information about EVERYTHING. Well, mostly about encyclopedias. And Bob. Under construction since 1996.",
+            date: "03-Apr-1997"
+        },
+        {
+            title: "Y2K Bug - Is Your Computer Ready???",
+            url: "http://www.y2k-survival.net/prepare-now.htm",
+            desc: "⚠️ THE MILLENNIUM BUG IS COMING! Find out if your PC will survive January 1, 2000. Download our FREE Y2K checker tool!",
+            date: "10-Sep-1999"
+        },
+        {
+            title: "Cool Links Page - The BEST Sites on the Web",
+            url: "http://members.aol.com/~surferdude/links.htm",
+            desc: "My personal collection of the coolest sites! Includes: Neopets, Homestar Runner, Newgrounds, and that weird page with all the hamsters.",
+            date: "08-Jun-1999"
+        },
+        {
+            title: "Dave's Web Counter - FREE Hit Counter For Your Page!",
+            url: "http://www.digits.net/web-counter/",
+            desc: "Add a FREE visitor counter to your website! Choose from 50+ styles including odometer, flames, and neon. Shows everyone how popular you are!",
+            date: "17-May-1998"
+        },
+        {
+            title: "Under Construction - Coming Soon!!!",
+            url: "http://www.geocities.com/SunsetStrip/1234/",
+            desc: "🚧 This site is UNDER CONSTRUCTION 🚧 Check back soon for awesome content! In the meantime, sign my guestbook!",
+            date: "01-Jan-1999"
+        },
+        {
+            title: "Space Jam Official Website",
+            url: "http://www.warnerbros.com/spacejam/",
+            desc: "Welcome to the Space Jam website! Meet the Tune Squad, play games, and download exclusive Looney Tunes wallpapers for your desktop!",
+            date: "15-Nov-1996"
+        }
+    ];
+
+    // Visitor counter
+    let count = parseInt(localStorage.getItem('maltavista-visitors') || '0') + 1;
+    localStorage.setItem('maltavista-visitors', count.toString());
+    document.getElementById('visitorCounter').textContent = 'Visitors: ' + String(count).padStart(6, '0');
+
+    function doSearch() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        const area = document.getElementById('resultsArea');
+
+        if (!query) {
+            area.innerHTML = '<p style="font-family:Arial;font-size:13px;color:red;text-align:center;margin:12px;">Please enter a search query!</p>';
+            return;
+        }
+
+        // Shuffle and pick results based on query
+        const shuffled = [...fakeResults].sort(() => Math.random() - 0.5);
+        const numResults = Math.max(3, Math.floor(Math.random() * shuffled.length));
+        const results = shuffled.slice(0, numResults);
+        const totalFake = Math.floor(Math.random() * 900000) + 100000;
+
+        let html = `<div class="result-count">MaltaVista found <b>${totalFake.toLocaleString()}</b> results for "<b>${escapeHtml(query)}</b>" (showing 1-${numResults})</div>`;
+
+        results.forEach((r, i) => {
+            html += `
+                <div class="result">
+                    <a href="#">${(i + 1)}. ${r.title}</a>
+                    <div class="url">${r.url}</div>
+                    <div class="desc">${r.desc}</div>
+                    <div class="date">Last modified: ${r.date} - Size: ${Math.floor(Math.random() * 50 + 2)}K</div>
+                </div>`;
+        });
+
+        html += `<p style="font-family:Arial;font-size:11px;color:#666;margin-top:16px;text-align:center;">
+            Search took 0.${Math.floor(Math.random() * 9) + 1}${Math.floor(Math.random() * 10)} seconds |
+            <a href="#" style="color:#0000cc;">Refine your search</a> |
+            <a href="#" style="color:#0000cc;">Search within results</a>
+        </p>`;
+
+        area.innerHTML = html;
+    }
+
+    function luckySearch() {
+        const phrases = [
+            "You're feeling malty! 🍺 Here's a random page from 1997.",
+            "The malts have spoken! Redirecting to... nowhere, actually.",
+            "Malt-o-matic engaged! Unfortunately our lucky server is down.",
+            "✨ You've won a FREE trip to... this same page! Congratulations!",
+            "Our hamsters are too tired to find a lucky result right now. 🐹"
+        ];
+        const area = document.getElementById('resultsArea');
+        const msg = phrases[Math.floor(Math.random() * phrases.length)];
+        area.innerHTML = `<p style="font-family:Arial;font-size:14px;text-align:center;margin:20px;color:#000080;font-weight:bold;">${msg}</p>`;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Search on Enter
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') doSearch();
+    });
+</script>
+
+</body>
+</html>
