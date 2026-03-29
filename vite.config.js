@@ -24,6 +24,7 @@ export default defineConfig(({ command }) => ({
         newTab: './demos/new-tab/index.html',
         slideDeck: './demos/slide-deck/index.html',
         maltavista: './demos/maltavista/index.html',
+        siteGenerator: './demos/site-generator/index.html',
       },
     },
   },
