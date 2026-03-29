@@ -1,5 +1,14 @@
 let currentSlide = 0;
 let slidesList = [];
+let hashNavigation = false; // true when navigating via popstate/initial load
+
+function getSlideIndexFromHash() {
+  const match = window.location.hash.match(/^#slide-(\d+)$/);
+  if (match) {
+    return parseInt(match[1], 10) - 1; // convert 1-based to 0-based
+  }
+  return 0;
+}
 
 async function loadSlides() {
   try {
@@ -31,7 +40,11 @@ async function loadSlides() {
       slidesList.push(slideDiv);
     });
     
-    showSlide(currentSlide);
+    const startIndex = getSlideIndexFromHash();
+    hashNavigation = true;
+    showSlide(startIndex);
+    hashNavigation = false;
+    history.replaceState({ slide: currentSlide }, '', `#slide-${currentSlide + 1}`);
   } catch (err) {
     document.getElementById('deck').innerHTML = `<h1 style="color:red; text-align:center;">Error loading slides.md</h1>`;
   }
@@ -51,6 +64,11 @@ function showSlide(index) {
       slide.classList.remove('active');
     }
   });
+
+  if (!hashNavigation) {
+    const hash = `#slide-${currentSlide + 1}`;
+    history.pushState({ slide: currentSlide }, '', hash);
+  }
 }
 
 function nextSlide() {
@@ -75,6 +93,17 @@ window.addEventListener('click', (e) => {
   if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
     nextSlide();
   }
+});
+
+// Browser back/forward navigation
+window.addEventListener('popstate', (e) => {
+  hashNavigation = true;
+  if (e.state && typeof e.state.slide === 'number') {
+    showSlide(e.state.slide);
+  } else {
+    showSlide(getSlideIndexFromHash());
+  }
+  hashNavigation = false;
 });
 
 // Init
