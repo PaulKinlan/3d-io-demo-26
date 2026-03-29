@@ -259,9 +259,9 @@
     <div class="banner">
         <div class="banner-logo">M<span>alta</span>Vista!</div>
         <div class="banner-links">
-            <a href="#">Help</a>
-            <a href="#">My MaltaVista</a>
-            <a href="#">Web Directory</a>
+            <a href="javascript:void(0)">Help</a>
+            <a href="javascript:void(0)">My MaltaVista</a>
+            <a href="javascript:void(0)">Web Directory</a>
         </div>
     </div>
 
@@ -282,7 +282,7 @@
     <!-- Search -->
     <div class="search-area">
         <div class="search-row">
-            <label>Search:</label>
+            <label for="searchInput">Search:</label>
             <input type="text" class="search-input" id="searchInput" placeholder="Type your query here..." />
             <button class="btn" onclick="doSearch()">Search!</button>
             <button class="btn" onclick="luckySearch()">I'm Feeling Malty</button>
@@ -315,7 +315,7 @@
             <span class="stripe"></span>
         </div>
         &copy; 1996-1999 MaltaVista Technologies, Inc. All rights reserved.<br>
-        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Webmaster Tools</a>
+        <a href="javascript:void(0)">Privacy Policy</a> | <a href="javascript:void(0)">Terms of Service</a> | <a href="javascript:void(0)">Webmaster Tools</a>
         <div class="visitor-counter" id="visitorCounter">Visitors: 000000</div>
     </div>
 
@@ -397,7 +397,7 @@
     ];
 
     // Visitor counter
-    let count = parseInt(localStorage.getItem('maltavista-visitors') || '0') + 1;
+    let count = parseInt(localStorage.getItem('maltavista-visitors') || '0', 10) + 1;
     localStorage.setItem('maltavista-visitors', count.toString());
     document.getElementById('visitorCounter').textContent = 'Visitors: ' + String(count).padStart(6, '0');
 
@@ -410,8 +410,12 @@
             return;
         }
 
-        // Shuffle and pick results based on query
-        const shuffled = [...fakeResults].sort(() => Math.random() - 0.5);
+        // Fisher-Yates shuffle
+        const shuffled = [...fakeResults];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         const numResults = Math.max(3, Math.floor(Math.random() * shuffled.length));
         const results = shuffled.slice(0, numResults);
         const totalFake = Math.floor(Math.random() * 900000) + 100000;
@@ -421,7 +425,7 @@
         results.forEach((r, i) => {
             html += `
                 <div class="result">
-                    <a href="#">${(i + 1)}. ${r.title}</a>
+                    <a href="javascript:void(0)">${(i + 1)}. ${r.title}</a>
                     <div class="url">${r.url}</div>
                     <div class="desc">${r.desc}</div>
                     <div class="date">Last modified: ${r.date} - Size: ${Math.floor(Math.random() * 50 + 2)}K</div>
@@ -430,8 +434,8 @@
 
         html += `<p style="font-family:Arial;font-size:11px;color:#666;margin-top:16px;text-align:center;">
             Search took 0.${Math.floor(Math.random() * 9) + 1}${Math.floor(Math.random() * 10)} seconds |
-            <a href="#" style="color:#0000cc;">Refine your search</a> |
-            <a href="#" style="color:#0000cc;">Search within results</a>
+            <a href="javascript:void(0)" style="color:#0000cc;">Refine your search</a> |
+            <a href="javascript:void(0)" style="color:#0000cc;">Search within results</a>
         </p>`;
 
         area.innerHTML = html;
