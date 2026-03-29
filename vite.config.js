@@ -26,6 +26,7 @@ export default defineConfig(({ command }) => ({
         wahoo: './demos/wahoo/index.html',
         meoTowns: './demos/meo-towns/index.html',
         wahooWail: './demos/wahoo-wail/index.html',
+        siteGenerator: './demos/site-generator/index.html',
       },
     },
   },
