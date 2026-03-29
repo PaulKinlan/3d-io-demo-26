@@ -84,4 +84,21 @@ New demos that run inside the 3D monitor should be managed as follows:
 2. Make sure the demo works standalone as a standard HTML page.
 3. Register the demo in the Vite config (`vite.config.js`) under `build.rollupOptions.input` so it's built properly.
 4. Add a link to the new demo inside the New Tab Page (NTP) located at `demos/new-tab/index.html`.
-5. **Always keep the `browser` demo as the default on page load** in `src/main.js` (`src="/demos/browser/"`). The browser demo acts as the wrapper that initially loads the NTP.
+5. **Add the demo URL to the Web MCP `navigateComputerScreen` tool** in `src/main.js` — append the new path (e.g., `"/demos/my-new-demo/"`) to the `enum` array in the `navigateComputerScreen` tool's `inputSchema`. This lets Claude navigate to the demo via the Web MCP API.
+6. **Always keep the `browser` demo as the default on page load** in `src/main.js` (`src="/demos/browser/"`). The browser demo acts as the wrapper that initially loads the NTP.
+
+## Web MCP Integration
+
+The project exposes interactive controls to Claude via the browser-native Web MCP API (`window.navigator.modelContext`). The `setupMCP()` function in `src/main.js` registers the following tools:
+
+| Tool | Description |
+|------|-------------|
+| `toggleDeskLamp` | Toggle the desk lamp on/off |
+| `toggleNightMode` | Toggle room ceiling lights on/off |
+| `focusMonitor` | Zoom camera to focus on the computer monitor |
+| `focusBooks` | Zoom camera to focus on the bookshelf |
+| `resetCameraFocus` | Reset camera to default room view |
+| `spinChair` | Spin the desk chair around |
+| `navigateComputerScreen` | Navigate the monitor iframe to a demo (URL must be in the enum list) |
+
+When adding a new demo, the `navigateComputerScreen` enum must be updated (step 5 above) or Claude won't be able to navigate to it.
