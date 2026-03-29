@@ -23,6 +23,7 @@ export default defineConfig(({ command }) => ({
         browser: './demos/browser/index.html',
         newTab: './demos/new-tab/index.html',
         slideDeck: './demos/slide-deck/index.html',
+        maltavista: './demos/maltavista/index.html',
         siteGenerator: './demos/site-generator/index.html',
       },
     },

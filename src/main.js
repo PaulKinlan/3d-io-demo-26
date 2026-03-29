@@ -867,6 +867,7 @@ const setupMCP = () => {
           enum: [
             "/demos/browser/",
             "/demos/flappy-bird/",
+            "/demos/maltavista/",
             "/demos/new-tab/",
             "/demos/slide-deck/",
             "/demos/site-generator/"
