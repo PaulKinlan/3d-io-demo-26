@@ -210,7 +210,7 @@
         <div class="logo">Wahoo<span>!</span></div>
         <div class="tagline">The Internet's Guide to Everything&trade; &mdash; Since 1996</div>
         <div class="search-area">
-            <input type="text" id="searchInput" placeholder="Search the Web..." onkeydown="if(event.key==='Enter') doSearch()">
+            <input type="text" id="searchInput" placeholder="Search the Web...">
             <button onclick="doSearch()">Search</button>
         </div>
         <div class="nav-links">
@@ -381,6 +381,10 @@
                 alert('Searching the World Wide Web for: "' + q + '"\n\nPlease wait... your 56k modem is working hard!');
             }
         }
+
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doSearch();
+        });
     </script>
 </body>
 </html>

@@ -248,13 +248,13 @@
     <div class="mail-layout">
         <!-- Folders -->
         <div class="folders">
-            <div class="folder active" onclick="showFolder('inbox')">
+            <div class="folder active" onclick="showFolder('inbox', this)">
                 &#128229; Inbox <span class="count">3</span>
             </div>
-            <div class="folder" onclick="showFolder('sent')">&#128228; Sent</div>
-            <div class="folder" onclick="showFolder('drafts')">&#128196; Drafts</div>
-            <div class="folder" onclick="showFolder('trash')">&#128465; Trash</div>
-            <div class="folder" onclick="showFolder('spam')">&#9940; Bulk Mail <span class="count">47</span></div>
+            <div class="folder" onclick="showFolder('sent', this)">&#128228; Sent</div>
+            <div class="folder" onclick="showFolder('drafts', this)">&#128196; Drafts</div>
+            <div class="folder" onclick="showFolder('trash', this)">&#128465; Trash</div>
+            <div class="folder" onclick="showFolder('spam', this)">&#9940; Bulk Mail <span class="count">47</span></div>
         </div>
 
         <!-- Mail area -->
@@ -373,13 +373,13 @@
         let currentFolder = 'inbox';
         let selectedMsg = null;
 
-        function showFolder(name) {
+        function showFolder(name, el) {
             currentFolder = name;
             selectedMsg = null;
 
             // Update folder UI
             document.querySelectorAll('.folder').forEach(f => f.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            el.classList.add('active');
 
             renderMessages();
             document.getElementById('previewPane').innerHTML = '<div style="text-align:center; color:#999; padding-top:40px;">&#128236; Select a message to read</div>';
