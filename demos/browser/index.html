@@ -438,6 +438,14 @@
         urlInput.select();
     });
 
+    // Accept postMessage-based navigation requests from child iframes
+    window.addEventListener('message', (event) => {
+        if (event.source !== browserView.contentWindow) return;
+        if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
+            loadUrl(event.data.url);
+        }
+    });
+
     browserView.addEventListener('load', () => {
         browserView.style.opacity = '1';
         try {
@@ -446,6 +454,17 @@
                 urlInput.value = path;
                 updateTabInfo(path, browserView.contentDocument.title);
             }
+
+            // Intercept link clicks so navigation stays inside browser-view
+            browserView.contentDocument.addEventListener('click', (e) => {
+                const anchor = e.target.closest('a[href]');
+                if (!anchor) return;
+                const href = anchor.getAttribute('href');
+                if (href && (href.startsWith('/') || href.startsWith('http'))) {
+                    e.preventDefault();
+                    loadUrl(href);
+                }
+            });
         } catch(e) {
             updateTabInfo(urlInput.value, urlInput.value);
         }
