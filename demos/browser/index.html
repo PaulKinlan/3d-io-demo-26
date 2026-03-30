@@ -440,8 +440,8 @@
 
     // Accept postMessage-based navigation requests from child iframes
     window.addEventListener('message', (event) => {
-        if (event.origin !== window.location.origin) return;
-        if (event.data && event.data.type === 'navigate') {
+        if (event.source !== browserView.contentWindow) return;
+        if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
             loadUrl(event.data.url);
         }
     });
