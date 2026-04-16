@@ -62,7 +62,7 @@
         console.log('Test Harness: Canvas has requestPaint:', typeof canvas.requestPaint);
         console.log('Test Harness: Canvas has onpaint:', typeof canvas.onpaint);
 
-                    const iframe = canvas.querySelector('iframe');
+                const iframe = canvas.querySelector('iframe');
 
         // Set up onpaint if available
         if ('requestPaint' in canvas) {
@@ -91,14 +91,14 @@
                     }
                 }
 
-                            };
-                        }
+            };
+        }
 
-                        const ctx = canvas.getContext('2d');
-                        function loop() {
-                            // Fill with dark gray to see if the canvas is rendering at all
-                            ctx.fillStyle = '#333333';
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const ctx = canvas.getContext('2d');
+                function loop() {
+                    // Fill with dark gray to see if the canvas is rendering at all
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                     // Call requestPaint if available to trigger updates
                     if (canvas.requestPaint) {
                         canvas.requestPaint();
@@ -108,16 +108,7 @@
         }
         loop();
 
-        // Listen for messages from the iframe
-        window.addEventListener('message', (e) => {
-            if (e.data && e.data.type === 'frame') {
-                if (Math.random() > 0.95) {
-                    console.log('Test Harness: Received frame from iframe');
-                }
-            }
-        });
-
-        console.log('Test Harness: Loaded');
+                console.log('Test Harness: Loaded');
     </script>
 </body>
 
