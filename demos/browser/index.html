@@ -389,6 +389,12 @@
     addressTextContainer.addEventListener('click', () => {
         urlInput.focus();
     });
+
+    const params = new URLSearchParams(window.location.search);
+    const startUrl = params.get('url');
+    if (startUrl) {
+        loadUrl(startUrl);
+    }
     
     function updateTabInfo(url, titleStr) {
         // Basic heuristic for title

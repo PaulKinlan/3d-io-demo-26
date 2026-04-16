@@ -1,5 +1,5 @@
 import './style.css';
-import * as THREE from 'three';
+import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
 import { buildRoom } from './models/room.js';
@@ -46,16 +46,14 @@ app.innerHTML = `
       </ul>
     </div>
     <section class="html-canvas-lab" aria-hidden="true">
-      <canvas class="monitor-html-canvas" width="960" height="720" layoutsubtree>
         <div class="monitor-html-subtree">
           <iframe
             class="monitor-html-frame"
-            src="/demos/browser/"
+            src="/demos/browser/index.html"
             title="Monitor demos"
             loading="eager"
           ></iframe>
         </div>
-      </canvas>
     </section>
     ${monitorDebugEnabled ? `
       <aside class="monitor-debug-panel">
@@ -69,25 +67,12 @@ app.innerHTML = `
 document.body.classList.toggle('monitor-debug', monitorDebugEnabled);
 
 const sceneShell = document.querySelector('.scene-shell');
-const htmlCanvas = document.querySelector('.monitor-html-canvas');
-const htmlSubtree = htmlCanvas?.querySelector('.monitor-html-subtree');
-const htmlFrame = htmlCanvas?.querySelector('.monitor-html-frame');
+const htmlSubtree = document.querySelector('.monitor-html-subtree');
+const htmlFrame = document.querySelector('.monitor-html-frame');
 const debugLog = document.querySelector('.monitor-debug-log');
-const htmlContext = htmlCanvas.getContext('2d');
-const drawMonitorElement = htmlContext && (
-  (typeof htmlContext.drawElementImage === 'function' && htmlContext.drawElementImage.bind(htmlContext))
-  || (typeof htmlContext.drawElement === 'function' && htmlContext.drawElement.bind(htmlContext))
-);
-const requestMonitorPaint = typeof htmlCanvas.requestPaint === 'function'
-  ? htmlCanvas.requestPaint.bind(htmlCanvas)
-  : null;
-const monitorDrawApi = typeof htmlContext?.drawElementImage === 'function'
-  ? 'drawElementImage'
-  : (typeof htmlContext?.drawElement === 'function' ? 'drawElement' : 'unavailable');
-
 const monitorViewport = {
-  width: htmlCanvas.width,
-  height: htmlCanvas.height,
+  width: 960,
+  height: 720,
 };
 
 let deskLampRef;
@@ -96,9 +81,9 @@ let keyLightRef;
 
 const monitorState = {
   ready: false,
-  supported: Boolean(drawMonitorElement),
+  supported: true,
   lastDraw: 0,
-  paintDriven: Boolean(drawMonitorElement && requestMonitorPaint),
+  paintDriven: true,
   paintRequested: false,
   paintEvents: 0,
   paintRequests: 0,
@@ -107,6 +92,8 @@ const monitorState = {
   texture: null,
 };
 
+// HTMLTexture handles onpaint updates now
+
 const syncMonitorDebug = () => {
   if (!debugLog) {
     return;
@@ -114,11 +101,7 @@ const syncMonitorDebug = () => {
 
   debugLog.textContent = [
     'Enable with ?monitorDebug=1',
-    `draw api: ${monitorDrawApi}`,
     `draw supported: ${monitorState.supported}`,
-    `paint event support: ${'onpaint' in htmlCanvas}`,
-    `requestPaint support: ${Boolean(requestMonitorPaint)}`,
-    `paint-driven mode: ${monitorState.paintDriven}`,
     `ready: ${monitorState.ready}`,
     `paint requests: ${monitorState.paintRequests}`,
     `paint events: ${monitorState.paintEvents}`,
@@ -144,7 +127,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.domElement.className = 'scene-canvas';
 renderer.domElement.setAttribute('layoutsubtree', 'true');
@@ -163,7 +146,7 @@ const room = {
   height: 8.5,
 };
 
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
 const animatedMaterials = [];
 const activityLights = [];
 const networkLights = [];
@@ -624,14 +607,15 @@ htmlFrame.addEventListener('load', () => {
      console.warn('Forward overlays trigger restrictions:', e);
   }
 
+  console.log('Monitor frame loaded. State:', monitorState);
+  
   if (!monitorState.supported) {
+    console.log('Monitor not supported, rendering fallback.');
     renderMonitorFallback();
     return;
   }
 
-  if (monitorState.paintDriven) {
-    requestMonitorPaint();
-  }
+  console.log('Monitor supported. Paint driven:', monitorState.paintDriven);
 });
 
 const context = {
@@ -695,7 +679,7 @@ const updateMonitorTransform = () => {
   const rect = renderer.domElement.getBoundingClientRect();
   const C_W = rect.width;
   const C_H = rect.height;
-  const labRect = htmlCanvas.parentNode.getBoundingClientRect();
+  const labRect = document.querySelector('.html-canvas-lab').getBoundingClientRect();
 
   const viewportMatrix = new THREE.Matrix4().set(
     C_W / 2, 0, 0, C_W / 2 + rect.left - labRect.left,
@@ -720,7 +704,13 @@ const updateMonitorTransform = () => {
 };
 
 const animate = (time = 0) => {
-  const elapsed = clock.getElapsedTime();
+  timer.update(time);
+  const elapsed = timer.getElapsed();
+  
+  if (monitorState.sync) {
+    monitorState.sync();
+  }
+
   const flicker = 0.7 + Math.sin(elapsed * 8.5) * 0.08 + Math.sin(elapsed * 19) * 0.03;
 
   for (const material of animatedMaterials) {

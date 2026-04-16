@@ -1,5 +1,6 @@
-import * as THREE from 'three';
+import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
 import { loadTexture } from '../lib/texture-loader.js';
+
 
 export const buildDesk = ({
   scene,
@@ -150,6 +151,12 @@ export const buildDesk = ({
 
   monitorState.texture = new THREE.HTMLTexture(htmlSubtree);
   monitorState.texture.colorSpace = THREE.SRGBColorSpace;
+  
+  monitorState.sync = () => {
+    monitorState.texture.needsUpdate = true;
+  };
+  
+  console.log('CanvasTexture created directly from htmlCanvas');
 
   const screenMaterial = new THREE.MeshStandardMaterial({
     color: '#111111',
