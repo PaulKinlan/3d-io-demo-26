@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Harness - Layout Subtree on Canvas</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: sans-serif;
+        }
+        #testCanvas {
+            border: 2px solid #555;
+            background: #000;
+            width: 400px;
+            height: 600px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        /* Style for the iframe inside the canvas */
+        canvas iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Harness - Layout Subtree on Canvas</h1>
+    <p>This page tests if putting <code>layoutsubtree="true"</code> on the canvas and placing the iframe inside it works.</p>
+    
+    <div class="container">
+        <div>
+            <h2>Canvas with Layout Subtree</h2>
+            <!-- The canvas has the attribute and the iframe as a child -->
+            <canvas id="testCanvas" width="400" height="600" layoutsubtree="true">
+                <iframe src="/demos/flappy-bird/index.html"></iframe>
+            </canvas>
+        </div>
+        <div>
+            <h2>Live Iframe (For reference)</h2>
+            <iframe src="/demos/flappy-bird/index.html" style="width: 400px; height: 600px; border: 2px solid green;"></iframe>
+        </div>
+    </div>
+
+    <script>
+        console.log('Test Harness: Initializing');
+        const canvas = document.getElementById('testCanvas');
+        
+        // Check if methods are available
+        console.log('Test Harness: Canvas has requestPaint:', typeof canvas.requestPaint);
+        console.log('Test Harness: Canvas has onpaint:', typeof canvas.onpaint);
+
+        // Set up onpaint if available
+        if ('requestPaint' in canvas) {
+            canvas.onpaint = () => {
+                console.log('Test Harness: onpaint called on canvas');
+            };
+        }
+
+        const ctx = canvas.getContext('2d');
+        function loop() {
+            // Fill with dark gray to see if the canvas is rendering at all
+            ctx.fillStyle = '#333333';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Try to draw the iframe element into the canvas
+            const iframe = canvas.querySelector('iframe');
+            if (iframe) {
+                // Force style trigger to invalidate cache and force redraw
+                iframe.style.opacity = iframe.style.opacity === '0.999' ? '1' : '0.999';
+                
+                if (ctx.drawElementImage) {
+                    try {
+                        ctx.drawElementImage(iframe, 0, 0);
+                        if (Math.random() > 0.98) console.log('Test Harness: Called drawElementImage');
+                    } catch(e) {
+                        if (Math.random() > 0.98) console.error('Test Harness: drawElementImage error:', e.message);
+                    }
+                } else if (ctx.drawElement) {
+                    try {
+                        ctx.drawElement(iframe, 0, 0);
+                        if (Math.random() > 0.98) console.log('Test Harness: Called drawElement');
+                    } catch(e) {
+                        if (Math.random() > 0.98) console.error('Test Harness: drawElement error:', e.message);
+                    }
+                }
+            }
+            
+            // Call requestPaint if available to trigger updates
+            if (canvas.requestPaint) {
+                canvas.requestPaint();
+            }
+            
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // Listen for messages from the iframe
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'frame') {
+                if (Math.random() > 0.95) {
+                    console.log('Test Harness: Received frame from iframe');
+                }
+            }
+        });
+
+        console.log('Test Harness: Loaded');
+    </script>
+</body>
+</html>

@@ -384,7 +384,9 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
 
 renderer.domElement.addEventListener('wheel', hideInstructions, { passive: true });
 const handleSceneClick = (event) => {
+  console.log('handleSceneClick triggered');
   const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
+  console.log('Click distance:', dist);
   if (dist > 5) return;
 
   const bounds = renderer.domElement.getBoundingClientRect();
@@ -392,6 +394,28 @@ const handleSceneClick = (event) => {
   pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
 
   raycaster.setFromCamera(pointer, camera);
+
+  // Check for monitor click
+  console.log('monitorState.screenMesh exists:', !!monitorState.screenMesh);
+  if (monitorState.screenMesh) {
+    const monitorHit = raycaster.intersectObject(monitorState.screenMesh);
+    console.log('Monitor hit count:', monitorHit.length);
+    if (monitorHit.length > 0) {
+      const hit = monitorHit[0];
+      console.log('Hit UV:', hit.uv);
+      if (hit.uv) {
+        const x = hit.uv.x * 960;
+        const y = (1 - hit.uv.y) * 720;
+        const iframe = document.querySelector('.monitor-html-frame');
+        if (iframe) {
+          console.log('Parent: Sent click to iframe', x, y);
+          iframe.contentWindow.postMessage({ type: 'click', x, y }, '*');
+        } else {
+          console.log('Parent: Iframe not found!');
+        }
+      }
+    }
+  }
 
   const hit = raycaster.intersectObjects(spinTargets, false).find((h) => h.object.userData.spinGroup);
 
@@ -529,6 +553,15 @@ const renderMonitorFallback = (time = performance.now()) => {
 
 window.addEventListener('keydown', (e) => {
   console.log('Key pressed:', e.key);
+  
+  if (e.code === 'Space') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      console.log('Parent: Sent spacebar to iframe');
+      iframe.contentWindow.postMessage({ type: 'keydown', code: 'Space' }, '*');
+    }
+  }
+
   if (e.key.toLowerCase() === 'c') {
     if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
       if (typeof resetCameraFocus === 'function') resetCameraFocus();
@@ -707,6 +740,16 @@ const animate = (time = 0) => {
   timer.update(time);
   const elapsed = timer.getElapsed();
   
+  if (renderer.domElement.onpaint) {
+    console.log('Parent: Calling renderer.domElement.onpaint()');
+    renderer.domElement.onpaint();
+  }
+  
+  if (renderer.domElement.requestPaint) {
+    console.log('Parent: Calling renderer.domElement.requestPaint()');
+    renderer.domElement.requestPaint();
+  }
+
   if (monitorState.sync) {
     monitorState.sync();
   }
@@ -880,5 +923,27 @@ const setupMCP = () => {
 };
 
 setupMCP();
+
+// Listen for frame updates from iframes to force texture updates
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'frame') {
+    if (monitorState.texture) {
+      console.log('Parent: Received frame message, refreshing texture');
+      monitorState.texture.needsUpdate = true;
+      
+      const element = document.querySelector('.monitor-html-frame');
+      if (element) {
+        // Try to call requestPaint on the iframe itself to force layoutsubtree capture
+        if (element.requestPaint) {
+          console.log('Parent: Calling iframe.requestPaint()');
+          element.requestPaint();
+        }
+        
+        // Force style trigger as a fallback
+        element.style.opacity = element.style.opacity === '0.999' ? '1' : '0.999';
+      }
+    }
+  }
+});
 
 animate();

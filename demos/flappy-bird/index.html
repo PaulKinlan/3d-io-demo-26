@@ -25,7 +25,7 @@
         }
     </style>
 </head>
-<body>
+<body tabindex="0" role="button" style="outline: none;">
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -224,11 +224,16 @@
             update();
             draw();
             frames++;
+            if (frames % 60 === 0) {
+                console.log('Game loop running, state:', gameState, 'frames:', frames);
+            }
+            window.top.postMessage({ type: 'frame' }, '*');
             requestAnimationFrame(loop);
         }
 
         // Input
         function handleInput() {
+            console.log('handleInput called. Current state:', gameState);
             switch(gameState) {
                 case 'start':
                     gameState = 'play';
@@ -254,10 +259,23 @@
             }
         });
 
-        canvas.addEventListener('click', handleInput);
+        document.body.addEventListener('click', handleInput);
 
         // Start loop
         loop();
+
+        // Listen for click and keydown messages from parent
+        window.addEventListener('message', (e) => {
+            console.log('Iframe: Received message', e.data);
+            if (e.data && (e.data.type === 'click' || (e.data.type === 'keydown' && e.data.code === 'Space'))) {
+                handleInput();
+            }
+        });
+
+        // Logging for direct clicks
+        document.body.addEventListener('click', (e) => {
+            console.log('Flappy Bird: Body received click', e.target);
+        });
     </script>
 </body>
 </html>

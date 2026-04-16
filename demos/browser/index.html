@@ -441,8 +441,7 @@
     });
 
     // Accept postMessage-based navigation requests from child iframes
-    window.addEventListener('message', (event) => {
-        debugger;
+        window.addEventListener('message', (event) => {
         //if (event.source !== browserView.contentWindow) return;
         if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
             loadUrl(event.data.url);
@@ -500,6 +499,11 @@
     if (initialUrl) {
         loadUrl(initialUrl);
     }
+
+    // Logging for clicks
+    document.body.addEventListener('click', (e) => {
+        console.log('Browser Wrapper: Body received click', e.target);
+    });
 </script>
 </body>
 </html>
