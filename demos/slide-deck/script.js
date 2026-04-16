@@ -88,9 +88,10 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Click navigation anywhere goes to next slide (unless it's a link or button)
+// Click navigation anywhere goes to next slide (unless it's an interactive element)
 window.addEventListener('click', (e) => {
-  if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
+  const interactiveTags = ['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT', 'LABEL', 'DETAILS', 'SUMMARY', 'PROGRESS'];
+  if (!interactiveTags.includes(e.target.tagName)) {
     nextSlide();
   }
 });

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 97 Boot</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .logo {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+        }
+        .red { background: #ff4b4b; }
+        .green { background: #00d200; }
+        .blue { background: #0080ff; }
+        .yellow { background: #ffcc00; }
+        
+        h1 {
+            font-size: 32px;
+            margin: 10px 0;
+            font-weight: 300;
+        }
+        h2 {
+            font-size: 18px;
+            color: #aaa;
+            margin: 0;
+            font-weight: 400;
+        }
+        
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            border: 2px solid #fff;
+            margin-top: 40px;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #0080ff; /* Windows 97 style blue bar */
+            width: 0%;
+            animation: load 3s linear forwards;
+        }
+        
+        @keyframes load {
+            0% { width: 0%; }
+            30% { width: 30%; }
+            60% { width: 70%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <div class="square red"></div>
+        <div class="square green"></div>
+        <div class="square blue"></div>
+        <div class="square yellow"></div>
+    </div>
+    <h1>Microsoft Windows 97</h1>
+    <h2>Starting up...</h2>
+    
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <script>
+        // Redirect after 3.5 seconds
+        setTimeout(() => {
+            // Try to notify parent that boot is complete if in iframe
+            window.parent.postMessage({ type: 'boot-complete' }, '*');
+            // Fallback redirect
+            setTimeout(() => {
+                window.location.href = '/demos/new-tab/';
+            }, 500);
+        }, 3500);
+    </script>
+</body>
+</html>

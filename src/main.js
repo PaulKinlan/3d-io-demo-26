@@ -561,6 +561,30 @@ window.addEventListener('keydown', (e) => {
       iframe.contentWindow.postMessage({ type: 'keydown', code: 'Space' }, '*');
     }
   }
+  
+  if (e.key.toLowerCase() === 'p') {
+    if (typeof window.isComputerOn === 'undefined') window.isComputerOn = true;
+    window.isComputerOn = !window.isComputerOn;
+    console.log('Computer Power:', window.isComputerOn ? 'ON' : 'OFF');
+    
+    const iframe = document.querySelector('.monitor-html-frame');
+    
+    if (!window.isComputerOn) {
+      if (monitorState && monitorState.material) {
+        monitorState.material.emissive.set('#000000');
+      }
+      if (iframe) {
+        iframe.src = 'about:blank';
+      }
+    } else {
+      if (monitorState && monitorState.material) {
+        monitorState.material.emissive.set('#ffffff');
+      }
+      if (iframe) {
+        iframe.src = '/demos/boot/index.html';
+      }
+    }
+  }
 
   if (e.key.toLowerCase() === 'c') {
     if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
@@ -912,12 +936,46 @@ const setupMCP = () => {
             "/demos/wahoo/",
             "/demos/meo-towns/",
             "/demos/wahoo-wail/",
-            "/demos/site-generator/"
+            "/demos/site-generator/",
+            "/demos/boot/"
           ],
           description: "The URL of the demo to navigate to."
         }
       },
       required: ["url"]
+    }
+  });
+
+  window.navigator.modelContext.registerTool({
+    execute: () => {
+      if (typeof window.isComputerOn === 'undefined') window.isComputerOn = true;
+      window.isComputerOn = !window.isComputerOn;
+      
+      const iframe = document.querySelector('.monitor-html-frame');
+      
+      if (!window.isComputerOn) {
+        if (monitorState && monitorState.material) {
+          monitorState.material.emissive.set('#000000');
+        }
+        if (iframe) {
+          iframe.src = 'about:blank';
+        }
+      } else {
+        if (monitorState && monitorState.material) {
+          monitorState.material.emissive.set('#ffffff');
+        }
+        if (iframe) {
+          iframe.src = '/demos/boot/index.html';
+        }
+      }
+      return { success: true, state: window.isComputerOn ? 'ON' : 'OFF' };
+    },
+    name: "toggleComputerPower",
+    description: "Toggles the power of the 3D computer monitor on or off. Boot sequence runs on turn on.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: []
     }
   });
 };

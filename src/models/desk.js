@@ -168,6 +168,7 @@ export const buildDesk = ({
     metalness: 0.08,
   });
   animatedMaterials.push(screenMaterial);
+  monitorState.material = screenMaterial; // Store for power toggling
 
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.72), screenMaterial);
   screen.position.set(-5.1, 4.05, -3.86);
