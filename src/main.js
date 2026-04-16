@@ -844,7 +844,13 @@ const setupMCP = () => {
     execute: ({ url }) => {
       const iframe = document.querySelector('.monitor-html-frame');
       if (iframe) {
-        iframe.src = url;
+        // Wrap the URL in the browser wrapper to ensure the bar is shown,
+        // unless navigating to the browser wrapper itself.
+        if (url === "/demos/browser/") {
+          iframe.src = url;
+        } else {
+          iframe.src = `/demos/browser/?url=${encodeURIComponent(url)}`;
+        }
       }
     },
     name: "navigateComputerScreen",

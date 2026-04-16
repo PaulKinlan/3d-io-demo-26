@@ -23,10 +23,8 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            width: 100vw;
+            background: #202124; /* Solid dark background to match monitor bezel */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
         }
@@ -37,9 +35,7 @@
             display: flex;
             flex-direction: column;
             background-color: var(--bg-window);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
             overflow: hidden;
-            border-radius: 0; /* Assuming it occupies full iframe, no outer border radius needed, but kept flat */
         }
 
         /* Top Title & Tab Bar */
@@ -446,7 +442,8 @@
 
     // Accept postMessage-based navigation requests from child iframes
     window.addEventListener('message', (event) => {
-        if (event.source !== browserView.contentWindow) return;
+        debugger;
+        //if (event.source !== browserView.contentWindow) return;
         if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
             loadUrl(event.data.url);
         }
@@ -496,6 +493,13 @@
             browserView.contentWindow.history.forward();
         } catch(e) { }
     });
+
+    // Handle URL parameter from query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialUrl = urlParams.get('url');
+    if (initialUrl) {
+        loadUrl(initialUrl);
+    }
 </script>
 </body>
 </html>

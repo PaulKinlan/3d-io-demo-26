@@ -188,11 +188,22 @@
 
         .dir-columns { display: flex; gap: 16px; }
         .dir-col { flex: 1; min-width: 0; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .scroll-container {
+            height: 100%;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
-
-    <div class="topbar">
+    <div class="scroll-container">
+        <div class="topbar">
         <div>
             <a href="/demos/wahoo-wail/">Wail</a> |
             <a href="/demos/meo-towns/">Meo-Towns</a> |
@@ -386,5 +397,6 @@
             if (e.key === 'Enter') doSearch();
         });
     </script>
+    </div><!-- .scroll-container -->
 </body>
 </html>
