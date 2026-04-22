@@ -2,7 +2,7 @@ import http from 'node:http';
 
 export function handleClockRequest(req, res) {
   const url = req.url;
-  if (url === '/' || url === '/index.html' || url === '/demos/patching-clock/' || url === '/demos/patching-clock/index.html') {
+  if (url === '/demos/patching-clock/' || url === '/demos/patching-clock/index.html') {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -77,6 +77,11 @@ export function handleClockRequest(req, res) {
 // If run directly, start the server
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const server = http.createServer((req, res) => {
+    // Rewrite root requests to the demo path for the handler
+    if (req.url === '/' || req.url === '/index.html') {
+      req.url = '/demos/patching-clock/';
+    }
+    
     if (!handleClockRequest(req, res)) {
       res.statusCode = 404;
       res.end('Not Found');

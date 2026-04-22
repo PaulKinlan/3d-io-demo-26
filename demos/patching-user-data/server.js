@@ -2,7 +2,7 @@ import http from 'node:http';
 
 export function handleUserDataRequest(req, res) {
   const url = req.url;
-  if (url === '/' || url === '/index.html' || url === '/demos/patching-user-data/' || url === '/demos/patching-user-data/index.html') {
+  if (url === '/demos/patching-user-data/' || url === '/demos/patching-user-data/index.html') {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -219,6 +219,11 @@ export function handleUserDataRequest(req, res) {
 
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const server = http.createServer((req, res) => {
+    // Rewrite root requests to the demo path for the handler
+    if (req.url === '/' || req.url === '/index.html') {
+      req.url = '/demos/patching-user-data/';
+    }
+    
     if (!handleUserDataRequest(req, res)) {
       res.statusCode = 404;
       res.end('Not Found');
