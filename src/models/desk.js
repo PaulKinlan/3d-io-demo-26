@@ -163,11 +163,11 @@ export const buildDesk = ({
     map: monitorState.texture,
     emissiveMap: monitorState.texture,
     emissive: '#ffffff',
-    emissiveIntensity: 1.2,
+    emissiveIntensity: 0.5,
     roughness: 0.16,
     metalness: 0.08,
   });
-  animatedMaterials.push(screenMaterial);
+
   monitorState.material = screenMaterial; // Store for power toggling
 
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.72), screenMaterial);

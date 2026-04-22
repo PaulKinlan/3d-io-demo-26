@@ -1,7 +1,5 @@
-export function handleGithubRequest(req, res) {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  setTimeout(() => {
-    res.write(`
+export function getGithubContent() {
+  return `
 <template for="github-activity">
   <div class="island-content">
     <ul>
@@ -11,7 +9,5 @@ export function handleGithubRequest(req, res) {
     </ul>
   </div>
 </template>
-`);
-    res.end();
-  }, 2500);
+`;
 }

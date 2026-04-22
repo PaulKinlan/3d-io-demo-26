@@ -27,13 +27,13 @@ async function fetchAndParseRSS(url) {
   }
 }
 
-export function handleRSSRequest(req, res) {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-
-  Promise.all([
-    fetchAndParseRSS('https://paul.kinlan.me/index.xml'),
-    fetchAndParseRSS('https://aifoc.us/index.xml')
-  ]).then(([paulItems, aifocusItems]) => {
+export async function getRSSContent() {
+  try {
+    const [paulItems, aifocusItems] = await Promise.all([
+      fetchAndParseRSS('https://paul.kinlan.me/index.xml'),
+      fetchAndParseRSS('https://aifoc.us/index.xml')
+    ]);
+    
     let html = `
 <template for="rss-list">
   <div class="island-content">
@@ -56,10 +56,8 @@ export function handleRSSRequest(req, res) {
   </div>
 </template>`;
 
-    res.write(html);
-    res.end();
-  }).catch(err => {
-    res.write('<template for="rss-list"><div class="island-content">Error loading feeds</div></template>');
-    res.end();
-  });
+    return html;
+  } catch (err) {
+    return '<template for="rss-list"><div class="island-content">Error loading feeds</div></template>';
+  }
 }

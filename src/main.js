@@ -998,8 +998,20 @@ window.addEventListener('message', (e) => {
           console.log('Parent: Calling iframe.requestPaint()');
           element.requestPaint();
         }
-        
-
+      }
+    }
+  }
+  
+  if (e.data && e.data.type === 'navigate' && typeof e.data.url === 'string') {
+    const url = e.data.url;
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      // Wrap the URL in the browser wrapper to ensure the bar is shown,
+      // unless navigating to the browser wrapper itself.
+      if (url === "/demos/browser/") {
+        iframe.src = url;
+      } else {
+        iframe.src = `/demos/browser/?url=${encodeURIComponent(url)}`;
       }
     }
   }

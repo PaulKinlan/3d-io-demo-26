@@ -290,6 +290,7 @@
             flex-grow: 1;
             position: relative;
             background-color: #fff;
+            overflow: hidden;
         }
 
         iframe {
@@ -367,7 +368,7 @@
 
     <!-- Content -->
     <div class="content-area">
-        <iframe id="browser-view" src="/demos/new-tab/"></iframe>
+        <iframe id="browser-view"></iframe>
     </div>
 </div>
 
@@ -390,6 +391,8 @@
     const startUrl = params.get('url');
     if (startUrl) {
         loadUrl(startUrl);
+    } else {
+        loadUrl('/demos/new-tab/');
     }
     
     function updateTabInfo(url, titleStr) {
@@ -417,7 +420,9 @@
                 if (parsed.origin === window.location.origin) {
                     path = parsed.pathname + parsed.search + parsed.hash;
                 }
-            } catch(e) {}
+            } catch (e) {
+                console.log('malformed url', e);
+            }
         }
         
 
@@ -441,12 +446,12 @@
     });
 
     // Accept postMessage-based navigation requests from child iframes
-        window.addEventListener('message', (event) => {
-        //if (event.source !== browserView.contentWindow) return;
-        if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
-            loadUrl(event.data.url);
-        }
-    });
+        //     window.addEventListener('message', (event) => {
+        //     //if (event.source !== browserView.contentWindow) return;
+        //     if (event.data && event.data.type === 'navigate' && typeof event.data.url === 'string') {
+        //         loadUrl(event.data.url);
+        //     }
+        // });
 
     browserView.addEventListener('load', () => {
 
@@ -472,8 +477,7 @@
         }
     });
     
-    btnRefresh.addEventListener('click', () => {
-        browserView.style.opacity = '0.5';
+            btnRefresh.addEventListener('click', () => {
         browserView.src = browserView.src;
     });
     
@@ -493,12 +497,7 @@
         } catch(e) { }
     });
 
-    // Handle URL parameter from query string
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialUrl = urlParams.get('url');
-    if (initialUrl) {
-        loadUrl(initialUrl);
-    }
+
 
     // Logging for clicks
     document.body.addEventListener('click', (e) => {

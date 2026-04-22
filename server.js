@@ -8,9 +8,7 @@ import { createServer as createViteServer } from 'vite';
 import { handleClockRequest } from './demos/patching-clock/handler.js';
 import { handleUserDataRequest } from './demos/patching-user-data/handler.js';
 import { handleIslandsShell } from './demos/islands-html/shell.js';
-import { handleRSSRequest } from './demos/islands-html/rss.js';
-import { handleGithubRequest } from './demos/islands-html/github.js';
-import { handleProjectsRequest } from './demos/islands-html/projects.js';
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -49,20 +47,7 @@ async function createServer() {
       return;
     }
 
-    if (pathname === '/demos/islands-html/rss') {
-      handleRSSRequest(req, res);
-      return;
-    }
 
-    if (pathname === '/demos/islands-html/github') {
-      handleGithubRequest(req, res);
-      return;
-    }
-
-    if (pathname === '/demos/islands-html/projects') {
-      handleProjectsRequest(req, res);
-      return;
-    }
 
     // Fallback to Vite middleware for static assets and other demos
     vite.middlewares(req, res, async () => {

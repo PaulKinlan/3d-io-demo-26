@@ -1,7 +1,5 @@
-export function handleProjectsRequest(req, res) {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  setTimeout(() => {
-    res.write(`
+export function getProjectsContent() {
+  return `
 <template for="projects-list">
   <div class="island-content">
     <ul>
@@ -11,7 +9,5 @@ export function handleProjectsRequest(req, res) {
     </ul>
   </div>
 </template>
-`);
-    res.end();
-  }, 1000);
+`;
 }

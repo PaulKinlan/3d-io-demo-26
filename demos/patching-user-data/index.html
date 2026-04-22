@@ -13,6 +13,7 @@
       align-items: center;
       margin: 0;
       min-height: 100vh;
+      overflow: hidden;
     }
     .store-header {
       width: 100%;
@@ -188,9 +189,5 @@
   <p style="margin-top: 2rem; color: rgba(232, 246, 255, 0.6);">
     Note: This static file will not update automatically. Access this path via the Vite dev server or run <code>node server.js</code> to see the streaming behavior.
   </p>
-  <script>
-    // Notify parent for texture updates (Childhood Bedroom pattern)
-    window.top.postMessage({ type: 'frame' }, '*');
-  </script>
 </body>
 </html>

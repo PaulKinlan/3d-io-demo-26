@@ -13,6 +13,7 @@
       align-items: center;
       margin: 0;
       min-height: 100vh;
+      overflow: hidden;
     }
     header {
       width: 100%;
@@ -109,21 +110,6 @@
     </div>
   </div>
 
-  <script>
-    // Fetch and pipe islands to specific elements
-    async function loadIsland(name, elementId) {
-      const response = await fetch(`/demos/islands-html/${name}`);
-      const element = document.getElementById(elementId);
-      if (element) {
-        await response.body
-          .pipeThrough(new TextDecoderStream())
-          .pipeTo(element.streamAppendHTMLUnsafe());
-      }
-    }
 
-    loadIsland('rss', 'rss-island');
-    loadIsland('github', 'github-island');
-    loadIsland('projects', 'projects-island');
-  </script>
 </body>
 </html>
