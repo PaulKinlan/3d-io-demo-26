@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Share Presenter</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0c1118;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            color: #89ffd8;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #8e9fae;
+            margin-bottom: 20px;
+        }
+        canvas {
+            width: 100%;
+            max-height: 60vh;
+            border: 2px solid #18283c;
+            border-radius: 8px;
+            background: #000;
+            display: none;
+        }
+        video {
+            display: none;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            background: #89ffd8;
+            color: #0c1118;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #7dc6ff;
+        }
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #ffb36b;
+        }
+        
+        /* Presenting Mode */
+        body.presenting {
+            padding: 0;
+            background: #000;
+        }
+        body.presenting .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body.presenting h1,
+        body.presenting p,
+        body.presenting .controls,
+        body.presenting .status {
+            display: none;
+        }
+        body.presenting canvas {
+            width: 100vw;
+            height: 100vh;
+            max-height: 100vh;
+            border: none;
+            border-radius: 0;
+            object-fit: fill; /* Fill the screen to remove black bars */
+        }
+        
+        .floating-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+        }
+        body.presenting .floating-controls {
+            display: block;
+        }
+        .floating-controls button {
+            background: #ffb36b;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .floating-controls button:hover {
+            background: #ffa040;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Screen Share Presenter</h1>
+        <p>Share your screen or another tab to display it on the 3D monitor.</p>
+        
+        <video id="hiddenVideo" autoplay playsinline></video>
+        <canvas id="previewCanvas" width="960" height="720"></canvas>
+        
+        <div class="controls">
+            <button id="startButton">Start Presenting</button>
+        </div>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const video = document.getElementById('hiddenVideo');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
+
+        startButton.addEventListener('click', async () => {
+            try {
+                statusDiv.textContent = 'Requesting display media...';
+                
+                // Use CaptureController for Surface Control API
+                const controller = new CaptureController();
+                
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: false,
+                    controller: controller
+                });
+                
+                video.srcObject = stream;
+                
+                // Update canvas resolution to match video stream to fix blurriness
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                if (settings.width && settings.height) {
+                    canvas.width = settings.width;
+                    canvas.height = settings.height;
+                }
+                
+                canvas.style.display = 'block';
+                startButton.style.display = 'none';
+                statusDiv.textContent = 'Presenting live stream.';
+                document.body.classList.add('presenting');
+                
+                // Create controls container
+                let ctrlDiv = document.querySelector('.floating-controls');
+                if (!ctrlDiv) {
+                    ctrlDiv = document.createElement('div');
+                    ctrlDiv.className = 'floating-controls';
+                    document.body.appendChild(ctrlDiv);
+                }
+                
+                // Enable Captured Surface Control if it's a tab and supported
+                const isTab = settings.displaySurface === 'browser';
+                if (isTab && 'forwardWheel' in CaptureController.prototype) {
+                    console.log("Enabling surface control...");
+                    
+                    // Forward scroll events from canvas to captured tab
+                    console.log("Calling forwardWheel on canvas...");
+                    controller.forwardWheel(canvas)
+                        .then(() => console.log("forwardWheel established!"))
+                        .catch(err => console.error("forwardWheel failed:", err));
+                    
+                    // Add listener to check if wheel events are received and if they are trusted
+                    canvas.addEventListener('wheel', (e) => {
+                        console.log("Canvas received wheel event. isTrusted:", e.isTrusted, "deltaY:", e.deltaY);
+                    });
+                    
+                    // Add key listener to simulate scroll on arrow keys
+                    window.addEventListener('keydown', (e) => {
+                        if (['ArrowDown', 'ArrowRight'].includes(e.key)) {
+                            console.log("Simulating scroll down for next slide");
+                            const event = new WheelEvent('wheel', { deltaY: 100, deltaMode: 0, bubbles: true });
+                            canvas.dispatchEvent(event);
+                        } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+                            console.log("Simulating scroll up for previous slide");
+                            const event = new WheelEvent('wheel', { deltaY: -100, deltaMode: 0, bubbles: true });
+                            canvas.dispatchEvent(event);
+                        }
+                    });
+                    
+                    // Add Zoom controls
+                    const zoomOutBtn = document.createElement('button');
+                    zoomOutBtn.textContent = 'Zoom -';
+                    zoomOutBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        try { await controller.decreaseZoomLevel(); } catch(err) { console.error(err); }
+                    };
+                    
+                    const zoomInBtn = document.createElement('button');
+                    zoomInBtn.textContent = 'Zoom +';
+                    zoomInBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        try { await controller.increaseZoomLevel(); } catch(err) { console.error(err); }
+                    };
+                    
+                    ctrlDiv.appendChild(zoomOutBtn);
+                    ctrlDiv.appendChild(zoomInBtn);
+                }
+                
+                // Check for Capture Handle
+                if ('getCaptureHandle' in MediaStreamTrack.prototype) {
+                    const captureHandle = track.getCaptureHandle();
+                    if (captureHandle) {
+                        console.log("Capture Handle detected:", captureHandle.handle);
+                        statusDiv.textContent = 'Presenting: ' + captureHandle.handle;
+                        
+                        // If it's our mock slides, show control button!
+                        if (captureHandle.handle === "slides-demo-handle") {
+                            const nextBtn = document.createElement('button');
+                            nextBtn.id = 'nextSlideBtn';
+                            nextBtn.textContent = 'Next Slide';
+                            nextBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                const channel = new BroadcastChannel('slides-control');
+                                channel.postMessage('next');
+                                console.log("Sent next slide message");
+                            };
+                            ctrlDiv.appendChild(nextBtn);
+                        }
+                    }
+                }
+                
+                function drawFrame() {
+                    if (!video.paused && !video.ended) {
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        window.top.postMessage({ type: 'frame' }, '*');
+                        requestAnimationFrame(drawFrame);
+                    }
+                }
+                
+                video.addEventListener('play', drawFrame);
+                drawFrame();
+                
+                stream.getVideoTracks()[0].addEventListener('ended', () => {
+                    canvas.style.display = 'none';
+                    startButton.style.display = 'inline-block';
+                    statusDiv.textContent = 'Presentation ended.';
+                    document.body.classList.remove('presenting');
+                });
+                
+            } catch (err) {
+                console.error('Error sharing screen:', err);
+                statusDiv.textContent = 'Error: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

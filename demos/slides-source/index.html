@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Slides (Captured Source)</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { color: #ffb36b; }
+        .slide-content {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        .status {
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mock Slides Source</h1>
+    <p>This tab exposes a Capture Handle.</p>
+    <div class="slide-content">Slide #<span id="slideNum">1</span></div>
+    <p class="status">Share this tab in the "Screen Share" demo to test remote control.</p>
+    
+    <script>
+        // Set Capture Handle Config
+        if ('setCaptureHandleConfig' in navigator.mediaDevices) {
+            navigator.mediaDevices.setCaptureHandleConfig({
+                handle: "slides-demo-handle",
+                exposeOrigin: true,
+                permittedOrigins: ['*']
+            });
+            console.log("Capture Handle set!");
+        }
+        
+        // Listen for messages from capturer via BroadcastChannel
+        const channel = new BroadcastChannel('slides-control');
+        channel.onmessage = (e) => {
+            console.log("Received message:", e.data);
+            if (e.data === 'next') {
+                const span = document.getElementById('slideNum');
+                span.textContent = parseInt(span.textContent) + 1;
+            }
+        };
+    </script>
+</body>
+</html>

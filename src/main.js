@@ -52,6 +52,7 @@ app.innerHTML = `
             src="/demos/browser/index.html"
             title="Monitor demos"
             loading="eager"
+            allow="display-capture"
           ></iframe>
         </div>
     </section>
@@ -765,12 +766,10 @@ const animate = (time = 0) => {
   const elapsed = timer.getElapsed();
   
   if (renderer.domElement.onpaint) {
-    console.log('Parent: Calling renderer.domElement.onpaint()');
     renderer.domElement.onpaint();
   }
   
   if (renderer.domElement.requestPaint) {
-    console.log('Parent: Calling renderer.domElement.requestPaint()');
     renderer.domElement.requestPaint();
   }
 
@@ -937,7 +936,9 @@ const setupMCP = () => {
             "/demos/meo-towns/",
             "/demos/wahoo-wail/",
             "/demos/site-generator/",
-            "/demos/boot/"
+            "/demos/boot/",
+            "/demos/screen-share/",
+            "/demos/patching-clock/"
           ],
           description: "The URL of the demo to navigate to."
         }
@@ -986,7 +987,6 @@ setupMCP();
 window.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'frame') {
     if (monitorState.texture) {
-      console.log('Parent: Received frame message, refreshing texture');
       monitorState.texture.needsUpdate = true;
       
       const element = document.querySelector('.monitor-html-frame');

@@ -94,10 +94,52 @@ Modern browsers support rich media and interactive semantics:
 This selector will be used to customize the environment in a future demo.
 Select an option to see the placeholder icon update (simulated):
 
+<style>
+.theme-picker,
+.theme-picker::picker(select) {
+  appearance: base-select;
+}
+.theme-picker {
+  padding: 8px;
+  background: #0c1118;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  width: 200px;
+}
+.theme-picker::picker(select) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: #18283c;
+  border: 1px solid #555;
+  border-radius: 8px;
+}
+.theme-picker option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 5px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+.theme-picker option[value="default"] { background: #0c1118; }
+.theme-picker option[value="dark"] { background: #000000; color: #aaaaaa; }
+.theme-picker option[value="neon"] { background: #1a0033; border-color: #ff00ff; color: #00ffff; text-shadow: 0 0 5px #ff00ff; }
+.theme-picker option[value="retro"] { background: #ffaa00; border-color: #8800ff; color: #8800ff; font-weight: bold; }
+</style>
 <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-top: 20px; display: flex; align-items: center; gap: 20px;">
   <div>
     <label for="custom-select" style="display: block; margin-bottom: 8px;">Choose a Theme:</label>
-    <select id="custom-select" style="padding: 8px; background: #0c1118; color: #fff; border: 1px solid #555; border-radius: 4px; width: 200px;">
+    <select id="custom-select" class="theme-picker" name="theme">
+      <button style="background: transparent; border: none; color: inherit; width: 100%; text-align: left; padding: 0; cursor: pointer; display: flex; align-items: center;">
+        <selectedcontent></selectedcontent>
+      </button>
       <option value="default">Default Theme</option>
       <option value="dark">Sleek Dark Mode</option>
       <option value="neon">Cyberpunk Neon</option>
