@@ -152,7 +152,9 @@ export function handleIslandsRequest(req, res) {
       const response = await fetch(\`/demos/islands-html/\${name}\`);
       const element = document.getElementById(elementId);
       if (element) {
-        await response.body.pipeTo(element.streamHTMLUnsafe());
+        await response.body
+          .pipeThrough(new TextDecoderStream())
+          .pipeTo(element.streamAppendHTMLUnsafe());
       }
     }
 
