@@ -999,8 +999,7 @@ window.addEventListener('message', (e) => {
           element.requestPaint();
         }
         
-        // Force style trigger as a fallback
-        element.style.opacity = element.style.opacity === '0.999' ? '1' : '0.999';
+
       }
     }
   }

@@ -420,7 +420,7 @@
             } catch(e) {}
         }
         
-        browserView.style.opacity = '0.7';
+
         browserView.src = fullUrl;
         
         urlInput.value = path;
@@ -449,7 +449,7 @@
     });
 
     browserView.addEventListener('load', () => {
-        browserView.style.opacity = '1';
+
         try {
             if (browserView.contentWindow.location.href !== 'about:blank') {
                 const path = browserView.contentWindow.location.pathname + browserView.contentWindow.location.search + browserView.contentWindow.location.hash;
