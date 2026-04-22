@@ -1,7 +1,8 @@
-const http = require('http');
+import http from 'node:http';
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/' || req.url === '/index.html') {
+export function handleClockRequest(req, res) {
+  const url = req.url;
+  if (url === '/' || url === '/index.html' || url === '/demos/patching-clock/' || url === '/demos/patching-clock/index.html') {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -57,8 +58,9 @@ const server = http.createServer((req, res) => {
       const time = new Date().toLocaleTimeString();
       res.write(`
 <template for="clock">
-  <span>${time}</span>
-  <?marker name="clock">
+   <?start name="clock">
+      <span>${time}</span>
+   <?end>
 </template>
 `);
     }, 1000);
@@ -66,13 +68,23 @@ const server = http.createServer((req, res) => {
     req.on('close', () => {
       clearInterval(interval);
     });
-  } else {
-    res.statusCode = 404;
-    res.end('Not Found');
-  }
-});
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    return true;
+  }
+  return false;
+}
+
+// If run directly, start the server
+if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+  const server = http.createServer((req, res) => {
+    if (!handleClockRequest(req, res)) {
+      res.statusCode = 404;
+      res.end('Not Found');
+    }
+  });
+
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
