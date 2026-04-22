@@ -126,22 +126,22 @@ export function handleIslandsRequest(req, res) {
   <div class="container" id="blog-shell">
     <div class="island" id="rss-island">
       <h2>Latest RSS Feeds</h2>
-      <section contentname="rss-list">
-        <div class="loading">Loading feeds...</div>
+      <section>
+        <?start name="rss-list"><div class="loading">Loading feeds...</div><?end>
       </section>
     </div>
     
     <div class="island" id="github-island">
       <h2>GitHub Activity</h2>
-      <section contentname="github-activity">
-        <div class="loading">Loading activity...</div>
+      <section>
+        <?start name="github-activity"><div class="loading">Loading activity...</div><?end>
       </section>
     </div>
     
     <div class="island" id="projects-island">
       <h2>Recent Projects</h2>
-      <section contentname="projects-list">
-        <div class="loading">Loading projects...</div>
+      <section>
+        <?start name="projects-list"><div class="loading">Loading projects...</div><?end>
       </section>
     </div>
   </div>
@@ -152,7 +152,7 @@ export function handleIslandsRequest(req, res) {
       const response = await fetch(\`/demos/islands-html/\${name}\`);
       const element = document.getElementById(elementId);
       if (element) {
-        await response.body.pipeTo(element.streamAppendHTMLUnsafe());
+        await response.body.pipeTo(element.streamHTMLUnsafe());
       }
     }
 
