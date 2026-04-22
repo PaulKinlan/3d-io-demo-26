@@ -159,11 +159,11 @@ export const buildDesk = ({
   console.log('CanvasTexture created directly from htmlCanvas');
 
   const screenMaterial = new THREE.MeshStandardMaterial({
-    color: '#111111',
+    color: '#050505',
     map: monitorState.texture,
     emissiveMap: monitorState.texture,
     emissive: '#ffffff',
-    emissiveIntensity: 0.5,
+    emissiveIntensity: 0.7,
     roughness: 0.16,
     metalness: 0.08,
   });

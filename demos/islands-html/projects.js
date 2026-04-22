@@ -1,6 +1,9 @@
-export function getProjectsContent() {
-  return `
-<template for="projects-list">
+export function handleProjectsRequest(req, res) {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+
+  setTimeout(() => {
+    res.write(`
   <div class="island-content">
     <ul>
       <li><strong>Web MCP</strong> - Model Context Protocol for Web</li>
@@ -8,6 +11,7 @@ export function getProjectsContent() {
       <li><strong>DPU Demos</strong> - This site!</li>
     </ul>
   </div>
-</template>
-`;
+`);
+    res.end();
+  }, 1000);
 }
