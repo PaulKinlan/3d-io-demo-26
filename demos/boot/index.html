@@ -90,7 +90,7 @@
             window.parent.postMessage({ type: 'boot-complete' }, '*');
             // Fallback redirect
             setTimeout(() => {
-                window.location.href = '/demos/new-tab/';
+                window.location.href = '/demos/browser/?url=/demos/new-tab/';
             }, 500);
         }, 3500);
     </script>
