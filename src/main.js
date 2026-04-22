@@ -938,7 +938,8 @@ const setupMCP = () => {
             "/demos/site-generator/",
             "/demos/boot/",
             "/demos/screen-share/",
-            "/demos/patching-clock/"
+            "/demos/patching-clock/",
+            "/demos/patching-user-data/"
           ],
           description: "The URL of the demo to navigate to."
         }
