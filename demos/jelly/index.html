@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jelly slider</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+        body {
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            gap: 1.5rem;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        #controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            width: 75%;
+        }
+        #slider {
+            cursor: grab;
+            width: 75%;
+            height: 12.5%;
+            --jelly-color: rgb(255, 115, 19);
+            --ground-color: rgb(255, 255, 255);
+            --text-color: rgb(40, 40, 40);
+            color: var(--jelly-color);
+            background-color: var(--ground-color);
+            caret-color: var(--text-color);
+            transition: opacity 0.3s;
+        }
+        
+        /* Default to showing the slider (non-styled mode) */
+        #slider {
+            opacity: 1;
+        }
+        
+        /* Super mode hides the slider but keeps it interactive */
+        body.super-mode #slider {
+            opacity: 0;
+        }
+        
+        #slider:focus {
+            --jelly-color: rgb(51, 153, 255);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            #slider {
+                --ground-color: rgb(26, 26, 26);
+                --text-color: rgb(204, 204, 204);
+            }
+        }
+        @media (prefers-contrast: more) {
+            #slider {
+                --jelly-color: rgb(255, 51, 0);
+                --text-color: rgb(0, 0, 0);
+            }
+            #slider:focus {
+                --jelly-color: rgb(0, 0, 255);
+            }
+            @media (prefers-color-scheme: dark) {
+                #slider {
+                    --text-color: rgb(255, 255, 255);
+                }
+            }
+        }
+        @media (forced-colors: active) {
+            #slider {
+                --jelly-color: transparent;
+                --ground-color: Canvas;
+                --text-color: CanvasText;
+            }
+            #slider:focus {
+                --jelly-color: Highlight;
+            }
+        }
+        #value {
+            text-align: right;
+            height: 12.5%;
+            width: 75%;
+            color: white;
+            font-size: 5vmin;
+            line-height: 10vmin;
+            font-family: sans-serif;
+        }
+        
+        canvas {
+            border: 1px solid #ccc;
+            background: #eee;
+        }
+        
+        body.super-mode canvas {
+            border: none;
+            background: transparent;
+        }
+        
+        #attribution {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        #attribution a {
+            color: #ff7313;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button id="toggleMode">Toggle Super Mode</button>
+        <span id="modeStatus">Mode: Normal (Styled HTML Slider)</span>
+    </div>
+
+    <canvas layoutsubtree width="800" height="600">
+        <input id="slider" type="range" min="0" max="100" step="1" value="100" />
+        <div id="value" inert="true"></div>
+    </canvas>
+
+    <div id="attribution">
+        This is based on Software Mansion's <a href="https://github.com/software-mansion/TypeGPU/tree/main/apps/typegpu-docs/src/examples/rendering/jelly-slider" target="_blank">Jelly Slider</a>, which was inspired by the work of <a href="https://x.com/cerpow/status/1964953851603358112" target="_blank">Voicu Apostol</a>.
+    </div>
+
+    <script type="module" src="./index.ts"></script>
+    
+    <script>
+        // Handle mode toggle
+        const btn = document.getElementById('toggleMode');
+        const status = document.getElementById('modeStatus');
+        const body = document.body;
+        
+        btn.addEventListener('click', () => {
+            body.classList.toggle('super-mode');
+            if (body.classList.contains('super-mode')) {
+                status.textContent = 'Mode: Super (HTML in Canvas)';
+                btn.textContent = 'Toggle Normal Mode';
+            } else {
+                status.textContent = 'Mode: Normal (Styled HTML Slider)';
+                btn.textContent = 'Toggle Super Mode';
+            }
+            // Notify the room script that mode changed if needed
+            window.top.postMessage({ type: 'mode-change', mode: body.classList.contains('super-mode') ? 'super' : 'normal' }, '*');
+        });
+    </script>
+</body>
+</html>

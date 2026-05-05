@@ -1,10 +1,12 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import typegpuPlugin from 'unplugin-typegpu/vite';
 
 const threeProxyPath = fileURLToPath(new URL('./src/lib/three-proxy.js', import.meta.url));
 const threeAddonsProxyPrefix = `${fileURLToPath(new URL('./src/lib/three-addons/', import.meta.url))}/`;
 
 export default defineConfig(({ command }) => ({
+  plugins: [typegpuPlugin()],
   resolve: {
     // Vite dev needs concrete files for import analysis, but production should
     // keep the bare specifiers so the browser import map remains authoritative.
@@ -28,6 +30,7 @@ export default defineConfig(({ command }) => ({
         wahooWail: './demos/wahoo-wail/index.html',
         maltavista: './demos/maltavista/index.html',
         siteGenerator: './demos/site-generator/index.html',
+        jelly: './demos/jelly/index.html',
       },
     },
   },
