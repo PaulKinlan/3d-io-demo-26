@@ -4,7 +4,7 @@ An interactive, fully procedural 3D scene of a childhood bedroom rendered with T
 
 ## Features
 
-- **Interactive HTML Textures** -- fully functional iframe web applications mapped onto the 3D CRT monitor screen (play Flappy Bird, view slide decks, browse sites inside the 3D scene)
+- **Interactive HTML Textures** -- fully functional iframe web applications mapped onto the 3D CRT monitor screen (play Flopity Gull, view slide decks, browse sites inside the 3D scene)
 - **Procedural & Static geometry** -- objects (desk, chair, bed, bookshelf, CRT monitor, lamps, posters) are carefully constructed and pieced together in code
 - **Canvas & Image textures** -- custom textures generated procedurally at runtime via the Canvas API with seamless fallbacks to static images
 - **Animated CRT glow & Lights** -- the monitor screen flickers with a subtle emissive pulse and system lights blink dynamically
@@ -54,7 +54,7 @@ src/
   lib/                  Utility functions and wrappers
 demos/                  Internal iframe HTML apps for the 3D computer monitor
   browser/              Chrome-like browser clone
-  flappy-bird/          Flappy Bird clone
+  flappy-bird/          Flopity Gull clone
   slide-deck/           Markdown-based slide presentation framework
   new-tab/              New Tab page clone
 public/                 Static assets
