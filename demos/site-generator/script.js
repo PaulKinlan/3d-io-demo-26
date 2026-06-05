@@ -42,21 +42,65 @@ function onSWReady() {
 }
 
 async function checkPromptAPI() {
-  if (self.ai && self.ai.languageModel) {
-    try {
-      const capabilities = await self.ai.languageModel.capabilities();
+  // Current Chrome exposes the Prompt API as a global `LanguageModel`.
+  // Older builds used `self.ai.languageModel` with a different shape.
+  const lm = self.LanguageModel || (self.ai && self.ai.languageModel);
+  if (!lm) {
+    setStatus('error', 'Prompt API not detected - use desktop Chrome 138+');
+    return;
+  }
+
+  try {
+    if (typeof lm.availability === 'function') {
+      // New API: 'available' | 'downloadable' | 'downloading' | 'unavailable'
+      const status = await lm.availability();
+      if (status === 'available') {
+        setStatus('ready', 'Ready - Gemini Nano available');
+      } else if (status === 'downloadable' || status === 'downloading') {
+        // Proactively kick off the download so the model is ready by the time
+        // the user navigates, and surface progress in the status bar.
+        await ensureModelDownloaded(lm);
+      } else {
+        setStatus('error', 'Prompt API not available on this device');
+      }
+    } else {
+      // Legacy API: capabilities() -> { available: 'readily' | 'after-download' | 'no' }
+      const capabilities = await lm.capabilities();
       if (capabilities.available === 'readily') {
-        setStatus('ready', 'Ready - Prompt API available');
+        setStatus('ready', 'Ready - Gemini Nano available');
       } else if (capabilities.available === 'after-download') {
         setStatus('loading', 'Downloading Gemini Nano model...');
       } else {
         setStatus('error', 'Prompt API not available on this device');
       }
-    } catch {
-      setStatus('error', 'Could not check Prompt API capabilities');
     }
-  } else {
-    setStatus('error', 'Prompt API not detected - use Chrome 138+');
+  } catch (e) {
+    setStatus('error', 'Could not check Prompt API: ' + e.message);
+  }
+}
+
+// Trigger (or attach to) the Gemini Nano download. The model is shared across
+// the origin, so warming it up here means the service worker can use it
+// immediately. Progress is reported live via the `downloadprogress` event.
+async function ensureModelDownloaded(lm) {
+  setStatus('loading', 'Starting Gemini Nano download...');
+  try {
+    const session = await lm.create({
+      // Declaring the output language silences Chrome's "no output language"
+      // warning and improves output quality.
+      expectedOutputs: [{ type: 'text', languages: ['en'] }],
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          const pct = Math.round(e.loaded * 100);
+          setStatus('loading', `Downloading Gemini Nano... ${pct}%`);
+        });
+      },
+    });
+    // This warm-up session is only needed to drive the download; release it.
+    session.destroy?.();
+    setStatus('ready', 'Ready - Gemini Nano downloaded');
+  } catch (e) {
+    setStatus('error', 'Model download failed: ' + e.message);
   }
 }
 

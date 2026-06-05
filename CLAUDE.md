@@ -102,3 +102,30 @@ The project exposes interactive controls to Claude via the browser-native Web MC
 | `navigateComputerScreen` | Navigate the monitor iframe to a demo (URL must be in the enum list) |
 
 When adding a new demo, the `navigateComputerScreen` enum must be updated (step 5 above) or Claude won't be able to navigate to it.
+
+## Monitor rendering (html-in-canvas)
+
+The 3D monitor displays a **live, interactive web page** composited into the WebGL scene using the experimental **html-in-canvas** API. This is the most non-obvious part of the codebase — read this before changing monitor rendering, input handling, or `pointer-events`.
+
+How it works:
+
+- **three.js is the experimental dev build (with `HTMLTexture`), vendored locally** in `vendor/three/` (`three.module.js` + `three.core.js` + `addons/controls/OrbitControls.js`) so the project runs fully offline. There is **no `node_modules/three`**. `vite.config.js` aliases the bare `three` / `three/addons/*` specifiers to those local files — Vite serves them in dev and Rollup bundles them in build (single shared instance). No CDN / import map. To update three, re-download the dev build into `vendor/three/` (keep `three.module.js` + `three.core.js` together). `vendor/` must **not** live in `public/` — Vite refuses to import JS modules from `public/`.
+- The WebGL canvas is marked `layoutsubtree="true"` and the live DOM (`.monitor-html-subtree`) is **appended as a child of the canvas** (`src/main.js`, search `layoutsubtree`). The browser lays out and paints that subtree into the canvas texture.
+- `THREE.HTMLTexture` **only repaints** the texture (driven each frame by the canvas `onpaint`/`requestPaint` hooks in `animate()`). It does **not** forward input events and does **not** manage transforms.
+- **Interaction works through transform-sync, not event forwarding.** `updateMonitorTransform()` keeps the subtree's CSS `transform` (`matrix3d`) aligned with where the screen is drawn in 3D, so the live DOM physically sits at the drawn location. Native browser hit-testing then routes **clicks, text selection, and wheel/scroll directly into the DOM** (the WICG-recommended model).
+- Therefore **`.monitor-html-subtree` must stay `pointer-events: auto`**. Do **not** set it to `none`, and do **not** raycast on the canvas to forward synthesized click/scroll events via `postMessage` — that fights the real interaction model and breaks it.
+- Monitor content nesting: `canvas[layoutsubtree]` → `.monitor-html-subtree` → `.monitor-html-frame` (browser-chrome wrapper, `/demos/browser/`) → `#browser-view` (the demo iframe).
+
+Requirements & gotchas:
+
+- Needs **Chrome with html-in-canvas enabled** — an origin-trial token *or* `chrome://flags` → *Experimental Web Platform features*. `index.html` ships no OT token, so a flag is currently required. The internal Claude Preview Chromium does **not** support it — debug with the **Chrome DevTools / Claude-in-Chrome MCP** instead.
+- `npm run dev` serves on **http://localhost:5173**. A demo (`demos/site-generator`) registers a **service worker** that can serve a cached offline page over the origin — if you get an `offline-resources`/`neterror` page, unregister service workers + clear caches, then hard-reload.
+
+### Reference docs (don't re-discover these)
+
+- Chrome blog — html-in-canvas origin trial: https://developer.chrome.com/blog/html-in-canvas-origin-trial
+- WICG html-in-canvas explainer/spec: https://github.com/WICG/html-in-canvas/blob/main/README.md
+- Awesome html-in-canvas: https://github.com/GoogleChromeLabs/css-web-ui-demos/blob/main/html-in-canvas/awesome-html-in-canvas.md
+- three.js HTMLTexture docs: https://threejs.org/docs/#api/en/textures/HTMLTexture
+- three.js HTMLTexture example: https://threejs.org/examples/webgl_materials_texture_html.html
+- modern-web-guidance, apply-webgl-shaders grader.ts: https://github.com/GoogleChrome/modern-web-guidance-src/blob/c6bad352b6868a4026a4dee5a949d2d149708fbe/guides/user-experience/apply-webgl-shaders/grader.ts#L5

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Image</title>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --panel: #1a1d24;
+            --panel-2: #22262f;
+            --border: #2e333d;
+            --text: #e6e8ec;
+            --text-dim: #9aa0aa;
+            --accent: #7c5cff;
+            --accent-hover: #6b4aff;
+            --good: #34d399;
+            --bad: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(120% 120% at 50% 0%, #181b22 0%, var(--bg) 60%);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px 60px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 6px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        .status {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            display: inline-block;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        .status.ok { color: var(--good); border-color: rgba(52, 211, 153, 0.4); }
+        .status.err { color: var(--bad); border-color: rgba(248, 113, 113, 0.4); }
+
+        main {
+            width: 100%;
+            max-width: 860px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 720px) {
+            main { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel h2 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-dim);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .dropzone {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-dim);
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.2s, background 0.2s;
+            background: var(--panel-2);
+        }
+
+        .dropzone:hover,
+        .dropzone.dragover {
+            border-color: var(--accent);
+            background: #232734;
+        }
+
+        .dropzone img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #0b0d11;
+        }
+
+        .dropzone .hint {
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .dropzone .hint b { color: var(--text); }
+
+        input[type="file"] { display: none; }
+
+        label.field {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 70px;
+            background: var(--panel-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        textarea:focus { border-color: var(--accent); }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            font-size: 12px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--panel-2);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        button.run {
+            margin-top: 4px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.05s;
+        }
+
+        button.run:hover { opacity: 0.92; }
+        button.run:active { transform: translateY(1px); }
+        button.run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .output {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 240px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--text);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .output.placeholder { color: var(--text-dim); }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🔍 Analyse Image</h1>
+        <p>On-device image understanding with Chrome's built-in Prompt API</p>
+        <div class="status" id="status">Checking model availability…</div>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Image</h2>
+            <div class="dropzone" id="dropzone">
+                <div class="hint" id="hint">
+                    <b>Click to upload</b> or drop an image here<br>
+                    PNG, JPG, WebP &mdash; analysed entirely on-device
+                </div>
+                <img id="preview" alt="" hidden>
+            </div>
+            <input type="file" id="file" accept="image/*">
+
+            <label class="field">
+                Question / instruction
+                <textarea id="prompt" placeholder="Describe this image in detail.">Describe this image in detail.</textarea>
+            </label>
+
+            <div class="presets">
+                <span class="chip" data-p="Describe this image in detail.">Describe</span>
+                <span class="chip" data-p="List every object you can see in this image as a bullet list.">List objects</span>
+                <span class="chip" data-p="Extract and transcribe all text visible in this image.">Read text (OCR)</span>
+                <span class="chip" data-p="What is the overall mood and color palette of this image?">Mood &amp; colors</span>
+                <span class="chip" data-p="Write a short, witty caption for this image.">Caption</span>
+            </div>
+
+            <button class="run" id="run" disabled>Analyse image</button>
+        </section>
+
+        <section class="panel">
+            <h2>Result</h2>
+            <div class="output placeholder" id="output">The model's response will stream in here.</div>
+        </section>
+    </main>
+
+    <script type="module">
+        const statusEl = document.getElementById('status');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file');
+        const preview = document.getElementById('preview');
+        const hint = document.getElementById('hint');
+        const promptEl = document.getElementById('prompt');
+        const runBtn = document.getElementById('run');
+        const output = document.getElementById('output');
+
+        let currentBlob = null;
+        let session = null;
+
+        const inputOptions = {
+            expectedInputs: [
+                { type: 'text', languages: ['en'] },
+                { type: 'image' },
+            ],
+            expectedOutputs: [{ type: 'text', languages: ['en'] }],
+        };
+
+        function setStatus(text, cls = '') {
+            statusEl.textContent = text;
+            statusEl.className = 'status' + (cls ? ' ' + cls : '');
+        }
+
+        function updateRunState() {
+            runBtn.disabled = !currentBlob || !session;
+        }
+
+        // --- Feature detection & model availability ---
+        async function init() {
+            if (!('LanguageModel' in self)) {
+                setStatus('Prompt API unavailable — enable it in chrome://flags/#prompt-api-for-gemini-nano', 'err');
+                return;
+            }
+            try {
+                const availability = await LanguageModel.availability(inputOptions);
+                if (availability === 'unavailable') {
+                    setStatus('Model unavailable on this device', 'err');
+                    return;
+                }
+                if (availability === 'available') {
+                    setStatus('Model ready (on-device)', 'ok');
+                    await ensureSession();
+                } else {
+                    // 'downloadable' or 'downloading'
+                    setStatus('Model needs to download — click "Analyse image" to begin', 'ok');
+                    session = 'lazy'; // create on first run so the download is user-initiated
+                    updateRunState();
+                }
+            } catch (err) {
+                setStatus('Availability check failed: ' + err.message, 'err');
+            }
+        }
+
+        async function ensureSession() {
+            if (session && session !== 'lazy') return session;
+            session = await LanguageModel.create({
+                ...inputOptions,
+                monitor(m) {
+                    m.addEventListener('downloadprogress', (e) => {
+                        setStatus(`Downloading model… ${Math.round(e.loaded * 100)}%`, 'ok');
+                    });
+                },
+            });
+            setStatus('Model ready (on-device)', 'ok');
+            updateRunState();
+            return session;
+        }
+
+        // --- Image selection ---
+        function loadFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            currentBlob = file;
+            const url = URL.createObjectURL(file);
+            preview.src = url;
+            preview.hidden = false;
+            hint.hidden = true;
+            updateRunState();
+        }
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => loadFile(fileInput.files[0]));
+
+        ['dragenter', 'dragover'].forEach((ev) =>
+            dropzone.addEventListener(ev, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            })
+        );
+        ['dragleave', 'drop'].forEach((ev) =>
+            dropzone.addEventListener(ev, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            })
+        );
+        dropzone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            loadFile(file);
+        });
+
+        // Paste from clipboard
+        window.addEventListener('paste', (e) => {
+            const item = [...e.clipboardData.items].find((i) => i.type.startsWith('image/'));
+            if (item) loadFile(item.getAsFile());
+        });
+
+        // --- Prompt presets ---
+        document.querySelectorAll('.chip').forEach((chip) => {
+            chip.addEventListener('click', () => {
+                promptEl.value = chip.dataset.p;
+            });
+        });
+
+        // --- Run analysis (streaming) ---
+        runBtn.addEventListener('click', async () => {
+            if (!currentBlob) return;
+            runBtn.disabled = true;
+            output.classList.remove('placeholder');
+            output.innerHTML = '<span class="spinner"></span>Thinking…';
+
+            try {
+                const s = await ensureSession();
+                const question = promptEl.value.trim() || 'Describe this image in detail.';
+
+                const stream = s.promptStreaming([
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', value: question },
+                            { type: 'image', value: currentBlob },
+                        ],
+                    },
+                ]);
+
+                output.textContent = '';
+                for await (const chunk of stream) {
+                    output.textContent += chunk;
+                    output.scrollTop = output.scrollHeight;
+                }
+                if (!output.textContent) output.textContent = '(empty response)';
+            } catch (err) {
+                output.classList.add('placeholder');
+                output.textContent = 'Error: ' + err.message;
+            } finally {
+                updateRunState();
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

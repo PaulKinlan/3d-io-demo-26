@@ -17,13 +17,7 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-async function getAISession() {
-  if (aiSession) return aiSession;
-  if (!self.ai || !self.ai.languageModel) {
-    throw new Error('Prompt API not available');
-  }
-  aiSession = await self.ai.languageModel.create({
-    systemPrompt: `You are a web page generator. You generate realistic, well-structured HTML pages for any URL requested. Follow these rules strictly:
+const SYSTEM_PROMPT = `You are a web page generator. You generate realistic, well-structured HTML pages for any URL requested. Follow these rules strictly:
 
 1. Return ONLY the raw HTML content - no markdown code fences, no explanation, no commentary.
 2. Start your response with <!DOCTYPE html> and end with </html>.
@@ -35,8 +29,31 @@ async function getAISession() {
 8. Match the expected design and branding of the requested site as closely as possible.
 9. Include realistic placeholder text content appropriate for the site.
 10. Make the page responsive and accessible.
-11. Keep the page self-contained - everything inline.`
-  });
+11. Keep the page self-contained - everything inline.`;
+
+async function getAISession() {
+  if (aiSession) return aiSession;
+
+  // Current Chrome exposes the Prompt API as a global `LanguageModel`.
+  // Older builds used `self.ai.languageModel` with a `systemPrompt` option.
+  if (self.LanguageModel) {
+    // If the model still needs downloading, calling create() triggers it.
+    // Declaring expectedOutputs sets the output language (silences Chrome's
+    // "no output language specified" warning) and the monitor logs progress.
+    aiSession = await self.LanguageModel.create({
+      initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
+      expectedOutputs: [{ type: 'text', languages: ['en'] }],
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          console.log(`[site-generator sw] Gemini Nano download ${Math.round(e.loaded * 100)}%`);
+        });
+      },
+    });
+  } else if (self.ai && self.ai.languageModel) {
+    aiSession = await self.ai.languageModel.create({ systemPrompt: SYSTEM_PROMPT });
+  } else {
+    throw new Error('Prompt API not available');
+  }
   return aiSession;
 }
 
@@ -135,10 +152,11 @@ function generateFallbackPage(url, errorMsg) {
     <p>Error: <code>${safeError}</code></p>
     <div class="hint">
       <p><strong>Requirements:</strong></p>
-      <p>This demo requires Chrome with the built-in Prompt API enabled:</p>
-      <p>1. Use Chrome 138+ (or Chrome Canary/Dev)</p>
+      <p>This demo uses Chrome's built-in <code>LanguageModel</code> (Prompt API), powered by on-device Gemini Nano:</p>
+      <p>1. Chrome 138+ on desktop (Windows, macOS, or Linux)</p>
       <p>2. Enable <code>chrome://flags/#prompt-api-for-gemini-nano</code></p>
-      <p>3. Ensure the Gemini Nano model has been downloaded</p>
+      <p>3. Set <code>chrome://flags/#optimization-guide-on-device-model</code> to <em>Enabled BypassPerfRequirement</em></p>
+      <p>4. Relaunch Chrome and let Gemini Nano finish downloading (check <code>chrome://components</code>)</p>
     </div>
   </div>
 </body>

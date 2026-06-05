@@ -2,23 +2,25 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import typegpuPlugin from 'unplugin-typegpu/vite';
 
-const threeProxyPath = fileURLToPath(new URL('./src/lib/three-proxy.js', import.meta.url));
-const threeAddonsProxyPrefix = `${fileURLToPath(new URL('./src/lib/three-addons/', import.meta.url))}/`;
+// three.js — specifically the experimental dev build that ships HTMLTexture — is
+// vendored locally under ./vendor/three so the project runs fully offline. The
+// aliases below resolve the bare `three` / `three/addons/*` specifiers to those
+// local files in both dev and build; Vite/Rollup then serve (dev) or bundle
+// (build) a single shared instance. No CDN / import map required.
+const threeModulePath = fileURLToPath(new URL('./vendor/three/three.module.js', import.meta.url));
+const threeAddonsPrefix = fileURLToPath(new URL('./vendor/three/addons/', import.meta.url));
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   plugins: [typegpuPlugin()],
   resolve: {
-    // Vite dev needs concrete files for import analysis, but production should
-    // keep the bare specifiers so the browser import map remains authoritative.
-    alias: command === 'serve' ? [
-      { find: /^three\/addons\//, replacement: threeAddonsProxyPrefix },
-      { find: /^three$/, replacement: threeProxyPath },
-    ] : undefined,
+    alias: [
+      { find: /^three\/addons\//, replacement: threeAddonsPrefix },
+      { find: /^three$/, replacement: threeModulePath },
+    ],
   },
   build: {
     chunkSizeWarningLimit: 700,
     rollupOptions: {
-      external: ['three', /^three\/addons\//],
       input: {
         main: './index.html',
         flappyBird: './demos/flappy-bird/index.html',
@@ -31,7 +33,8 @@ export default defineConfig(({ command }) => ({
         maltavista: './demos/maltavista/index.html',
         siteGenerator: './demos/site-generator/index.html',
         jelly: './demos/jelly/index.html',
+        analyseImage: './demos/analyse-image/index.html',
       },
     },
   },
-}));
+});

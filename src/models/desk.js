@@ -1,4 +1,4 @@
-import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
+import * as THREE from 'three';
 import { loadTexture } from '../lib/texture-loader.js';
 
 

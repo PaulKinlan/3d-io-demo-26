@@ -1,5 +1,5 @@
 import './style.css';
-import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
+import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { loadTexture } from './lib/texture-loader.js';
 import { buildRoom } from './models/room.js';
@@ -850,46 +850,52 @@ const toggleNightMode = () => {
 };
 
 const setupMCP = () => {
-  if (typeof window === 'undefined' || !window.navigator || !window.navigator.modelContext) {
+  // The Web MCP entry point moved from navigator.modelContext to
+  // document.modelContext; prefer the new location and fall back for older Chrome.
+  const modelContext =
+    (typeof document !== 'undefined' && document.modelContext) ||
+    (typeof window !== 'undefined' && window.navigator && window.navigator.modelContext);
+
+  if (!modelContext) {
     return;
   }
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => { toggleLamp(); },
     name: "toggleDeskLamp",
     description: "Toggles the desk lamp on or off.",
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => { toggleNightMode(); },
     name: "toggleNightMode",
     description: "Toggles the room's night mode ceiling lights on or off.",
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => { focusTarget('monitor'); },
     name: "focusMonitor",
     description: "Zooms the camera in to focus on the computer monitor.",
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => { focusTarget('books'); },
     name: "focusBooks",
     description: "Zooms the camera in to focus on the bookshelf.",
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => { resetCameraFocus(); },
     name: "resetCameraFocus",
     description: "Zooms the camera out to the default room view, resetting any focus.",
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => {
       const chairPart = spinTargets.find(mesh => mesh.userData.spinGroup);
       if (chairPart) {
@@ -906,7 +912,7 @@ const setupMCP = () => {
     inputSchema: { type: "object", properties: {} }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: ({ url }) => {
       const iframe = document.querySelector('.monitor-html-frame');
       if (iframe) {
@@ -941,7 +947,8 @@ const setupMCP = () => {
             "/demos/patching-clock/",
             "/demos/patching-user-data/",
             "/demos/islands-html/",
-            "/demos/jelly/"
+            "/demos/jelly/",
+            "/demos/analyse-image/"
           ],
           description: "The URL of the demo to navigate to."
         }
@@ -950,7 +957,7 @@ const setupMCP = () => {
     }
   });
 
-  window.navigator.modelContext.registerTool({
+  modelContext.registerTool({
     execute: () => {
       if (typeof window.isComputerOn === 'undefined') window.isComputerOn = true;
       window.isComputerOn = !window.isComputerOn;
