@@ -248,23 +248,8 @@ export const buildDesk = ({
     },
   });
 
-  const keyboardMaterial = new THREE.MeshStandardMaterial({
-    map: loadTexture('misc-keyboard', { repeat: [1, 1] }),
-    roughness: 0.82,
-  });
-  const keyboardMaterials = [
-    plasticMaterial,  // right
-    plasticMaterial,  // left
-    keyboardMaterial, // top
-    plasticMaterial,  // bottom
-    plasticMaterial,  // front
-    plasticMaterial,  // back
-  ];
-  const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.08, 0.44), keyboardMaterials);
-  keyboard.position.set(-4.5, 3.3, -3.52);
-  keyboard.castShadow = true;
-  keyboard.receiveShadow = true;
-  deskGroup.add(keyboard);
+  // The keyboard is now built as an interactive 3D model in models/keyboard.js
+  // (individual pressable keycaps, live layout legends, lock LEDs).
 
   const mouseMaterial = new THREE.MeshStandardMaterial({
     color: '#a89888',

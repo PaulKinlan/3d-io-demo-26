@@ -5,6 +5,7 @@ import { loadTexture } from './lib/texture-loader.js';
 import { buildRoom } from './models/room.js';
 import { buildRug } from './models/rug.js';
 import { buildDesk } from './models/desk.js';
+import { buildKeyboard } from './models/keyboard.js';
 import { buildBed } from './models/bed.js';
 import { buildTable } from './models/table.js';
 import { buildShelf } from './models/shelf.js';
@@ -160,6 +161,8 @@ const registerSpinTarget = (meshes) => {
   spinTargets.push(...meshes);
 };
 const spinningGroups = new Set();
+const frameCallbacks = [];
+const registerFrameUpdate = (fn) => { frameCallbacks.push(fn); };
 const tempBox = new THREE.Box3();
 const tempCenter = new THREE.Vector3();
 const tempSize = new THREE.Vector3();
@@ -692,12 +695,14 @@ const context = {
   activityLights,
   networkLights,
   defaultView,
-  registerSpinTarget
+  registerSpinTarget,
+  registerFrameUpdate
 };
 
 buildRoom(context);
 buildRug(context);
 buildDesk(context);
+buildKeyboard(context);
 buildBed(context);
 buildTable(context);
 buildShelf(context);
@@ -811,8 +816,12 @@ const animate = (time = 0) => {
     }
   }
 
+  for (const fn of frameCallbacks) {
+    fn(elapsed);
+  }
+
   updateCameraTransition();
-  
+
   // Scale rotate rotation sensitivity depending on orthographic zoom
   controls.rotateSpeed = 0.6 / Math.max(0.1, camera.zoom);
   controls.update();
