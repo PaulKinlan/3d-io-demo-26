@@ -6,5 +6,13 @@
   },
   "imports": {
     "@std/http": "jsr:@std/http@^1"
+  },
+  "deploy": {
+    "install": "npm ci",
+    "build": "npm run build",
+    "runtime": {
+      "type": "dynamic",
+      "entrypoint": "serve.ts"
+    }
   }
 }
