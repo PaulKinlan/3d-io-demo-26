@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bare boot screen: render without the injected browser chrome. -->
+    <meta name="frame" content="none">
     <title>Ffenestr 97 Boot</title>
     <style>
         body {
@@ -120,7 +122,7 @@
             window.parent.postMessage({ type: 'boot-complete' }, '*');
             // Fallback redirect
             setTimeout(() => {
-                window.location.href = '/demos/browser/?url=/demos/new-tab/';
+                window.location.href = '/demos/new-tab/';
             }, 500);
         }, 3500);
     </script>

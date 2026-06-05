@@ -1,0 +1,238 @@
+/*
+ * Browser-chrome overlay — injected into every demo at build/dev time by the
+ * transformIndexHtml plugin in `demos/_frame/wrap.js`.
+ *
+ * Design: the chrome is a `position: fixed` bar pinned to the top of the demo
+ * document. The demo's own body element and content are left completely
+ * untouched, so each demo keeps the exact layout it has when opened standalone
+ * (centering, 100vh, body backgrounds, body.appendChild, etc.). The only cost is
+ * that the bar overlays the top ~84px of the page — acceptable for a faux browser.
+ *
+ * Every selector is scoped under `#browser-chrome` and uses `bf-` class names so
+ * nothing here can leak into demo content. Do NOT add bare element selectors.
+ */
+
+#browser-chrome {
+  --bf-height: 84px;
+  --bf-bg-toolbar: #f0f0f4;
+  --bf-bg-input: #e2e2e6;
+  --bf-bg-input-focus: #ffffff;
+  --bf-text-primary: #1c1c1e;
+  --bf-text-secondary: #8e8e93;
+  --bf-border-color: rgba(0, 0, 0, 0.1);
+  --bf-accent-color: #0a84ff;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--bf-height);
+  z-index: 2147483646; /* above virtually all demo content */
+  display: flex;
+  flex-direction: column;
+  background-color: #e4e4e9;
+  border-bottom: 1px solid var(--bf-border-color);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+#browser-chrome *,
+#browser-chrome *::before,
+#browser-chrome *::after {
+  box-sizing: border-box;
+}
+
+/* Title / tab bar */
+#browser-chrome .bf-title-bar {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 8px;
+  height: 40px;
+  background: linear-gradient(to bottom, #eff0f4, #e4e4e9);
+  border-bottom: 1px solid var(--bf-border-color);
+  position: relative;
+  flex: 0 0 auto;
+}
+
+#browser-chrome .bf-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#browser-chrome .bf-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+#browser-chrome .bf-dot-close { background-color: #ff5f56; }
+#browser-chrome .bf-dot-min { background-color: #ffbd2e; }
+#browser-chrome .bf-dot-max { background-color: #27c93f; }
+
+#browser-chrome .bf-tabs {
+  display: flex;
+  align-items: flex-end;
+  margin-left: 70px;
+  gap: 4px;
+  overflow: hidden;
+}
+
+#browser-chrome .bf-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  background-color: #ffffff;
+  color: var(--bf-text-primary);
+  font-size: 13px;
+  min-width: 120px;
+  max-width: 220px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.02) inset;
+}
+
+#browser-chrome .bf-favicon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+#browser-chrome .bf-tab-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+
+/* Toolbar */
+#browser-chrome .bf-toolbar {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  background-color: var(--bf-bg-toolbar);
+  gap: 12px;
+  flex: 1 1 auto;
+}
+
+#browser-chrome .bf-nav-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+#browser-chrome .bf-icon-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  padding: 0;
+}
+
+#browser-chrome .bf-icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+#browser-chrome .bf-icon-button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Address bar */
+#browser-chrome .bf-address-bar {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  background-color: var(--bf-bg-input);
+  border-radius: 8px;
+  height: 30px;
+  padding: 0 12px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid transparent;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  gap: 8px;
+}
+
+#browser-chrome .bf-address-bar:focus-within {
+  background-color: var(--bf-bg-input-focus);
+  border-color: var(--bf-accent-color);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+}
+
+#browser-chrome .bf-info-icon {
+  display: flex;
+  align-items: center;
+  color: var(--bf-text-secondary);
+}
+
+#browser-chrome .bf-info-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+#browser-chrome .bf-address-text {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  cursor: text;
+  overflow: hidden;
+}
+
+#browser-chrome .bf-url-prefix {
+  font-size: 13px;
+  color: var(--bf-text-secondary);
+  white-space: pre;
+}
+
+#browser-chrome .bf-url-input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--bf-text-primary);
+  font-family: inherit;
+  padding: 0;
+}
+
+#browser-chrome .bf-url-input::placeholder {
+  color: #a0a0a5;
+}
+
+#browser-chrome .bf-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#browser-chrome .bf-profile {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}

@@ -49,7 +49,7 @@ app.innerHTML = `
         <div class="monitor-html-subtree">
           <iframe
             class="monitor-html-frame"
-            src="/demos/browser/index.html"
+            src="/demos/new-tab/index.html"
             title="Monitor demos"
             loading="eager"
             allow="display-capture"
@@ -916,13 +916,9 @@ const setupMCP = () => {
     execute: ({ url }) => {
       const iframe = document.querySelector('.monitor-html-frame');
       if (iframe) {
-        // Wrap the URL in the browser wrapper to ensure the bar is shown,
-        // unless navigating to the browser wrapper itself.
-        if (url === "/demos/browser/") {
-          iframe.src = url;
-        } else {
-          iframe.src = `/demos/browser/?url=${encodeURIComponent(url)}`;
-        }
+        // Every demo now carries its own browser chrome (injected at build/dev
+        // time by demos/_frame/wrap.js), so navigate to it directly.
+        iframe.src = url;
       }
     },
     name: "navigateComputerScreen",
@@ -1014,13 +1010,8 @@ window.addEventListener('message', (e) => {
     const url = e.data.url;
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      // Wrap the URL in the browser wrapper to ensure the bar is shown,
-      // unless navigating to the browser wrapper itself.
-      if (url === "/demos/browser/") {
-        iframe.src = url;
-      } else {
-        iframe.src = `/demos/browser/?url=${encodeURIComponent(url)}`;
-      }
+      // Demos carry their own injected chrome now — navigate directly.
+      iframe.src = url;
     }
   }
 });

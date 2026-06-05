@@ -1,6 +1,18 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import typegpuPlugin from 'unplugin-typegpu/vite';
+import { browserChrome } from './demos/_frame/wrap.js';
+
+// Auto-discover every `demos/<name>/index.html` as a build entry so adding a
+// demo never requires editing this file. The main 3D app stays the `main` entry.
+const demosDir = fileURLToPath(new URL('./demos/', import.meta.url));
+const demoInputs = Object.fromEntries(
+  readdirSync(demosDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && !d.name.startsWith('_'))
+    .filter((d) => existsSync(`${demosDir}${d.name}/index.html`))
+    .map((d) => [`demo-${d.name}`, `./demos/${d.name}/index.html`]),
+);
 
 // three.js — specifically the experimental dev build that ships HTMLTexture — is
 // vendored locally under ./vendor/three so the project runs fully offline. The
@@ -11,7 +23,7 @@ const threeModulePath = fileURLToPath(new URL('./vendor/three/three.module.js', 
 const threeAddonsPrefix = fileURLToPath(new URL('./vendor/three/addons/', import.meta.url));
 
 export default defineConfig({
-  plugins: [typegpuPlugin()],
+  plugins: [typegpuPlugin(), browserChrome()],
   resolve: {
     alias: [
       { find: /^three\/addons\//, replacement: threeAddonsPrefix },
@@ -23,17 +35,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        flappyBird: './demos/flappy-bird/index.html',
-        browser: './demos/browser/index.html',
-        newTab: './demos/new-tab/index.html',
-        slideDeck: './demos/slide-deck/index.html',
-        wahoo: './demos/wahoo/index.html',
-        meoTowns: './demos/meo-towns/index.html',
-        wahooWail: './demos/wahoo-wail/index.html',
-        maltavista: './demos/maltavista/index.html',
-        siteGenerator: './demos/site-generator/index.html',
-        jelly: './demos/jelly/index.html',
-        analyseImage: './demos/analyse-image/index.html',
+        ...demoInputs,
       },
     },
   },

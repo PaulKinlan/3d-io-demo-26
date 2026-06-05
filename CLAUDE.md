@@ -78,14 +78,44 @@ Workflow:
 
 ## Managing Demos
 
-New demos that run inside the 3D monitor should be managed as follows:
+The browser chrome (tab bar + toolbar + address bar) is **injected into every
+demo automatically** at build *and* dev time by the Vite plugin in
+`demos/_frame/wrap.js` (see "Browser chrome" below). There is **no wrapper page
+and no inner iframe** — each demo is a single document that carries its own
+chrome. Adding a demo is therefore mostly "drop a folder in":
 
 1. Create a new directory for the demo in `demos/` (e.g., `demos/my-new-demo/`)
-2. Make sure the demo works standalone as a standard HTML page.
-3. Register the demo in the Vite config (`vite.config.js`) under `build.rollupOptions.input` so it's built properly.
-4. Add a link to the new demo inside the New Tab Page (NTP) located at `demos/new-tab/index.html`.
-5. **Add the demo URL to the Web MCP `navigateComputerScreen` tool** in `src/main.js` — append the new path (e.g., `"/demos/my-new-demo/"`) to the `enum` array in the `navigateComputerScreen` tool's `inputSchema`. This lets Claude navigate to the demo via the Web MCP API.
-6. **Always keep the `browser` demo as the default on page load** in `src/main.js` (`src="/demos/browser/"`). The browser demo acts as the wrapper that initially loads the NTP.
+   with an `index.html`. It is auto-discovered as a build entry and gets chrome
+   injected automatically — **no `vite.config.js` edit needed**.
+2. Make sure the demo works standalone as a standard HTML page. It still does:
+   the chrome is a fixed overlay bar, so your `<body>` and content are untouched.
+3. **Add the demo URL to the Web MCP `navigateComputerScreen` tool** in
+   `src/main.js` — append the new path (e.g., `"/demos/my-new-demo/"`) to the
+   `enum` array. This is the one manual step, and it only affects whether *Claude*
+   can navigate there via Web MCP; the chrome's own address bar can reach any path.
+4. (Optional) Add a shortcut tile inside the New Tab Page (`demos/new-tab/index.html`).
+
+The default page shown on the monitor is `/demos/new-tab/` (a normal chromed
+demo). To render a demo **without** chrome (e.g. a boot/splash screen), add
+`<meta name="frame" content="none">` to its `<head>`.
+
+## Browser chrome (injected, no iframe)
+
+`demos/_frame/` holds the shared chrome that `wrap.js` merges into each demo via
+Vite's `transformIndexHtml` hook (runs identically in dev via `server.js` and in
+the production build):
+
+- `frame.css` — chrome styling, all scoped under `#browser-chrome` / `.bf-*` so
+  it cannot leak into demo content. Injected as the last `<style>` in `<head>`.
+- `frame.html` — the chrome bar markup, injected as the first child of `<body>`.
+- `frame.js` — chrome behaviour. Navigation is **real page navigation** (the
+  address bar / Home / Back / Forward drive the actual document), since every
+  destination demo carries its own chrome. No `postMessage` proxying.
+- `wrap.js` — the plugin. Wraps everything under `demos/` except the main app and
+  any page with `<meta name="frame" content="none">`.
+
+`demos/browser/` is now just a back-compat redirect (it forwards a legacy
+`?url=/demos/x/` to that demo, which renders its own chrome).
 
 ## Web MCP Integration
 
@@ -99,9 +129,9 @@ The project exposes interactive controls to Claude via the browser-native Web MC
 | `focusBooks` | Zoom camera to focus on the bookshelf |
 | `resetCameraFocus` | Reset camera to default room view |
 | `spinChair` | Spin the desk chair around |
-| `navigateComputerScreen` | Navigate the monitor iframe to a demo (URL must be in the enum list) |
+| `navigateComputerScreen` | Navigate the monitor iframe to a demo (URL must be in the enum list). Sets `iframe.src = url` directly — the demo carries its own injected chrome, so there is no `?url=` wrapping anymore. |
 
-When adding a new demo, the `navigateComputerScreen` enum must be updated (step 5 above) or Claude won't be able to navigate to it.
+When adding a new demo, the `navigateComputerScreen` enum must be updated (step 3 above) or Claude won't be able to navigate to it.
 
 ## Monitor rendering (html-in-canvas)
 
@@ -116,7 +146,7 @@ How it works:
 - `THREE.HTMLTexture` **only repaints** the texture (driven each frame by the canvas `onpaint`/`requestPaint` hooks in `animate()`). It does **not** forward input events and does **not** manage transforms.
 - **Interaction works through transform-sync, not event forwarding.** `updateMonitorTransform()` keeps the subtree's CSS `transform` (`matrix3d`) aligned with where the screen is drawn in 3D, so the live DOM physically sits at the drawn location. Native browser hit-testing then routes **clicks, text selection, and wheel/scroll directly into the DOM** (the WICG-recommended model).
 - Therefore **`.monitor-html-subtree` must stay `pointer-events: auto`**. Do **not** set it to `none`, and do **not** raycast on the canvas to forward synthesized click/scroll events via `postMessage` — that fights the real interaction model and breaks it.
-- Monitor content nesting: `canvas[layoutsubtree]` → `.monitor-html-subtree` → `.monitor-html-frame` (browser-chrome wrapper, `/demos/browser/`) → `#browser-view` (the demo iframe).
+- Monitor content nesting: `canvas[layoutsubtree]` → `.monitor-html-subtree` → `.monitor-html-frame` (a **single** iframe loading the demo directly, default `/demos/new-tab/`). The demo's browser chrome is injected into that same document (see "Browser chrome"), so there is **no second/inner iframe** — navigation swaps the one iframe's document.
 
 Requirements & gotchas:
 
