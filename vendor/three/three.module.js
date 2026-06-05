@@ -11017,14 +11017,6 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 	const _htmlTextures = new Set();
 	let _canvas;
 
-	// Cached html-in-canvas texElementImage2D call strategy. The API signature
-	// differs across Chrome channels ( Stable vs Canary ): the current form is
-	// 3-arg with a sized internal format ( target, RGBA8, element ), while older
-	// builds use a texImage2D-style 6-arg form with the unsized RGBA enum. We
-	// probe the variants once ( see uploadHTMLTexture ) and cache the one that
-	// works so we don't throw/catch on every frame. null = not yet detected.
-	let _htmlTexImageMode = null;
-
 	const _sources = new WeakMap(); // maps WebglTexture objects to instances of Source
 
 	// cordova iOS (as of 5.0) still uses UIWebView, which provides OffscreenCanvas,
@@ -12307,57 +12299,26 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 					}
 
 					const level = 0;
-					const internalFormat = _gl.RGBA;
 					const srcFormat = _gl.RGBA;
 					const srcType = _gl.UNSIGNED_BYTE;
 
-					// The experimental html-in-canvas texElementImage2D API has two
-					// signatures in the wild across Chrome channels ( Stable vs Canary ):
-					//   'modern' — 3-arg, sized internal format ( target, RGBA8, element ),
-					//              per the WICG reference demo.
-					//   'legacy' — 6-arg, texImage2D-style with the unsized RGBA enum.
-					// We probe both ( newest first ) on the first successful upload and
-					// cache the winner in _htmlTexImageMode so we don't throw/catch every
-					// frame. A wrong signature throws a TypeError ( advance to the next
-					// variant ); the transient pre-first-paint "No cached paint record"
-					// throws a non-TypeError and is rethrown so the caller can suppress it.
-					const callModern = () => _gl.texElementImage2D( _gl.TEXTURE_2D, _gl.RGBA8, image );
-					const callLegacy = () => _gl.texElementImage2D( _gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image );
+					// The experimental html-in-canvas texElementImage2D API ships with
+					// two different signatures across Chrome channels:
+					//   3-arg ( target, internalformat, element )                 — Canary
+					//   6-arg ( target, level, internalformat, format, type, element ) — Stable
+					// Both take the SIZED RGBA8 internal format ( per the WICG reference
+					// demo ). We select the form by the method's declared arity, so we
+					// never throw to probe the signature. That matters: the transient
+					// pre-first-paint "No cached paint record" error must be allowed to
+					// bubble up to the caller ( animate's try/catch ) for suppression,
+					// not be caught/masked by signature-detection logic here.
+					if ( _gl.texElementImage2D.length >= 6 ) {
 
-					if ( _htmlTexImageMode === 'modern' ) {
-
-						callModern();
-
-					} else if ( _htmlTexImageMode === 'legacy' ) {
-
-						callLegacy();
+						_gl.texElementImage2D( _gl.TEXTURE_2D, level, _gl.RGBA8, srcFormat, srcType, image );
 
 					} else {
 
-						try {
-
-							callModern();
-							_htmlTexImageMode = 'modern';
-
-						} catch ( err ) {
-
-							if ( ! ( err instanceof TypeError ) ) throw err;
-
-							try {
-
-								callLegacy();
-								_htmlTexImageMode = 'legacy';
-
-							} catch ( legacyErr ) {
-
-								// Both signatures rejected the call. Surface the modern-API
-								// error ( the meaningful one ) rather than the legacy
-								// fallback's misleading positional-argument error.
-								throw err;
-
-							}
-
-						}
+						_gl.texElementImage2D( _gl.TEXTURE_2D, _gl.RGBA8, image );
 
 					}
 					_gl.texParameteri( _gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR );
