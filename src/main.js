@@ -53,7 +53,7 @@ app.innerHTML = `
             src="/demos/new-tab/index.html"
             title="Monitor demos"
             loading="eager"
-            allow="display-capture"
+            allow="display-capture; publickey-credentials-get *; publickey-credentials-create *"
           ></iframe>
         </div>
     </section>
