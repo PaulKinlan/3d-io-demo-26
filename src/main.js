@@ -594,6 +594,7 @@ window.addEventListener('keydown', (e) => {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
       iframe.src = '/demos/berlin-io-connect/index.html';
+      iframe.focus();
     }
   }
 
