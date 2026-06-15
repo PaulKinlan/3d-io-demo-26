@@ -598,6 +598,14 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
+  if (e.key.toLowerCase() === 'h') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/new-tab/index.html';
+      iframe.focus();
+    }
+  }
+
   if (e.key.toLowerCase() === 'c') {
     if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
       if (typeof resetCameraFocus === 'function') resetCameraFocus();
