@@ -33,18 +33,16 @@ body, html {
   height: 100%;
   padding: 40px 60px;
   box-sizing: border-box;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  opacity: 0;
-  transition: opacity 0.4s ease-in-out;
   pointer-events: none;
 }
 
 .slide.active {
-  opacity: 1;
+  display: flex;
   pointer-events: auto;
 }
 
