@@ -1,3 +1,5 @@
+import markdown from './slides.md?raw';
+
 let currentSlide = 0;
 let slidesList = [];
 let hashNavigation = false; // true when navigating via popstate/initial load
@@ -10,14 +12,8 @@ function getSlideIndexFromHash() {
   return 0;
 }
 
-async function loadSlides() {
+function loadSlides() {
   try {
-    const response = await fetch('./slides.md');
-    if (!response.ok) {
-      throw new Error("Failed to load slides.md");
-    }
-    const markdown = await response.text();
-    
     // Split the markdown using popular markdown slide separators like --- or ***
     const rawSlides = markdown.split(/\n---\n|\n\*\*\*\n/);
     

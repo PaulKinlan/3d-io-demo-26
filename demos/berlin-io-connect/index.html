@@ -144,7 +144,10 @@
       <a class="slide-link" href="https://aifoc.us/model-gap" target="_blank">View on aifoc.us</a>
     </div>
 
-
+    <div class="slide image-slide">
+      <img src="install-mwg.png" alt="Install MWG">
+      <a class="slide-link" href="https://goo.gle/mwg" target="_blank">goo.gle/mwg</a>
+    </div>
   </div>
 
   <script>
@@ -165,6 +168,15 @@
         showSlide(current + 1);
       } else if (e.key === 'ArrowLeft') {
         showSlide(current - 1);
+      } else if (e.key >= '1' && e.key <= '9') {
+        const targetIndex = parseInt(e.key, 10) - 1;
+        if (targetIndex < slides.length) {
+          showSlide(targetIndex);
+        }
+      } else if (e.key === '0') {
+        if (9 < slides.length) {
+          showSlide(9);
+        }
       }
     });
   </script>
