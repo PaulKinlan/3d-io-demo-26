@@ -28,14 +28,14 @@
 
     <!-- Clean arrowhead -->
     <marker id="arrow" viewBox="0 0 14 14" refX="10" refY="7" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M 2 2 L 12 7 L 2 12 Q 4 7 2 2 Z" fill="#A0AEC0" />
+      <path d="M 2 2 L 12 7 L 2 12 Q 4 7 2 2 Z" fill="#a0aec0" />
     </marker>
   </defs>
 
   <rect width="800" height="600" fill="#ffffff" />
 
   <!-- Smooth arcs -->
-  <g stroke="#A0AEC0" stroke-width="6" fill="none" stroke-linecap="round" filter="url(#arrow-shadow)">
+  <g stroke="#a0aec0" stroke-width="6" fill="none" stroke-linecap="round" filter="url(#arrow-shadow)">
     <path d="M 474.92 114.56 A 200 200 0 0 1 585.44 225.08" marker-end="url(#arrow)" />
     <path d="M 585.44 374.92 A 200 200 0 0 1 474.92 485.44" marker-end="url(#arrow)" />
     <path d="M 325.08 485.44 A 200 200 0 0 1 214.56 374.92" marker-end="url(#arrow)" />
