@@ -1,4 +1,5 @@
 import markdown from './slides.md?raw';
+import { marked } from 'marked';
 
 let currentSlide = 0;
 let slidesList = [];
@@ -42,7 +43,7 @@ function loadSlides() {
     hashNavigation = false;
     history.replaceState({ slide: currentSlide }, '', `#slide-${currentSlide + 1}`);
   } catch (err) {
-    document.getElementById('deck').innerHTML = `<h1 style="color:red; text-align:center;">Error loading slides.md</h1>`;
+    document.getElementById('deck').innerHTML = `<h1 style="color:red; text-align:center;">Error loading slides.md: ${err.message}</h1>`;
   }
 }
 

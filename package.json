@@ -11,8 +11,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "typegpu": "^0.11.3",
     "@typegpu/sdf": "^0.11.1",
+    "marked": "^18.0.5",
+    "typegpu": "^0.11.3",
     "wgpu-matrix": "^3.4.2"
   },
   "devDependencies": {
