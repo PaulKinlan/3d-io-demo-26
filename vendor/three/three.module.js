@@ -12307,19 +12307,21 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 					// two different signatures across Chrome channels:
 					//   3-arg ( target, internalformat, element )                 — Canary
 					//   6-arg ( target, level, internalformat, format, type, element ) — Stable
-					// Both take the SIZED RGBA8 internal format ( per the WICG reference
-					// demo ). We select the form by the method's declared arity, so we
+					// Both take a SIZED internal format. We use SRGB8_ALPHA8 ( not RGBA8 )
+					// so the browser-painted sRGB pixels get decoded to linear on sample —
+					// a linear RGBA8 format leaves the HTML looking washed out / wrong gamma.
+					// We select the form by the method's declared arity, so we
 					// never throw to probe the signature. That matters: the transient
 					// pre-first-paint "No cached paint record" error must be allowed to
 					// bubble up to the caller ( animate's try/catch ) for suppression,
 					// not be caught/masked by signature-detection logic here.
 					if ( _gl.texElementImage2D.length >= 6 ) {
 
-						_gl.texElementImage2D( _gl.TEXTURE_2D, level, _gl.RGBA8, srcFormat, srcType, image );
+						_gl.texElementImage2D( _gl.TEXTURE_2D, level, _gl.SRGB8_ALPHA8, srcFormat, srcType, image );
 
 					} else {
 
-						_gl.texElementImage2D( _gl.TEXTURE_2D, _gl.RGBA8, image );
+						_gl.texElementImage2D( _gl.TEXTURE_2D, _gl.SRGB8_ALPHA8, image );
 
 					}
 					_gl.texParameteri( _gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR );
