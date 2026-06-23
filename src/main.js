@@ -17,7 +17,7 @@ const monitorDebugEnabled = new URLSearchParams(window.location.search).has('mon
 
 app.innerHTML = `
   <main class="scene-shell">
-    <section class="hud">
+    <section class="hud hidden">
       <p class="eyebrow">Rough Direction</p>
       <h1>Childhood Bedroom</h1>
       <p>
@@ -32,7 +32,7 @@ app.innerHTML = `
         <span>Press <kbd>?</kbd> for shortcuts</span>
       </div>
     </section>
-    <aside class="caption">
+    <aside class="caption hidden">
       The monitor renders a same-origin iframe to a hidden canvas and maps that live result
       into the 3D screen, with a fallback HUD when the experimental html-in-canvas APIs are unavailable.
     </aside>
