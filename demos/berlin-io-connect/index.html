@@ -118,6 +118,92 @@
     .nav-right {
       right: 0;
     }
+
+    /* Custom 96% Slide */
+    .custom-slide {
+      background: #fff;
+      padding: 40px !important;
+      box-sizing: border-box;
+    }
+
+    .big-number {
+      font-size: 220px;
+      font-weight: 800;
+      color: #000;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .active .big-number::before {
+      animation:
+        fade-in-rainbow 0.5s 1s ease forwards,
+        slide-rainbow 2s 1s linear infinite;
+    }
+
+    .big-number::before {
+      content: "96%";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      color: transparent;
+      background: linear-gradient(to right in oklch longer hue, oklch(65% 0.3 0), oklch(65% 0.3 0));
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: blur(15px);
+      background-size: 200% 100%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes fade-in-rainbow {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-rainbow {
+      from {
+        background-position: 0% center;
+      }
+
+      to {
+        background-position: -200% center;
+      }
+    }
+
+    .subtitle-text {
+      font-size: 28px;
+      font-weight: 400;
+      color: #333;
+      max-width: 800px;
+      text-align: center;
+      margin-top: 80px;
+      line-height: 1.5;
+      opacity: 0;
+    }
+
+    .active .subtitle-text {
+      animation: fade-in 1s 2.5s ease forwards;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
@@ -150,11 +236,13 @@
       <img src="install-mwg.png" alt="Install MWG">
       <a class="slide-link" href="https://goo.gle/mwg" target="_blank">goo.gle/mwg</a>
     </div>
-    <div class="slide image-slide">
-      <img src="modernize.gif" alt="Modernize MWG" style="margin: 1em;">
+    <div class="slide custom-slide">
+      <img src="modernize.gif" alt="Modernize MWG" style="margin: 1em; width: 100%; border-radius: 1em;
+    box-shadow: black 0 0 1em;">
     </div>
-    <div class="slide image-slide">
-      <video autoplay loop muted playsinline style="margin: 1em; width: 100%">
+    <div class="slide custom-slide">
+      <video autoplay loop muted playsinline style="margin: 1em; width: 100%; border-radius: 1em;
+    box-shadow: black 0 0 1em;">
         <source src="gemini-cli-2.mp4" type="video/mp4">
       </video>
     </div>
@@ -162,13 +250,12 @@
       <img src="closed-loop.svg" alt="Closed Loop Debugging Flowchart"
         style="width: 80%; max-height: 80vh; object-fit: contain;">
     </div>
-    <div class="slide image-slide">
-      <h2
-        style="position: absolute; max-width: 80%; text-align: center; font-size: 28px; font-weight: 500; margin: 0; line-height: 1.4;">
-        TODO: Our partners at LY Corporation deployed this closed-loop testing framework and cut their manual
-        performance
-        auditing workloads by at least 96%.
-      </h2>
+    <div class="slide custom-slide">
+      <div class="big-number">96%</div>
+      <div class="subtitle-text">
+        LY Corporation deployed this closed-loop testing framework and cut their manual performance auditing workloads
+        by at least 96%.
+      </div>
     </div>
 
   </div>
