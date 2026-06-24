@@ -1,297 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="frame" content="none">
-  <title>CSS Demos Showcase</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSS Shape Outside Demo</title>
   <style>
-    /* Premium aesthetics */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
     :root {
-      --bg-gradient: radial-gradient(circle at top right, #312e81 0%, #0f172a 50%, #020617 100%);
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #8b5cf6;
-      --accent-secondary: #ec4899;
+      --bg-paper: #f8fafc;
+      --text-charcoal: #334155;
+      --accent-grad: linear-gradient(135deg, #a78bfa, #ec4899);
     }
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    html, body {
-      background-color: #0f172a;
-      background-image: var(--bg-gradient);
-      color: var(--text-main);
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-paper);
+      color: var(--text-charcoal);
+      margin: 0;
+      padding: 3rem;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      font-family: 'Outfit', system-ui, sans-serif;
+      overflow-y: auto;
     }
 
-    header {
-      padding: 2rem;
-      text-align: center;
-      animation: slide-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    header h1 {
+    h1 {
       font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(to right, #a78bfa, #ec4899);
+      margin-top: 0;
+      background: var(--accent-grad);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.02em;
     }
-    
-    header p {
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-      font-weight: 300;
+
+    .demo-area {
+      font-size: 1.25rem;
+      line-height: 1.8;
+      text-align: justify;
     }
 
-    .container {
-      display: flex;
-      flex: 1;
-      gap: 2rem;
-      padding: 0 2rem 2rem 2rem;
-      height: calc(100vh - 120px);
-      animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
+    @keyframes morph-radius {
+      0% {
+        shape-outside: polygon(round 0px, 0% 0%, 100% 0%, 30% 16.6%, 100% 33.3%, 30% 50%, 100% 66.6%, 30% 83.3%, 100% 100%, 0% 100%);
+        clip-path: polygon(round 0px, 0% 0%, 100% 0%, 30% 16.6%, 100% 33.3%, 30% 50%, 100% 66.6%, 30% 83.3%, 100% 100%, 0% 100%);
+      }
+      100% {
+        shape-outside: polygon(round 60px, 0% 0%, 100% 0%, 30% 16.6%, 100% 33.3%, 30% 50%, 100% 66.6%, 30% 83.3%, 100% 100%, 0% 100%);
+        clip-path: polygon(round 60px, 0% 0%, 100% 0%, 30% 16.6%, 100% 33.3%, 30% 50%, 100% 66.6%, 30% 83.3%, 100% 100%, 0% 100%);
+      }
     }
 
-    .sidebar {
-      width: 340px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-      overflow-y: auto;
-      padding-right: 0.5rem;
+    .float-shape {
+      float: left;
+      width: 280px;
+      height: 480px;
+      margin-right: 25px;
+      margin-bottom: 15px;
+      background: var(--accent-grad);
+      opacity: 0.85;
+      
+      animation: morph-radius 2s infinite alternate ease-in-out;
     }
-
-    .demo-card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 1.25rem;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .demo-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      transition: left 0.6s ease;
-    }
-
-    .demo-card:hover::before {
-      left: 100%;
-    }
-
-    .demo-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(167, 139, 250, 0.5);
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
-    }
-
-    .demo-card.active {
-      border-color: var(--accent-secondary);
-      background: rgba(236, 72, 153, 0.05);
-      box-shadow: 0 0 30px rgba(236, 72, 153, 0.15), inset 0 0 20px rgba(236, 72, 153, 0.05);
-    }
-
-    .demo-card.active h2 {
-      color: #fbcfe8;
-    }
-
-    .demo-card h2 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      transition: color 0.3s;
-    }
-
-    .demo-card p {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-      font-weight: 300;
-    }
-
-    .main-view {
-      flex: 1;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 1.5rem;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0,0,0,0.3);
-    }
-
-    .main-header {
-      padding: 1.25rem 2rem;
-      border-bottom: 1px solid var(--glass-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-    }
-
-    .main-header h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #e2e8f0;
-    }
-
-    .badge {
-      background: rgba(255,255,255,0.1);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #cbd5e1;
-      border: 1px solid rgba(255,255,255,0.1);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .iframe-wrapper {
-      flex: 1;
-      position: relative;
-      background: #f8fafc; /* Lighter background for the actual demos */
-    }
-
-    iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Custom scrollbar for sidebar */
-    .sidebar::-webkit-scrollbar { width: 6px; }
-    .sidebar::-webkit-scrollbar-track { background: transparent; }
-    .sidebar::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
-      border-radius: 3px;
-    }
-    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
-
-    @keyframes slide-down {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
   </style>
 </head>
 <body>
-  <header>
-    <h1>Modern CSS Showcase</h1>
-    <p>Discover the latest features in web styling</p>
-  </header>
-
-  <div class="container">
-    <div class="sidebar" id="sidebar">
-      <!-- Cards generated by JS -->
-    </div>
-
-    <div class="main-view">
-      <div class="main-header">
-        <h2 id="current-title">Select a demo</h2>
-        <span id="current-badge" class="badge"></span>
-      </div>
-      <div class="iframe-wrapper">
-        <iframe id="demo-iframe" src="about:blank"></iframe>
-      </div>
-    </div>
+  <h1>Animated CSS shape-outside</h1>
+  <div class="demo-area">
+    <div class="float-shape"></div>
+    <p>
+      Notice how the text flows around this shape. The boundary of the shape is defined using a single CSS <code>polygon()</code> declaration with a new <code>round</code> parameter. 
+    </p>
+    <p>
+      As the corner radius dynamically animates from 0px (sharp zigzag) to 60px (smooth waves), the <code>shape-outside</code> property interpolates seamlessly. The text automatically re-flows in real-time, hugging the contours of the organic shape.
+    </p>
+    <p>
+      Previously, achieving a rounded exclusion zone required complex SVG definitions with <code>url(#clip)</code> references, which were incredibly tedious to build and notoriously difficult to animate via CSS. Now, a simple <code>polygon(round ...)</code> does the trick natively!
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+    <p>
+      Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi. Donec fermentum. Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis, neque. Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada diam lacus eget erat. Cras mollis scelerisque nunc. Nullam arcu. Aliquam consequat. Curabitur augue lorem, dapibus quis, laoreet et, pretium ac, nisi. Aenean magna nisl, mollis quis, molestie eu, feugiat in, nisi. Aenean diam.
+    </p>
   </div>
-
-  <script>
-    const demos = [
-      {
-        id: 'shape-palette',
-        title: 'Shape Palette',
-        desc: 'Interactive demonstration of CSS border-shape polygon() properties.',
-        badge: 'Chrome 147',
-        url: 'examples/shape-palette.html'
-      },
-      {
-        id: 'animated-clip-path',
-        title: 'Animated Clip Path',
-        desc: 'Optional rounding parameters for polygon() dynamically animated.',
-        badge: 'Chrome 150',
-        url: 'examples/animated-clip-path.html'
-      },
-      {
-        id: 'scroll-state',
-        title: 'Scroll State',
-        desc: 'Support for @scroll-state based container query styling.',
-        badge: 'Chrome 144',
-        url: 'examples/scroll-state-scrolled-support.html'
-      }
-    ];
-
-    const sidebar = document.getElementById('sidebar');
-    const iframe = document.getElementById('demo-iframe');
-    const currentTitle = document.getElementById('current-title');
-    const currentBadge = document.getElementById('current-badge');
-    let activeId = null;
-
-    function renderSidebar() {
-      sidebar.innerHTML = '';
-      demos.forEach(demo => {
-        const card = document.createElement('div');
-        card.className = `demo-card ${activeId === demo.id ? 'active' : ''}`;
-        card.onclick = () => selectDemo(demo);
-        
-        card.innerHTML = `
-          <h2>${demo.title}</h2>
-          <p>${demo.desc}</p>
-        `;
-        sidebar.appendChild(card);
-      });
-    }
-
-    function selectDemo(demo) {
-      if (activeId === demo.id) return;
-      activeId = demo.id;
-      
-      updateView(demo);
-      renderSidebar();
-    }
-
-    function updateView(demo) {
-      currentTitle.textContent = demo.title;
-      currentBadge.textContent = demo.badge;
-      iframe.src = demo.url;
-    }
-
-    // Initialize the first demo
-    selectDemo(demos[0]);
-  </script>
 </body>
 </html>
