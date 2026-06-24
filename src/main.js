@@ -606,6 +606,14 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
+  if (e.key.toLowerCase() === 'x') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/celebration/index.html';
+      iframe.focus();
+    }
+  }
+
   if (e.key.toLowerCase() === 'c') {
     if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
       if (typeof resetCameraFocus === 'function') resetCameraFocus();
@@ -975,7 +983,8 @@ const setupMCP = () => {
             "/demos/nested-view-transition/",
             "/demos/css-demos/",
             "/demos/email-verification-protocol/",
-            "/demos/immediate-ui-mode/"
+            "/demos/immediate-ui-mode/",
+            "/demos/celebration/"
           ],
           description: "The URL of the demo to navigate to."
         }

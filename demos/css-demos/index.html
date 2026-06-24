@@ -3,301 +3,284 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS Demos Showcase</title>
+  <meta name="frame" content="none">
+  <title>CSS Superpowers</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* Premium aesthetics */
     :root {
-      --bg-gradient: radial-gradient(circle at top right, #312e81 0%, #0f172a 50%, #020617 100%);
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --text-main: #f8fafc;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #ec4899;
+      --accent-hover: #f472b6;
+      --text: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #8b5cf6;
-      --accent-secondary: #ec4899;
     }
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    html, body {
-      background-color: #0f172a;
-      background-image: var(--bg-gradient);
-      color: var(--text-main);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      font-family: 'Outfit', system-ui, sans-serif;
+    html {
+      /* Define scroll state container on the document scroller */
+      container-type: scroll-state;
+      container-name: document-scroller;
+      background: var(--bg);
     }
 
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text);
+      min-height: 200vh; /* Ensure there is scrolling */
+    }
+
+    /* --- 1. @scroll-state aware header --- */
     header {
-      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.4s ease;
       text-align: center;
-      animation: slide-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    header h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(to right, #a78bfa, #ec4899);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.02em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      view-transition-name: header-bar;
     }
     
-    header p {
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-      font-weight: 300;
+    header h1 { margin: 0; font-size: 2.2rem; color: #a78bfa; transition: color 0.4s; }
+    header p { margin: 0.5rem 0 0 0; color: var(--text-muted); font-size: 1.1rem; }
+
+    @container document-scroller scroll-state(scrolled: top) {
+       header {
+         background: rgba(236, 72, 153, 0.15);
+         border-bottom: 1px solid rgba(236, 72, 153, 0.3);
+         box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+         padding: 1rem;
+       }
+       header h1 {
+         color: var(--accent);
+         font-size: 1.8rem;
+       }
     }
 
-    .container {
-      display: flex;
-      flex: 1;
+    main {
+      padding: 4rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 2rem;
-      padding: 0 2rem 2rem 2rem;
-      height: calc(100vh - 120px);
-      animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .sidebar {
-      width: 340px;
+    /* --- Normal Card Layout --- */
+    .card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-
-    .demo-card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 1.25rem;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .demo-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      transition: left 0.6s ease;
-    }
-
-    .demo-card:hover::before {
-      left: 100%;
-    }
-
-    .demo-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(167, 139, 250, 0.5);
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
-    }
-
-    .demo-card.active {
-      border-color: var(--accent-secondary);
-      background: rgba(236, 72, 153, 0.05);
-      box-shadow: 0 0 30px rgba(236, 72, 153, 0.15), inset 0 0 20px rgba(236, 72, 153, 0.05);
-    }
-
-    .demo-card.active h2 {
-      color: #fbcfe8;
-    }
-
-    .demo-card h2 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      transition: color 0.3s;
-    }
-
-    .demo-card p {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-      font-weight: 300;
-    }
-
-    .main-view {
-      flex: 1;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 1.5rem;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0,0,0,0.3);
-    }
-
-    .main-header {
-      padding: 1.25rem 2rem;
-      border-bottom: 1px solid var(--glass-border);
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-    }
-
-    .main-header h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #e2e8f0;
-    }
-
-    .badge {
-      background: rgba(255,255,255,0.1);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #cbd5e1;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
       border: 1px solid rgba(255,255,255,0.1);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-color: rgba(255,255,255,0.2);
     }
 
-    .iframe-wrapper {
-      flex: 1;
-      position: relative;
-      background: #f8fafc; /* Lighter background for the actual demos */
+    /* --- Decorative Shapes --- */
+    .shape-demo {
+      width: 120px;
+      height: 100px;
+      margin-bottom: 1.5rem;
+      background: var(--accent);
+      border: 3px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      /* Base clip-path for hover morphing */
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+      transition: clip-path 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease;
     }
 
-    iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    .shape-demo.hexagon {
+      border-shape: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      background: #ec4899;
+    }
+    .shape-demo.speech-bubble {
+      width: 130px;
+      border-shape: polygon(0% 0%, 100% 0%, 100% 72%, 60% 72%, 50% 100%, 40% 72%, 0% 72%);
+      background: #3b82f6;
+    }
+    .shape-demo.star {
+      border-shape: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      background: #f59e0b;
+    }
+
+    .card:hover .shape-demo {
+      transform: scale(1.1);
+      clip-path: polygon(round 20px, 0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+
+    .card h2 { margin-bottom: 0.5rem; font-size: 1.4rem; font-weight: 700; color: #fff; }
+    .card p { color: var(--text-muted); font-size: 1rem; line-height: 1.5; font-weight: 400; margin: 0; }
+
+    /* --- Element-scoped View Transitions --- */
+    #detail-view {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 200;
+      display: none;
+      padding: 2rem;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #detail-view.active {
+      display: flex;
+    }
+
+    .detail-card {
+      background: var(--card-bg);
+      padding: 3rem;
+      border-radius: 1rem;
+      max-width: 600px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    
+    .detail-card.vt-active {
+      view-transition-name: active-card;
+    }
+
+    .detail-card h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #fff; font-weight: 800; }
+    .detail-card p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6; }
+    
+    .back-btn {
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      background: var(--accent);
+      color: #fff;
       border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.3s;
+    }
+    .back-btn:hover { background: var(--accent-hover); }
+
+    ::view-transition-old(active-card),
+    ::view-transition-new(active-card) {
+      animation-duration: 0.4s;
+      animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Custom scrollbar for sidebar */
-    .sidebar::-webkit-scrollbar { width: 6px; }
-    .sidebar::-webkit-scrollbar-track { background: transparent; }
-    .sidebar::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
-      border-radius: 3px;
+    .card.selected {
+      view-transition-name: active-card;
     }
-    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
-
-    @keyframes slide-down {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
   </style>
 </head>
 <body>
-  <header>
-    <h1>Modern CSS Showcase</h1>
-    <p>Discover the latest features in web styling</p>
+
+  <header id="main-header">
+    <h1>CSS Superpowers Showcase</h1>
+    <p>Scroll down for <code>@scroll-state</code>, hover cards for <code>polygon(round)</code>, click for <strong>View Transitions</strong>.</p>
   </header>
 
-  <div class="container">
-    <div class="sidebar" id="sidebar">
-      <!-- Cards generated by JS -->
-    </div>
+  <main id="gallery"></main>
 
-    <div class="main-view">
-      <div class="main-header">
-        <h2 id="current-title">Select a demo</h2>
-        <span id="current-badge" class="badge"></span>
-      </div>
-      <div class="iframe-wrapper">
-        <iframe id="demo-iframe" src="about:blank"></iframe>
-      </div>
+  <div id="detail-view">
+    <div class="detail-card" id="detail-card">
+      <div class="shape-demo" id="detail-shape"></div>
+      <h2 id="detail-title">Title</h2>
+      <p id="detail-desc">Description</p>
+      <button class="back-btn" onclick="closeDetail()">Back to Gallery</button>
     </div>
   </div>
 
   <script>
-    const demos = [
-      {
-        id: 'shape-palette',
-        title: 'Shape Palette',
-        desc: 'Interactive demonstration of CSS border-shape polygon() properties.',
-        badge: 'Chrome 147',
-        url: 'examples/shape-palette.html'
-      },
-      {
-        id: 'animated-clip-path',
-        title: 'Animated Clip Path',
-        desc: 'Optional rounding parameters for polygon() dynamically animated.',
-        badge: 'Chrome 150',
-        url: 'examples/animated-clip-path.html'
-      },
-      {
-        id: 'scroll-state',
-        title: 'Scroll State',
-        desc: 'Support for @scroll-state based container query styling.',
-        badge: 'Chrome 144',
-        url: 'examples/scroll-state-scrolled-support.html'
-      },
-      {
-        id: 'concurrent-shuffle',
-        title: 'Concurrent Shuffle',
-        desc: 'Using Element-scoped view transitions for complex animations.',
-        badge: 'Chrome 147',
-        url: 'examples/concurrent-shuffle.html'
-      }
+    const items = [
+      { id: 1, title: 'Hexagon Card', desc: 'The shape above is built using a single div with CSS border-shape: polygon(...).', shapeClass: 'hexagon' },
+      { id: 2, title: 'Speech Bubble', desc: 'No SVG here! Just a standard CSS border-shape declaration. Hover the card to see the clip-path morph.', shapeClass: 'speech-bubble' },
+      { id: 3, title: 'Star Power', desc: 'A 10-point star shape rendered completely in CSS. Click on me to trigger an Element-scoped View Transition!', shapeClass: 'star' },
+      { id: 4, title: 'Animated Clip Path', desc: 'Hover me. The clip-path transitions smoothly to polygon(round 20px) thanks to rounding support.', shapeClass: 'hexagon' },
+      { id: 5, title: '@scroll-state', desc: 'Scroll up and down. Notice how the header at the top changes style automatically using @container scroll-state(scrolled: top).', shapeClass: 'speech-bubble' },
+      { id: 6, title: 'Concurrent VT', desc: 'When you click a card, the view-transition-name is dynamically applied, causing the card to smoothly expand!', shapeClass: 'star' }
     ];
 
-    const sidebar = document.getElementById('sidebar');
-    const iframe = document.getElementById('demo-iframe');
-    const currentTitle = document.getElementById('current-title');
-    const currentBadge = document.getElementById('current-badge');
-    let activeId = null;
+    const gallery = document.getElementById('gallery');
+    let selectedCard = null;
 
-    function renderSidebar() {
-      sidebar.innerHTML = '';
-      demos.forEach(demo => {
-        const card = document.createElement('div');
-        card.className = `demo-card ${activeId === demo.id ? 'active' : ''}`;
-        card.onclick = () => selectDemo(demo);
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `<div class="shape-demo ${item.shapeClass}"></div><h2>${item.title}</h2><p>${item.desc}</p>`;
+      el.onclick = () => openDetail(el, item);
+      gallery.appendChild(el);
+    });
+
+    const detailCard = document.getElementById('detail-card');
+    const detailShape = document.getElementById('detail-shape');
+
+    function openDetail(element, item) {
+      if (!document.startViewTransition) return showDetail(item);
+      
+      element.classList.add('selected');
+      detailCard.classList.remove('vt-active'); // Ensure target doesn't have it yet
+      
+      const t = document.startViewTransition(() => {
+        element.classList.remove('selected');
+        detailCard.classList.add('vt-active');
         
-        card.innerHTML = `
-          <h2>${demo.title}</h2>
-          <p>${demo.desc}</p>
-        `;
-        sidebar.appendChild(card);
+        detailShape.className = `shape-demo ${item.shapeClass}`;
+        document.getElementById('detail-title').textContent = item.title;
+        document.getElementById('detail-desc').textContent = item.desc;
+        document.getElementById('detail-view').classList.add('active');
+      });
+      t.finished.then(() => {
+        selectedCard = element;
       });
     }
 
-    function selectDemo(demo) {
-      if (activeId === demo.id) return;
-      activeId = demo.id;
-      
-      updateView(demo);
-      renderSidebar();
+    function closeDetail() {
+      if (!document.startViewTransition) return hideDetail();
+
+      if (selectedCard) {
+        detailCard.classList.add('vt-active');
+      }
+
+      const t = document.startViewTransition(() => {
+        detailCard.classList.remove('vt-active');
+        if (selectedCard) selectedCard.classList.add('selected');
+        document.getElementById('detail-view').classList.remove('active');
+      });
+
+      t.finished.then(() => {
+        if (selectedCard) {
+          selectedCard.classList.remove('selected');
+          selectedCard = null;
+        }
+      });
     }
 
-    function updateView(demo) {
-      currentTitle.textContent = demo.title;
-      currentBadge.textContent = demo.badge;
-      iframe.src = demo.url;
+    function showDetail(item) {
+      detailShape.className = `shape-demo ${item.shapeClass}`;
+      document.getElementById('detail-title').textContent = item.title;
+      document.getElementById('detail-desc').textContent = item.desc;
+      document.getElementById('detail-view').classList.add('active');
     }
 
-    // Initialize the first demo
-    selectDemo(demos[0]);
+    function hideDetail() {
+      document.getElementById('detail-view').classList.remove('active');
+    }
   </script>
 </body>
 </html>
