@@ -973,6 +973,7 @@ const setupMCP = () => {
             "/demos/berlin-io-connect/",
             "/demos/modern-web-guidance/",
             "/demos/nested-view-transition/",
+            "/demos/css-demos/",
             "/demos/email-verification-protocol/",
             "/demos/immediate-ui-mode/"
           ],
