@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Animated Clip Path — polygon() rounding — Chrome 150</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Controls ── */
+    .controls-row {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .ctrl { display: flex; flex-direction: column; gap: 0.3rem; }
+    .ctrl label { font-size: 0.72rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+    .ctrl input[type=range] { width: 130px; }
+    .ctrl-val { font-size: 0.72rem; font-family: monospace; color: var(--text-charcoal); }
+    .ctrl select { font-family: monospace; font-size: 0.8rem; padding: 0.25rem 0.4rem; border: 1px solid var(--border-black); background: var(--bg-paper); color: var(--text-charcoal); }
+
+    /* ── Demo stage ── */
+    .stage {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--bg-stone);
+      border: 1px solid var(--border-black);
+      margin-bottom: 1.25rem;
+      min-height: 220px;
+      align-items: center;
+    }
+
+    /* Clip-path shapes */
+    .clip-box {
+      width: 160px;
+      height: 160px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .clip-inner {
+      width: 100%;
+      height: 100%;
+      background: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--bg-paper);
+      transition: clip-path 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Hover variant: rounding increases on hover */
+    .clip-inner.hover-expand:hover {
+      /* Set via JS from the radius slider */
+    }
+
+    .clip-caption {
+      text-align: center;
+      font-size: 0.68rem;
+      font-family: monospace;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      max-width: 160px;
+    }
+    .clip-col { display: flex; flex-direction: column; align-items: center; }
+
+    /* ── Code output ── */
+    .code-output {
+      border: 1px solid var(--border-black);
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      background: var(--bg-paper);
+      color: var(--text-charcoal);
+      margin-bottom: 1.25rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+
+    /* ── Animation demo ── */
+    @keyframes morph-rounding {
+      0%, 100% { clip-path: var(--sharp-path); }
+      50%       { clip-path: var(--round-path); }
+    }
+    .anim-inner {
+      animation: morph-rounding 2s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    .anim-inner.playing { animation-play-state: running; }
+
+    .play-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .play-btn {
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      font-family: monospace;
+      font-weight: 600;
+      border: 2px solid var(--border-black);
+      background: var(--text-black);
+      color: var(--bg-ivory);
+      cursor: pointer;
+    }
+    .play-btn.paused {
+      background: var(--bg-paper);
+      color: var(--text-charcoal);
+    }
+
+    pre code { font-size: 0.8125rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+<main>
+  <p class="crumbs">
+    <a href="/v150/">&larr; Chrome 150</a> /
+    <a href="/v150/allow-optional-rounding-parameter-for-polygon/">polygon() rounding</a>
+  </p>
+
+  <header class="lede-block">
+    <p class="eyebrow">v150 · CSS · Shapes</p>
+    <h1>Animated Clip Path</h1>
+    <p class="lede"><code>clip-path: polygon(round …)</code> is fully animatable — you can transition or keyframe between a sharp polygon and a rounded one. Hover a shape to see the corners animate smooth, or press Play for a continuous morph between sharp and rounded.</p>
+  </header>
+
+  <div id="support-note" style="padding:0.6rem 0.9rem;border:1px solid var(--border-black);background:var(--bg-stone);font-size:0.78rem;font-family:monospace;margin-bottom:1rem;color:var(--text-charcoal);"></div>
+
+  <div class="controls-row">
+    <div class="ctrl">
+      <label>Shape</label>
+      <select id="shape-select">
+        <option value="triangle">triangle</option>
+        <option value="diamond">diamond</option>
+        <option value="hexagon" selected>hexagon</option>
+        <option value="arrow">arrow</option>
+        <option value="star">star</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Rounding radius</label>
+      <input type="range" id="radius" min="0" max="40" value="20" step="2">
+      <span class="ctrl-val" id="radius-val">20px</span>
+    </div>
+    <div class="ctrl">
+      <label>Transition duration</label>
+      <input type="range" id="duration" min="0.1" max="1.5" step="0.1" value="0.5">
+      <span class="ctrl-val" id="duration-val">0.5s</span>
+    </div>
+  </div>
+
+  <div class="play-row">
+    <button class="play-btn paused" id="play-btn">▶ Play morph</button>
+    <span style="font-size:0.75rem;font-family:monospace;color:var(--text-muted)" id="play-status">hover shapes to preview; Play for continuous morph</span>
+  </div>
+
+  <div class="stage">
+    <div class="clip-col">
+      <div class="clip-box">
+        <div class="clip-inner hover-expand" id="clip-sharp">hover me</div>
+      </div>
+      <div class="clip-caption" id="caption-sharp">polygon() — sharp</div>
+    </div>
+
+    <div class="clip-col">
+      <div class="clip-box">
+        <div class="clip-inner" id="clip-rounded">always rounded</div>
+      </div>
+      <div class="clip-caption" id="caption-rounded">polygon(round …)</div>
+    </div>
+
+    <div class="clip-col">
+      <div class="clip-box">
+        <div class="clip-inner anim-inner" id="clip-anim">morphing</div>
+      </div>
+      <div class="clip-caption">animated morph</div>
+    </div>
+  </div>
+
+  <div class="code-output" id="code-output"></div>
+
+  <section>
+    <h2>code</h2>
+    <pre><code>/* Sharp → rounded on hover */
+.shape {
+  clip-path: polygon(/* vertices */);
+  transition: clip-path 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.shape:hover {
+  clip-path: polygon(round 20px, /* same vertices */);
+}
+
+/* Keyframe morph */
+@keyframes morph-rounding {
+  0%, 100% { clip-path: polygon(/* sharp */); }
+  50%       { clip-path: polygon(round 20px, /* same vertices */); }
+}
+.shape {
+  animation: morph-rounding 2s ease-in-out infinite;
+}
+
+/* Works for any polygon shape — triangle, diamond, hexagon, arrow, star */</code></pre>
+  </section>
+
+  <section>
+    <h2>see also</h2>
+    <ul>
+      <li><a href="../shape-explorer/">Shape Explorer</a></li>
+      <li><a href="../clip-path-gallery/">Clip-Path Gallery</a></li>
+      <li><a href="https://chromestatus.com/feature/6636392944893952" target="_blank" rel="noopener">ChromeStatus entry</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/basic-shape/polygon" target="_blank" rel="noopener">MDN — polygon()</a></li>
+    </ul>
+  </section>
+
+  <footer class="byline">made by <a href="https://paul.kinlan.me/" target="_blank" rel="noopener">Paul Kinlan</a></footer>
+</main>
+
+<script>
+  const supportNote = document.getElementById('support-note');
+  const shapeSelect = document.getElementById('shape-select');
+  const radiusInput = document.getElementById('radius');
+  const durationInput = document.getElementById('duration');
+  const radiusVal = document.getElementById('radius-val');
+  const durationVal = document.getElementById('duration-val');
+  const clipSharp = document.getElementById('clip-sharp');
+  const clipRounded = document.getElementById('clip-rounded');
+  const clipAnim = document.getElementById('clip-anim');
+  const codeOutput = document.getElementById('code-output');
+  const captionSharp = document.getElementById('caption-sharp');
+  const captionRounded = document.getElementById('caption-rounded');
+  const playBtn = document.getElementById('play-btn');
+  const playStatus = document.getElementById('play-status');
+
+  const hasPolygonRound = CSS.supports('clip-path', 'polygon(round 12px, 50% 0%, 100% 100%, 0% 100%)');
+  supportNote.innerHTML = hasPolygonRound
+    ? '<strong>polygon() rounding supported</strong> — hover the left shape to see the CSS transition; use Play for a continuous morph.'
+    : '<strong>polygon() rounding not supported</strong> — requires Chrome 150+. The demo still shows the polygons; rounding may not apply.';
+
+  const SHAPES = {
+    triangle: '50% 0%, 100% 100%, 0% 100%',
+    diamond:  '50% 0%, 100% 50%, 50% 100%, 0% 50%',
+    hexagon:  '25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%',
+    arrow:    '0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%',
+    star:     '50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%',
+  };
+
+  function getSharp(name) { return `polygon(${SHAPES[name]})`; }
+  function getRound(name, r) { return `polygon(round ${r}px, ${SHAPES[name]})`; }
+
+  function update() {
+    const name = shapeSelect.value;
+    const r = parseInt(radiusInput.value);
+    const dur = parseFloat(durationInput.value);
+
+    radiusVal.textContent = r + 'px';
+    durationVal.textContent = dur + 's';
+
+    const sharp = getSharp(name);
+    const round = getRound(name, r);
+
+    clipSharp.style.clipPath = sharp;
+    clipSharp.style.transition = `clip-path ${dur}s cubic-bezier(0.34, 1.56, 0.64, 1)`;
+
+    clipRounded.style.clipPath = round;
+
+    // Animated element uses CSS variables set via style
+    clipAnim.style.setProperty('--sharp-path', sharp);
+    clipAnim.style.setProperty('--round-path', round);
+    clipAnim.style.clipPath = sharp; // start from sharp
+
+    captionSharp.textContent = `polygon(${SHAPES[name].slice(0,20)}…)`;
+    captionRounded.textContent = `polygon(round ${r}px, …)`;
+
+    codeOutput.textContent =
+`.shape-sharp  { clip-path: ${sharp}; }\n` +
+`.shape-sharp:hover { clip-path: ${round}; transition: clip-path ${dur}s; }\n\n` +
+`.shape-rounded { clip-path: ${round}; }\n\n` +
+`@keyframes morph-rounding {\n` +
+`  0%, 100% { clip-path: ${sharp}; }\n` +
+`  50%       { clip-path: ${round}; }\n` +
+`}`;
+  }
+
+  // Hover effect: apply rounded on hover via CSS variables
+  clipSharp.addEventListener('mouseover', () => {
+    const name = shapeSelect.value;
+    const r = parseInt(radiusInput.value);
+    clipSharp.style.clipPath = getRound(name, r);
+  });
+  clipSharp.addEventListener('mouseout', () => {
+    const name = shapeSelect.value;
+    clipSharp.style.clipPath = getSharp(name);
+  });
+
+  let playing = false;
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    playBtn.textContent = playing ? '⏸ Pause' : '▶ Play morph';
+    playBtn.classList.toggle('paused', !playing);
+    playStatus.textContent = playing ? 'morphing between sharp and rounded…' : 'paused';
+    clipAnim.classList.toggle('playing', playing);
+  });
+
+  shapeSelect.addEventListener('change', update);
+  radiusInput.addEventListener('input', update);
+  durationInput.addEventListener('input', update);
+  update();
+</script>
+</body>
+</html>

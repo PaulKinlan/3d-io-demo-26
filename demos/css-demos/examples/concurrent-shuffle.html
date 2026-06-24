@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concurrent Shuffle — Element-scoped view transitions — Chrome 147</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .unsupported {
+      display: none;
+      background: var(--bg-stone);
+      border: 2px solid var(--accent-rose);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent-rose);
+      margin-bottom: 1.5rem;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    @media (max-width: 520px) { .stage { grid-template-columns: 1fr; } }
+
+    .list-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .list-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .list-heading h3 {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .shuffle-btn {
+      font-size: 0.78rem;
+      padding: 0.3rem 0.75rem;
+    }
+
+    .card-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      /* scope element */
+      view-transition-scope: all;
+      contain: layout;
+    }
+
+    .card-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--bg-paper);
+      border: 2px solid var(--border-black);
+      box-shadow: var(--thin-shadow);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+    }
+    .card-swatch {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border-black);
+      flex-shrink: 0;
+    }
+    .card-name { flex: 1; font-weight: 500; }
+    .card-rank { color: var(--text-muted); font-size: 0.72rem; }
+
+    /* Status bar */
+    .status {
+      display: flex;
+      gap: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-stone);
+      border: 2px solid var(--border-black);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      margin-bottom: 1.5rem;
+    }
+    .status-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .status-label { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .status-value { font-weight: 500; }
+    .status-value.active { color: var(--accent-emerald); }
+
+    .both-btn-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .both-btn {
+      background: var(--accent-blue);
+      color: var(--bg-ivory);
+      border-color: var(--accent-blue);
+    }
+    .both-btn:hover {
+      background: var(--bg-paper);
+      color: var(--accent-blue);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <p class="crumbs"><a href="/v147/element-scoped-view-transitions/">&larr; Element-scoped view transitions</a></p>
+
+  <header class="lede-block">
+    <p class="eyebrow">v147 · JS · CSS · concept 1 of 3</p>
+    <h1>Concurrent Shuffle</h1>
+    <p class="lede">Two card lists. Two independent transition scopes. Shuffle both at once — they animate simultaneously without blocking each other or freezing the page.</p>
+  </header>
+
+  <p id="unsupported" class="unsupported">element.startViewTransition() is not available in this browser. This demo requires Chrome 147+.</p>
+
+  <div class="status">
+    <div class="status-item">
+      <span class="status-label">Left transitions</span>
+      <span class="status-value" id="left-count">0</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Right transitions</span>
+      <span class="status-value" id="right-count">0</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Concurrent now</span>
+      <span class="status-value" id="concurrent-now">0</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Max concurrent</span>
+      <span class="status-value" id="max-concurrent">0</span>
+    </div>
+  </div>
+
+  <div class="both-btn-row">
+    <button class="both-btn" id="both-btn">Shuffle both simultaneously</button>
+  </div>
+
+  <div class="stage">
+    <div class="list-col">
+      <div class="list-heading">
+        <h3>Left list</h3>
+        <button class="shuffle-btn" id="left-btn">Shuffle</button>
+      </div>
+      <ul class="card-list" id="left-list"></ul>
+    </div>
+    <div class="list-col">
+      <div class="list-heading">
+        <h3>Right list</h3>
+        <button class="shuffle-btn" id="right-btn">Shuffle</button>
+      </div>
+      <ul class="card-list" id="right-list"></ul>
+    </div>
+  </div>
+
+  <section>
+    <h2>how it works</h2>
+    <p>Each list element is the transition scope. When you shuffle, its <code>startViewTransition()</code> is called with a callback that rearranges the list items. Because each list is an independent scope, both can be mid-transition at the same time — something impossible with <code>document.startViewTransition()</code>.</p>
+    <pre><code>// Each list element is its own scope.
+// CSS: .card-list { view-transition-scope: all; contain: layout; }
+
+// Assign stable view-transition-name values to each card.
+cards.forEach((card, i) => {
+  card.style.viewTransitionName = `card-${listId}-${card.dataset.id}`;
+});
+
+// Shuffle scoped to the left list only.
+leftList.startViewTransition(() => {
+  shuffleChildren(leftList);
+});
+
+// Simultaneously, shuffle the right list independently.
+rightList.startViewTransition(() => {
+  shuffleChildren(rightList);
+});</code></pre>
+  </section>
+
+  <section>
+    <h2>see also</h2>
+    <ul>
+      <li><a href="/v147/element-scoped-view-transitions/">Element-scoped view transitions — feature index</a></li>
+      <li><a href="/v147/element-scoped-view-transitions/live-feed/">Live Feed — three concurrent auto-updating feeds</a></li>
+      <li><a href="/v147/element-scoped-view-transitions/panel-switcher/">Panel Switcher — interactive panel with live sidebar</a></li>
+      <li><a href="https://chromestatus.com/feature/5109852273377280" target="_blank" rel="noopener">ChromeStatus entry</a></li>
+      <li><a href="https://developer.chrome.com/blog/element-scoped-view-transitions" target="_blank" rel="noopener">Chrome Developers blog post</a></li>
+    </ul>
+  </section>
+
+  <footer class="byline">made by <a href="https://paul.kinlan.me/" target="_blank" rel="noopener">Paul Kinlan</a></footer>
+</main>
+<script>
+  // ---- Data ----
+  const LEFT_ITEMS = [
+    { id: 'l1', color: '#d11a2a', name: 'Crimson' },
+    { id: 'l2', color: '#0022ff', name: 'Royal Blue' },
+    { id: 'l3', color: '#0a8f5c', name: 'Emerald' },
+    { id: 'l4', color: '#b87b00', name: 'Amber' },
+    { id: 'l5', color: '#7c3aed', name: 'Violet' },
+    { id: 'l6', color: '#db2777', name: 'Fuchsia' },
+  ];
+  const RIGHT_ITEMS = [
+    { id: 'r1', color: '#0891b2', name: 'Cyan' },
+    { id: 'r2', color: '#ca8a04', name: 'Yellow' },
+    { id: 'r3', color: '#16a34a', name: 'Green' },
+    { id: 'r4', color: '#ea580c', name: 'Orange' },
+    { id: 'r5', color: '#475569', name: 'Slate' },
+    { id: 'r6', color: '#9f1239', name: 'Rose' },
+  ];
+
+  // ---- State ----
+  let leftOrder = [...LEFT_ITEMS];
+  let rightOrder = [...RIGHT_ITEMS];
+  let leftCount = 0, rightCount = 0;
+  let concurrent = 0, maxConcurrent = 0;
+
+  const leftList = document.getElementById('left-list');
+  const rightList = document.getElementById('right-list');
+
+  function renderList(ul, items) {
+    while (ul.firstChild) ul.removeChild(ul.firstChild);
+    items.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.className = 'card-item';
+      li.dataset.id = item.id;
+      li.style.viewTransitionName = `card-${item.id}`;
+      li.innerHTML = `
+        <span class="card-swatch" style="background:${item.color}"></span>
+        <span class="card-name">${item.name}</span>
+        <span class="card-rank">#${i + 1}</span>
+      `;
+      ul.appendChild(li);
+    });
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function updateStatus() {
+    document.getElementById('left-count').textContent = leftCount;
+    document.getElementById('right-count').textContent = rightCount;
+    document.getElementById('concurrent-now').textContent = concurrent;
+    document.getElementById('concurrent-now').className = 'status-value' + (concurrent > 1 ? ' active' : '');
+    document.getElementById('max-concurrent').textContent = maxConcurrent;
+  }
+
+  function doShuffleLeft() {
+    if (!('startViewTransition' in leftList)) return;
+    concurrent++;
+    maxConcurrent = Math.max(maxConcurrent, concurrent);
+    updateStatus();
+    const transition = leftList.startViewTransition(() => {
+      leftOrder = shuffle(leftOrder);
+      renderList(leftList, leftOrder);
+    });
+    transition.finished.then(() => {
+      concurrent = Math.max(0, concurrent - 1);
+      leftCount++;
+      updateStatus();
+    });
+  }
+
+  function doShuffleRight() {
+    if (!('startViewTransition' in rightList)) return;
+    concurrent++;
+    maxConcurrent = Math.max(maxConcurrent, concurrent);
+    updateStatus();
+    const transition = rightList.startViewTransition(() => {
+      rightOrder = shuffle(rightOrder);
+      renderList(rightList, rightOrder);
+    });
+    transition.finished.then(() => {
+      concurrent = Math.max(0, concurrent - 1);
+      rightCount++;
+      updateStatus();
+    });
+  }
+
+  // Check support
+  if (!('startViewTransition' in HTMLElement.prototype)) {
+    document.getElementById('unsupported').style.display = 'block';
+  }
+
+  // Initial render
+  renderList(leftList, leftOrder);
+  renderList(rightList, rightOrder);
+  updateStatus();
+
+  document.getElementById('left-btn').addEventListener('click', doShuffleLeft);
+  document.getElementById('right-btn').addEventListener('click', doShuffleRight);
+  document.getElementById('both-btn').addEventListener('click', () => {
+    doShuffleLeft();
+    doShuffleRight();
+  });
+</script>
+</body>
+</html>

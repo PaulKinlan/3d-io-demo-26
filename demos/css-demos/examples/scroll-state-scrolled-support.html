@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@scroll-state scrolled support — Chrome 144 — chrome platform showcase</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <p class="crumbs"><a href="/v144/">&larr; Chrome 144</a></p>
+
+  <header class="lede-block">
+    <p class="eyebrow">v144 · css</p>
+    <h1>@scroll-state scrolled support</h1>
+    <p class="lede">Allows authors to style descendants of containers based on the most recent scrolling direction.</p>
+  </header>
+
+  <section>
+    <h2>concepts</h2>
+    <ol class="demo-list">
+      <li class="demo-card">
+        <h3><a href="./scrolled-state-style/">Scrolled State Style</a></h3>
+        <p>Style a sticky header differently depending on whether the user has scrolled. The `scrolled` axis carries `top`, `bottom`, `x`, `y`, and `none` values — all in pure CSS, no scroll listener.</p>
+      </li>
+      <li class="demo-card">
+        <h3><a href="./direction-aware-nav/">Direction-aware Nav</a></h3>
+        <p>The motivating use case from the spec PR: a header that hides on down-scroll and pops back on up-scroll, in pure CSS via container queries — no rAF loop, no scroll throttling.</p>
+      </li>
+      <li class="demo-card">
+        <h3><a href="./state-matrix/">State Matrix</a></h3>
+        <p>Every value of the <code>scrolled</code> axis &mdash; <em>top</em>, <em>bottom</em>, <em>y</em>, <em>x</em>, <em>none</em> &mdash; on the same scroller. Watch named lanes light up as each container query matches.</p>
+      </li>
+      <li class="demo-card">
+        <h3><a href="./overflow-indicator/">Overflow Indicator</a></h3>
+        <p>Top and bottom fade shadows that appear exactly when the list has content beyond the visible edge — driven by <code>@scroll-state(scrolled: top/bottom)</code> with zero scroll listeners. Includes a side-by-side comparison with the JavaScript equivalent.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>why it shipped</h2>
+    <p>Web developers frequently implement UI patterns that respond to the user&#x27;s scroll direction. A classic example is a header that auto-hides as the user scrolls down the page and reappears as they scroll up.Currently, this relies on JavaScript to track scroll position, which can add performance overhead and code complexity.</p>
+  </section>
+
+  <section>
+    <h2>references</h2>
+    <ul>
+      <li><a href="https://chromestatus.com/feature/5083137520173056" target="_blank" rel="noopener">ChromeStatus entry</a></li>
+      <li><a href="https://drafts.csswg.org/css-conditional-5/#scrolled" target="_blank" rel="noopener">Spec</a></li>
+    </ul>
+  </section>
+
+  <footer class="byline">made by <a href="https://paul.kinlan.me/" target="_blank" rel="noopener">Paul Kinlan</a></footer>
+</main>
+</body>
+</html>

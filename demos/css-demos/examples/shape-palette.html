@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shape Palette — CSS border-shape — Chrome 147</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .shape-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-paper);
+      border: 2px solid var(--border-black);
+      box-shadow: var(--flat-shadow);
+    }
+    .shape-card h3 {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .shape-card pre {
+      font-size: 0.72rem;
+      padding: 0.6rem;
+      margin: 0;
+      line-height: 1.4;
+      overflow-x: auto;
+      box-shadow: none;
+    }
+
+    .shape-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+    }
+
+    .shape {
+      width: 100px;
+      height: 80px;
+      background: var(--accent-blue);
+      border: 3px solid var(--border-black);
+      box-shadow: 4px 4px 0px var(--border-black);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: default;
+    }
+    .shape:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px var(--border-black);
+    }
+
+    .shape.hexagon {
+      border-shape: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+    .shape.arrow-tab {
+      border-shape: polygon(0% 0%, 80% 0%, 100% 50%, 80% 100%, 0% 100%);
+    }
+    .shape.chevron {
+      border-shape: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%, 25% 50%);
+    }
+    .shape.speech-bubble {
+      width: 110px;
+      height: 90px;
+      border-shape: polygon(0% 0%, 100% 0%, 100% 72%, 60% 72%, 50% 100%, 40% 72%, 0% 72%);
+    }
+    .shape.star {
+      border-shape: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+    }
+    .shape.cross {
+      border-shape: polygon(
+        33% 0%, 66% 0%, 66% 33%,
+        100% 33%, 100% 66%, 66% 66%,
+        66% 100%, 33% 100%, 33% 66%,
+        0% 66%, 0% 33%, 33% 33%
+      );
+    }
+    .shape.diamond {
+      border-shape: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+    .shape.triangle {
+      border-shape: polygon(50% 0%, 100% 100%, 0% 100%);
+    }
+
+    .copy-btn {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+      background: var(--bg-stone);
+      color: var(--text-black);
+      border: 1px solid var(--border-black);
+      cursor: pointer;
+      box-shadow: 1px 1px 0px var(--border-black);
+      transition: var(--transition);
+      align-self: flex-start;
+    }
+    .copy-btn:hover {
+      background: var(--text-black);
+      color: var(--bg-ivory);
+      transform: translate(-1px, -1px);
+      box-shadow: 2px 2px 0px var(--border-black);
+    }
+    .copy-btn.copied {
+      background: var(--accent-emerald);
+      color: white;
+      border-color: var(--accent-emerald);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <p class="crumbs"><a href="/v147/css-border-shape/">&larr; CSS border-shape</a></p>
+
+  <header class="lede-block">
+    <p class="eyebrow">v147 · CSS · concept 2 of 3</p>
+    <h1>Shape Palette</h1>
+    <p class="lede">Eight shapes, each built with a single <code>border-shape</code> declaration. Hover to see the shadow shift. The border, background, and shadow all follow the polygon — no pseudo-elements, no SVG.</p>
+  </header>
+
+  <p class="note">Requires Chrome 147+. Shapes render as rectangles in earlier browsers.</p>
+
+  <div class="palette" id="palette"></div>
+
+  <section>
+    <h2>how it works</h2>
+    <p>Every shape below is a single <code>&lt;div&gt;</code> with <code>background</code>, <code>border</code>, <code>box-shadow</code>, and <code>border-shape</code>. The polygon coordinates use percentage values so the shape scales with the element.</p>
+    <pre><code>.shape {
+  width: 100px;
+  height: 80px;
+  background: blue;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0px black;
+  border-shape: polygon(/* points */);
+}
+
+/* Example — hexagon */
+.hexagon {
+  border-shape: polygon(
+    25% 0%, 75% 0%, 100% 50%,
+    75% 100%, 25% 100%, 0% 50%
+  );
+}</code></pre>
+    <p>Unlike <code>clip-path</code>, the border strokes along the polygon edge and <code>box-shadow</code> is cast from the polygon geometry — not the bounding rectangle.</p>
+  </section>
+
+  <section>
+    <h2>see also</h2>
+    <ul>
+      <li><a href="/v147/css-border-shape/">CSS border-shape — feature index</a></li>
+      <li><a href="/v147/css-border-shape/tooltip-architect/">Tooltip Architect — clip-path vs border-shape</a></li>
+      <li><a href="/v147/css-border-shape/badge-forge/">Badge Forge — interactive builder</a></li>
+      <li><a href="https://chromestatus.com/feature/5459864205393920" target="_blank" rel="noopener">ChromeStatus entry</a></li>
+    </ul>
+  </section>
+
+  <footer class="byline">made by <a href="https://paul.kinlan.me/" target="_blank" rel="noopener">Paul Kinlan</a></footer>
+</main>
+<script>
+  const shapes = [
+    {
+      name: 'Hexagon',
+      cls: 'hexagon',
+      polygon: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+    },
+    {
+      name: 'Arrow Tab',
+      cls: 'arrow-tab',
+      polygon: 'polygon(0% 0%, 80% 0%, 100% 50%, 80% 100%, 0% 100%)',
+    },
+    {
+      name: 'Chevron',
+      cls: 'chevron',
+      polygon: 'polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%, 25% 50%)',
+    },
+    {
+      name: 'Speech Bubble',
+      cls: 'speech-bubble',
+      polygon: 'polygon(0% 0%, 100% 0%, 100% 72%, 60% 72%, 50% 100%, 40% 72%, 0% 72%)',
+    },
+    {
+      name: '5-Point Star',
+      cls: 'star',
+      polygon: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+    },
+    {
+      name: 'Cross',
+      cls: 'cross',
+      polygon: 'polygon(33% 0%, 66% 0%, 66% 33%, 100% 33%, 100% 66%, 66% 66%, 66% 100%, 33% 100%, 33% 66%, 0% 66%, 0% 33%, 33% 33%)',
+    },
+    {
+      name: 'Diamond',
+      cls: 'diamond',
+      polygon: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+    },
+    {
+      name: 'Triangle',
+      cls: 'triangle',
+      polygon: 'polygon(50% 0%, 100% 100%, 0% 100%)',
+    },
+  ];
+
+  const palette = document.getElementById('palette');
+
+  shapes.forEach(({ name, cls, polygon }) => {
+    const card = document.createElement('div');
+    card.className = 'shape-card';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = name;
+
+    const preview = document.createElement('div');
+    preview.className = 'shape-preview';
+
+    const shape = document.createElement('div');
+    shape.className = `shape ${cls}`;
+    preview.appendChild(shape);
+
+    const codeText = `border-shape: ${polygon};`;
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.textContent = codeText;
+    pre.appendChild(code);
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'copy CSS';
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(codeText).then(() => {
+        btn.textContent = 'copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'copy CSS';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    card.appendChild(h3);
+    card.appendChild(preview);
+    card.appendChild(pre);
+    card.appendChild(btn);
+    palette.appendChild(card);
+  });
+</script>
+</body>
+</html>

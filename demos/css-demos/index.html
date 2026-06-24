@@ -3,399 +3,301 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS Demos</title>
+  <title>CSS Demos Showcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-/* CSS from user */
-:root {
-  view-transition-name: none;
-}
-::view-transition {
-  pointer-events: none;
-}
-::view-transition-group(*) {
-  animation-duration: 2.5s;
-/*  outline: 2px dotted lime; */
-}
-::view-transition-old(*) {
-  display: none;
-}
-::view-transition-new(*) {
-  animation: none;
-}
+    /* Premium aesthetics */
+    :root {
+      --bg-gradient: radial-gradient(circle at top right, #312e81 0%, #0f172a 50%, #020617 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #8b5cf6;
+      --accent-secondary: #ec4899;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      background-color: #0f172a;
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Outfit', system-ui, sans-serif;
+    }
 
-ul li {
-  view-transition-name: match-element;
-  view-transition-class: album;
-}
+    header {
+      padding: 2rem;
+      text-align: center;
+      animation: slide-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 
-/* A. To enable clipping of the remaining items while moving an item across lists*/
-ul {
-  view-transition-name: match-element; /* (A. 1/4) Capture the ul */
-  view-transition-group: contain; /* (A. 2/4) Contain all captured children */
-  view-transition-class: list; /* (A. 3/4) For styling Purposes */
-}
-::view-transition-group-children(.list) {
-  overflow: clip; /* (A. 4/4) Clip albums contained in the list */
-}
+    header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #a78bfa, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+    
+    header p {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
 
-/* To prevent names of the li elements from bleeding out into
-   the outer transition when doing a swap. When a swap is done,
-   capturing the uls themselves is sufficient. */
-/* However, this cannot be set for the move-element transition,
-   as it prevents anything inside the uls from being captured then
-   so we set this conditionally via JS (only on the swap transition) */
-ul {  
-/*  view-transition-scope: all; */
-}
+    .container {
+      display: flex;
+      flex: 1;
+      gap: 2rem;
+      padding: 0 2rem 2rem 2rem;
+      height: calc(100vh - 120px);
+      animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
 
-/* To allow the lists to move */
-/* This is needed because the uls have `view-transition-scope: all;` which prevents them from getting captured */
-div:has(> ul) {
-  view-transition-name: match-element;
-}
+    .sidebar {
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
 
-/* This prevents the clicked-element from getting
-   painted outside of the list-wrapper snapshot */
-.wrapper {
-  view-transition-name: lists-wrapper;
-}
-::view-transition-group(lists-wrapper) {
-  overflow: clip;
-}
+    .demo-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+    }
 
+    .demo-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      transition: left 0.6s ease;
+    }
 
-#clicked-element {
-  view-transition-name: clicked-element !important;
-  
-  /* The clicked element moves across lists, so it cannot be contained by 
-     one list … so we need to lift it out of there. */
-  view-transition-group: lists-wrapper;
-}
+    .demo-card:hover::before {
+      left: 100%;
+    }
 
-/* Paint on top of both lists */
-::view-transition-group(clicked-element) {
-  z-index: 100;
-}
+    .demo-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(167, 139, 250, 0.5);
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
+    }
 
+    .demo-card.active {
+      border-color: var(--accent-secondary);
+      background: rgba(236, 72, 153, 0.05);
+      box-shadow: 0 0 30px rgba(236, 72, 153, 0.15), inset 0 0 20px rgba(236, 72, 153, 0.05);
+    }
 
+    .demo-card.active h2 {
+      color: #fbcfe8;
+    }
 
+    .demo-card h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      transition: color 0.3s;
+    }
 
+    .demo-card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-weight: 300;
+    }
 
-body {
-  padding: 1rem;
-  font-size: 2em;
-}
+    .main-view {
+      flex: 1;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0,0,0,0.3);
+    }
 
-ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+    .main-header {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
 
-  border: 2px solid;
-  padding: 1rem;
-  border-radius: 0.25em;
-  margin: 1rem 0;
-  background: Canvas;
-}
+    .main-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
 
-li {
-  user-select: none;
-  border: 2px solid;
-  padding: 1rem;
-  border-radius: 0.25em;
-  
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  background: Canvas;
-  
-  &:hover {
-    border-color: SelectedItem;
-    cursor: pointer;
-  }
-  
-  .iframe-container {
-    position: relative;
-    width: 16rem;
-    height: 12rem;
-    flex-shrink: 0;
-  }
-  
-  .iframe-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: 0.25em;
-    background: white;
-  }
+    .badge {
+      background: rgba(255,255,255,0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.1);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
 
-  .iframe-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-  }
-}
+    .iframe-wrapper {
+      flex: 1;
+      position: relative;
+      background: #f8fafc; /* Lighter background for the actual demos */
+    }
 
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
+    /* Custom scrollbar for sidebar */
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+    }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
-ul {
-  height: 90vh;
-  max-height: 20rem;
-  overflow-y: scroll;
-}
+    @keyframes slide-down {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-
-
-button, input {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-.wrapper {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  width: 80vw;
-  max-width: 60rem;
-  
-  &.reversed {
-    flex-direction: row-reverse;
-  }
-  
-  > * {
-    flex: 1;
-  }
-  > button {
-    flex: 0;
-    align-self: center;
-  }
-}
-
-@layer reset {
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-}
-
-@layer layout {
-  :root {
-    color-scheme: dark;
-    font-family: system-ui;
-  }
-
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    display: grid;
-    place-content: center;
-  }
-}
-
-@layer warning {
-  .warnings {
-    position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    text-align: center;
-    display: none;
-  }
-  .warning {
-    display: block;
-    margin: 0 auto;
-    width: fit-content;
-    font-size: 1rem;
-    padding: 1em;
-    border: 1px solid #333;
-    color: black;
-    background: rgba(255, 255, 205, 0.8);
-    text-align: center;
-  }
-
-  .warning > :first-child {
-    margin-top: 0;
-  }
-
-  .warning > :last-child {
-    margin-bottom: 0;
-  }
-
-  .warning a {
-    color: blue;
-  }
-  .warning--info {
-    border: 1px solid #123456;
-    background: rgb(205 230 255 / 0.8);
-  }
-  .warning--alarm {
-    border: 1px solid red;
-    background: #ff000010;
-  }
-
-  .credits {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.5);
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    z-index: 1000;
-  }
-  
-  .credits a {
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: underline;
-  }
-}
   </style>
 </head>
 <body>
-  <!-- HTML from user -->
-  <div class="wrapper">
-    <div>
-      <ul id="list1">
-        <li>
-          <div class="iframe-container">
-            <div class="iframe-overlay"></div>
-            <iframe src="https://chrome-platform-showcase.paulkinlan-ea.deno.net/v147/css-border-shape/shape-palette/"></iframe>
-          </div>
-          <span>Border Shape Palette</span>
-        </li>
-        <li>
-          <div class="iframe-container">
-            <div class="iframe-overlay"></div>
-            <iframe src="https://chrome-platform-showcase.paulkinlan-ea.deno.net/v150/allow-optional-rounding-parameter-for-polygon/animated-clip-path/"></iframe>
-          </div>
-          <span>Animated Clip Path</span>
-        </li>
-      </ul>
-      <button>REORDER</button>
+  <header>
+    <h1>Modern CSS Showcase</h1>
+    <p>Discover the latest features in web styling</p>
+  </header>
+
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <!-- Cards generated by JS -->
     </div>
 
-    <button id="swap">↔</button>
-    
-    <div>
-      <ul id="list2">
-        <li>
-          <div class="iframe-container">
-            <div class="iframe-overlay"></div>
-            <iframe src="https://chrome-platform-showcase.paulkinlan-ea.deno.net/v144/scroll-state-scrolled-support/"></iframe>
-          </div>
-          <span>Scroll State</span>
-        </li>
-        <li>
-          <div class="iframe-container">
-            <div class="iframe-overlay"></div>
-            <iframe src="https://chrome-platform-showcase.paulkinlan-ea.deno.net/v147/element-scoped-view-transitions/concurrent-shuffle/"></iframe>
-          </div>
-          <span>Concurrent Shuffle</span>
-        </li>
-      </ul>
-      <button>REORDER</button>
+    <div class="main-view">
+      <div class="main-header">
+        <h2 id="current-title">Select a demo</h2>
+        <span id="current-badge" class="badge"></span>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe id="demo-iframe" src="about:blank"></iframe>
+      </div>
     </div>
-  </div>
-
-  <div class="warnings">
-    <div class="warning">
-      <p>⚠️ Your browser does not support Element-Scoped View Transitions.<br>Try Chrome 147 or newer. Alternatively, <a href="https://developer.chrome.com/blog/element-scoped-view-transitions/video/inner-and-outer-view-transition.mp4" target="_top">check out a recording</a>.</p>
-    </div>
-  </div>
-
-  <div class="credits">
-    Images provided by <a href="https://unsplash.com/" target="_blank">Unsplash</a> via <a href="https://picsum.photos/" target="_blank">Lorem Picsum</a>
   </div>
 
   <script>
-    /* JS from user */
-    function shuffleElements(container) {
-      const elements = Array.from(container.children);
-
-      // Shuffle the elements randomly
-      for (let i = elements.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [elements[i], elements[j]] = [elements[j], elements[i]];
+    const demos = [
+      {
+        id: 'shape-palette',
+        title: 'Shape Palette',
+        desc: 'Interactive demonstration of CSS border-shape polygon() properties.',
+        badge: 'Chrome 147',
+        url: 'examples/shape-palette.html'
+      },
+      {
+        id: 'animated-clip-path',
+        title: 'Animated Clip Path',
+        desc: 'Optional rounding parameters for polygon() dynamically animated.',
+        badge: 'Chrome 150',
+        url: 'examples/animated-clip-path.html'
+      },
+      {
+        id: 'scroll-state',
+        title: 'Scroll State',
+        desc: 'Support for @scroll-state based container query styling.',
+        badge: 'Chrome 144',
+        url: 'examples/scroll-state-scrolled-support.html'
+      },
+      {
+        id: 'concurrent-shuffle',
+        title: 'Concurrent Shuffle',
+        desc: 'Using Element-scoped view transitions for complex animations.',
+        badge: 'Chrome 147',
+        url: 'examples/concurrent-shuffle.html'
       }
+    ];
 
-      // Append the shuffled elements back into the container
-      elements.forEach(element => container.appendChild(element));
+    const sidebar = document.getElementById('sidebar');
+    const iframe = document.getElementById('demo-iframe');
+    const currentTitle = document.getElementById('current-title');
+    const currentBadge = document.getElementById('current-badge');
+    let activeId = null;
+
+    function renderSidebar() {
+      sidebar.innerHTML = '';
+      demos.forEach(demo => {
+        const card = document.createElement('div');
+        card.className = `demo-card ${activeId === demo.id ? 'active' : ''}`;
+        card.onclick = () => selectDemo(demo);
+        
+        card.innerHTML = `
+          <h2>${demo.title}</h2>
+          <p>${demo.desc}</p>
+        `;
+        sidebar.appendChild(card);
+      });
     }
 
-    document.querySelectorAll('button:not(#swap)').forEach($button => {
-      $button.addEventListener('click', async (e) => {
-        const $list = $button.previousElementSibling;
-        const t = $list.startViewTransition(() => {
-          shuffleElements($list);
-        });
-      });
-    });
-
-    let lastClickedElements = [];
-    document.querySelectorAll('li').forEach($li => {
-      $li.addEventListener('click', async (e) => {
-        // Store clicked element
-        lastClickedElements = [ $li, ...lastClickedElements].slice(0, 2);
-        
-        // Check if it was a double click on the same element
-        // If not, bail out
-        if (lastClickedElements.length < 2) return;
-        if (lastClickedElements[0] !== lastClickedElements[1]) return;
-        
-        // Determine where to move from and to
-        const $clickedElement = lastClickedElements[0];
-        const $sourceParentList = $clickedElement.parentElement;
-        const $targetParentList = document.querySelector(`ul:not(#${$sourceParentList.getAttribute('id')})`);
-        
-        // Mark element as the clicked one
-        $clickedElement.setAttribute('id', 'clicked-element');
-
-        // Move it
-        const t = document.querySelector('.wrapper').startViewTransition(() => {
-          $targetParentList.moveBefore($clickedElement, $targetParentList.firstElementChild);
-        });
-        
-        // Reset for next
-        lastClickedElements = [];
+    function selectDemo(demo) {
+      if (activeId === demo.id) return;
+      activeId = demo.id;
       
-        await t.finished;
-        $clickedElement.removeAttribute('id');
-      });
-    });
-
-    document.querySelectorAll('button#swap').forEach($button => {
-      $button.addEventListener('click', async (e) => {
-        
-        const $lists = document.querySelectorAll('ul');
-        
-        // Because the list items don’t need to be captured
-        // we temp apply `view-transition-scope: all;` on them
-        $lists.forEach($list => {
-          $list.style.viewTransitionScope = 'all';
-        });
-        
-        const t = document.querySelector('.wrapper').startViewTransition(() => {
-          document.querySelector('.wrapper').classList.toggle('reversed');
-        }); 
-        
-        // Cleanup the names
-        await t.finished;
-        $lists.forEach($list => {
-          $list.style.viewTransitionScope = '';
-        });
-      });
-    });
-
-    if (!Element.prototype.startViewTransition) {
-      document.querySelector('.warnings').style.display = 'block';
+      updateView(demo);
+      renderSidebar();
     }
+
+    function updateView(demo) {
+      currentTitle.textContent = demo.title;
+      currentBadge.textContent = demo.badge;
+      iframe.src = demo.url;
+    }
+
+    // Initialize the first demo
+    selectDemo(demos[0]);
   </script>
 </body>
 </html>

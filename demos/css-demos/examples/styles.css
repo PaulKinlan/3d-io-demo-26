@@ -1,0 +1,719 @@
+/* chrome-platform-showcase — design language ported from aifoc.us and the
+ * shared-worker-test dashboard. Editorial / print: ivory paper, black ink,
+ * Joan serif display, Lora body, JetBrains Mono for code, hard flat shadows,
+ * sharp 2px borders, no gradient nonsense.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Joan&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  /* Palette */
+  --bg-ivory: #fdfcf8;
+  --bg-stone: #f4f3ee;
+  --bg-paper: #ffffff;
+
+  --text-black: #000000;
+  --text-charcoal: #2d2d2d;
+  --text-muted: #666666;
+  --border-black: #000000;
+
+  --accent-blue: #0022ff;
+  --accent-emerald: #0a8f5c;
+  --accent-rose: #d11a2a;
+  --accent-amber: #b87b00;
+
+  /* Demo-local color aliases: keep generated demo CSS tokenized while preserving visual examples. */
+  --demo-color-002b36: #002b36;
+  --demo-color-003300: #003300;
+  --demo-color-003366: #003366;
+  --demo-color-0044cc: #0044cc;
+  --demo-color-006600: #006600;
+  --demo-color-007755: #007755;
+  --demo-color-00ff41: #00ff41;
+  --demo-color-0369a1: #0369a1;
+  --demo-color-059669: #059669;
+  --demo-color-064e3b: #064e3b;
+  --demo-color-065f46: #065f46;
+  --demo-color-073642: #073642;
+  --demo-color-0a0a0a: #0a0a0a;
+  --demo-color-0a0a14: #0a0a14;
+  --demo-color-0a0a3a: #0a0a3a;
+  --demo-color-0a0a40: #0a0a40;
+  --demo-color-0a1a3a: #0a1a3a;
+  --demo-color-0a3a0a: #0a3a0a;
+  --demo-color-0a4a20: #0a4a20;
+  --demo-color-0d0d0d: #0d0d0d;
+  --demo-color-0d6efd: #0d6efd;
+  --demo-color-0f172a: #0f172a;
+  --demo-color-0f766e: #0f766e;
+  --demo-color-10b981: #10b981;
+  --demo-color-111: #111;
+  --demo-color-14532d: #14532d;
+  --demo-color-152015: #152015;
+  --demo-color-16a34a: #16a34a;
+  --demo-color-1840a0: #1840a0;
+  --demo-color-198754: #198754;
+  --demo-color-1a1a1a: #1a1a1a;
+  --demo-color-1a1a2e: #1a1a2e;
+  --demo-color-1a1a5a: #1a1a5a;
+  --demo-color-1a2540: #1a2540;
+  --demo-color-1a2a40: #1a2a40;
+  --demo-color-1a2a45: #1a2a45;
+  --demo-color-1a2a60: #1a2a60;
+  --demo-color-1a2aa0: #1a2aa0;
+  --demo-color-1a73e8: #1a73e8;
+  --demo-color-1a7a3a: #1a7a3a;
+  --demo-color-1d4ed8: #1d4ed8;
+  --demo-color-1e1e1e: #1e1e1e;
+  --demo-color-1e3a5f: #1e3a5f;
+  --demo-color-1e3a8a: #1e3a8a;
+  --demo-color-1e40af: #1e40af;
+  --demo-color-2020a0: #2020a0;
+  --demo-color-204020: #204020;
+  --demo-color-222: #222;
+  --demo-color-228b22: #228b22;
+  --demo-color-22aa55: #22aa55;
+  --demo-color-22c55e: #22c55e;
+  --demo-color-242424: #242424;
+  --demo-color-2563eb: #2563eb;
+  --demo-color-264f78: #264f78;
+  --demo-color-268bd2: #268bd2;
+  --demo-color-27c93f: #27c93f;
+  --demo-color-2855ad: #2855ad;
+  --demo-color-2a2a2a: #2a2a2a;
+  --demo-color-2a2a3e: #2a2a3e;
+  --demo-color-2a3550: #2a3550;
+  --demo-color-2a4a2a: #2a4a2a;
+  --demo-color-2aa198: #2aa198;
+  --demo-color-2b6cb0: #2b6cb0;
+  --demo-color-302000: #302000;
+  --demo-color-333: #333;
+  --demo-color-3a1a0a: #3a1a0a;
+  --demo-color-3a1a6a: #3a1a6a;
+  --demo-color-3a2a10: #3a2a10;
+  --demo-color-3a3a3a: #3a3a3a;
+  --demo-color-3a4a6a: #3a4a6a;
+  --demo-color-3a8a3a: #3a8a3a;
+  --demo-color-3b82f6: #3b82f6;
+  --demo-color-4080e0: #4080e0;
+  --demo-color-440088: #440088;
+  --demo-color-444: #444;
+  --demo-color-4477cc: #4477cc;
+  --demo-color-451a03: #451a03;
+  --demo-color-4a4ae0: #4a4ae0;
+  --demo-color-4a7cdc: #4a7cdc;
+  --demo-color-4c1d95: #4c1d95;
+  --demo-color-546e7a: #546e7a;
+  --demo-color-555: #555;
+  --demo-color-569cd6: #569cd6;
+  --demo-color-586e75: #586e75;
+  --demo-color-5a0020: #5a0020;
+  --demo-color-5a4a00: #5a4a00;
+  --demo-color-5a4a20: #5a4a20;
+  --demo-color-5b21b6: #5b21b6;
+  --demo-color-5c3a1e: #5c3a1e;
+  --demo-color-63b3ed: #63b3ed;
+  --demo-color-6a9955: #6a9955;
+  --demo-color-6a9a6a: #6a9a6a;
+  --demo-color-6b7280: #6b7280;
+  --demo-color-6bc98a: #6bc98a;
+  --demo-color-6ee7b7: #6ee7b7;
+  --demo-color-6f42c1: #6f42c1;
+  --demo-color-713f12: #713f12;
+  --demo-color-78350f: #78350f;
+  --demo-color-7a4000: #7a4000;
+  --demo-color-7a5000: #7a5000;
+  --demo-color-7aa2e8: #7aa2e8;
+  --demo-color-7c2d12: #7c2d12;
+  --demo-color-7c3aed: #7c3aed;
+  --demo-color-7dd3fc: #7dd3fc;
+  --demo-color-7ec8a4: #7ec8a4;
+  --demo-color-7ec8e3: #7ec8e3;
+  --demo-color-7f1d1d: #7f1d1d;
+  --demo-color-8040c0: #8040c0;
+  --demo-color-80cbc4: #80cbc4;
+  --demo-color-82aaff: #82aaff;
+  --demo-color-839496: #839496;
+  --demo-color-86efac: #86efac;
+  --demo-color-888: #888;
+  --demo-color-89c4f4: #89c4f4;
+  --demo-color-89d185: #89d185;
+  --demo-color-8a0000: #8a0000;
+  --demo-color-8ac840: #8ac840;
+  --demo-color-8b0000: #8b0000;
+  --demo-color-8b5cf6: #8b5cf6;
+  --demo-color-8c33e0: #8c33e0;
+  --demo-color-906010: #906010;
+  --demo-color-92400e: #92400e;
+  --demo-color-9333ea: #9333ea;
+  --demo-color-93c5fd: #93c5fd;
+  --demo-color-991b1b: #991b1b;
+  --demo-color-999: #999;
+  --demo-color-9a3412: #9a3412;
+  --demo-color-9cdcfe: #9cdcfe;
+  --demo-color-a04020: #a04020;
+  --demo-color-a0f0a0: #a0f0a0;
+  --demo-color-a52a2a: #a52a2a;
+  --demo-color-a5f3c0: #a5f3c0;
+  --demo-color-a8f0c0: #a8f0c0;
+  --demo-color-a93226: #a93226;
+  --demo-color-aaa: #aaa;
+  --demo-color-aac: #aac;
+  --demo-color-b45309: #b45309;
+  --demo-color-b58900: #b58900;
+  --demo-color-b5cea8: #b5cea8;
+  --demo-color-b8d8ff: #b8d8ff;
+  --demo-color-b8e0a0: #b8e0a0;
+  --demo-color-bbb: #bbb;
+  --demo-color-bbf7d0: #bbf7d0;
+  --demo-color-be185d: #be185d;
+  --demo-color-c02020: #c02020;
+  --demo-color-c0392b: #c0392b;
+  --demo-color-c04030: #c04030;
+  --demo-color-c0a0e0: #c0a0e0;
+  --demo-color-c0d8ff: #c0d8ff;
+  --demo-color-c0f0d0: #c0f0d0;
+  --demo-color-c2410c: #c2410c;
+  --demo-color-c3e88d: #c3e88d;
+  --demo-color-c4b5fd: #c4b5fd;
+  --demo-color-c792ea: #c792ea;
+  --demo-color-c8c6bf: #c8c6bf;
+  --demo-color-cb4b16: #cb4b16;
+  --demo-color-cc4444: #cc4444;
+  --demo-color-cc8844: #cc8844;
+  --demo-color-ccc: #ccc;
+  --demo-color-ce9178: #ce9178;
+  --demo-color-d0d0d0: #d0d0d0;
+  --demo-color-d1fae5: #d1fae5;
+  --demo-color-d4d4d4: #d4d4d4;
+  --demo-color-d63384: #d63384;
+  --demo-color-d97706: #d97706;
+  --demo-color-db2777: #db2777;
+  --demo-color-dbeafe: #dbeafe;
+  --demo-color-dcdcaa: #dcdcaa;
+  --demo-color-dcfce7: #dcfce7;
+  --demo-color-ddd: #ddd;
+  --demo-color-e05a1a: #e05a1a;
+  --demo-color-e05c5c: #e05c5c;
+  --demo-color-e06020: #e06020;
+  --demo-color-e07020: #e07020;
+  --demo-color-e0d8cc: #e0d8cc;
+  --demo-color-e0e0e0: #e0e0e0;
+  --demo-color-e2e2e2: #e2e2e2;
+  --demo-color-e2e8f0: #e2e8f0;
+  --demo-color-e3f2fd: #e3f2fd;
+  --demo-color-e6f4ea: #e6f4ea;
+  --demo-color-e87a7a: #e87a7a;
+  --demo-color-e8d8ff: #e8d8ff;
+  --demo-color-e8e6df: #e8e6df;
+  --demo-color-e8e8e8: #e8e8e8;
+  --demo-color-e8eeff: #e8eeff;
+  --demo-color-e8f0f8: #e8f0f8;
+  --demo-color-e8f0ff: #e8f0ff;
+  --demo-color-e8f4fd: #e8f4fd;
+  --demo-color-e8f5e9: #e8f5e9;
+  --demo-color-ea580c: #ea580c;
+  --demo-color-eab308: #eab308;
+  --demo-color-ec4899: #ec4899;
+  --demo-color-ecfdf5: #ecfdf5;
+  --demo-color-edc: #edc;
+  --demo-color-ede9fe: #ede9fe;
+  --demo-color-edfdf0: #edfdf0;
+  --demo-color-ef4444: #ef4444;
+  --demo-color-eff6ff: #eff6ff;
+  --demo-color-f06010: #f06010;
+  --demo-color-f07030: #f07030;
+  --demo-color-f07178: #f07178;
+  --demo-color-f0c040: #f0c040;
+  --demo-color-f0e8ff: #f0e8ff;
+  --demo-color-f0ede0: #f0ede0;
+  --demo-color-f0efe9: #f0efe9;
+  --demo-color-f0f0f0: #f0f0f0;
+  --demo-color-f0f4ff: #f0f4ff;
+  --demo-color-f0f7f0: #f0f7f0;
+  --demo-color-f0faf5: #f0faf5;
+  --demo-color-f0fdf4: #f0fdf4;
+  --demo-color-f3e8ff: #f3e8ff;
+  --demo-color-f48771: #f48771;
+  --demo-color-f59e0b: #f59e0b;
+  --demo-color-f5a623: #f5a623;
+  --demo-color-f5f3ff: #f5f3ff;
+  --demo-color-f5f5f5: #f5f5f5;
+  --demo-color-f5f8ff: #f5f8ff;
+  --demo-color-f76b00: #f76b00;
+  --demo-color-f78c6c: #f78c6c;
+  --demo-color-f87171: #f87171;
+  --demo-color-f8f0ff: #f8f0ff;
+  --demo-color-f8fdf8: #f8fdf8;
+  --demo-color-f97316: #f97316;
+  --demo-color-f9a8d4: #f9a8d4;
+  --demo-color-f9f9f9: #f9f9f9;
+  --demo-color-faaf00: #faaf00;
+  --demo-color-fafaf7: #fafaf7;
+  --demo-color-fafaf8: #fafaf8;
+  --demo-color-fbbf24: #fbbf24;
+  --demo-color-fbcfe8: #fbcfe8;
+  --demo-color-fca5a5: #fca5a5;
+  --demo-color-fcd34d: #fcd34d;
+  --demo-color-fce4ec: #fce4ec;
+  --demo-color-fce7f3: #fce7f3;
+  --demo-color-fd7e14: #fd7e14;
+  --demo-color-fde68a: #fde68a;
+  --demo-color-fde8e8: #fde8e8;
+  --demo-color-fde8f4: #fde8f4;
+  --demo-color-fdf3e8: #fdf3e8;
+  --demo-color-fdf6e3: #fdf6e3;
+  --demo-color-fdf8e8: #fdf8e8;
+  --demo-color-fdf8f0: #fdf8f0;
+  --demo-color-fed7aa: #fed7aa;
+  --demo-color-fee2e2: #fee2e2;
+  --demo-color-fef08a: #fef08a;
+  --demo-color-fef3c7: #fef3c7;
+  --demo-color-fefce8: #fefce8;
+  --demo-color-ff0: #ff0;
+  --demo-color-ff5f56: #ff5f56;
+  --demo-color-ff79c6: #ff79c6;
+  --demo-color-ffb86c: #ffb86c;
+  --demo-color-ffbd2e: #ffbd2e;
+  --demo-color-ffc0d8: #ffc0d8;
+  --demo-color-ffc107: #ffc107;
+  --demo-color-ffd0e0: #ffd0e0;
+  --demo-color-ffeef0: #ffeef0;
+  --demo-color-fff0a0: #fff0a0;
+  --demo-color-fff1f2: #fff1f2;
+  --demo-color-fff3e0: #fff3e0;
+  --demo-color-fff5f5: #fff5f5;
+  --demo-color-fff7c0: #fff7c0;
+  --demo-color-fff7ed: #fff7ed;
+  --demo-color-fff8f8: #fff8f8;
+  --demo-color-fffbe6: #fffbe6;
+  --demo-color-fffbeb: #fffbeb;
+  --demo-color-fffbf0: #fffbf0;
+  --demo-color-fffdf5: #fffdf5;
+  --demo-color-fffdf8: #fffdf8;
+  --demo-color-rgba-0-34-255-0-06: rgba(0, 34, 255, 0.06);
+  --demo-color-rgba-0-34-255-0-1: rgba(0, 34, 255, 0.1);
+  --demo-color-rgba-0-34-255-0-3: rgba(0, 34, 255, 0.3);
+  --demo-color-rgba-0-34-255-0-4: rgba(0, 34, 255, 0.4);
+  --demo-color-rgba-0-34-255-0-5: rgba(0, 34, 255, 0.5);
+  --demo-color-rgba-0-0-0-0-35: rgba(0,0,0,0.35);
+  --demo-color-rgba-0-0-0-0-45: rgba(0,0,0,0.45);
+  --demo-color-rgba-0-0-0-0-55: rgba(0,0,0,0.55);
+  --demo-color-rgba-0-0-0-0-65: rgba(0,0,0,0.65);
+  --demo-color-rgba-100-160-255-0-1: rgba(100,160,255,0.1);
+  --demo-color-rgba-100-160-255-0-12: rgba(100,160,255,0.12);
+  --demo-color-rgba-134-239-172-0-15: rgba(134, 239, 172, 0.15);
+  --demo-color-rgba-134-239-172-0-12: rgba(134,239,172,0.12);
+  --demo-color-rgba-134-239-172-0-2: rgba(134,239,172,0.2);
+  --demo-color-rgba-16-185-129-0-2: rgba(16,185,129,0.2);
+  --demo-color-rgba-192-32-32-0-05: rgba(192,32,32,0.05);
+  --demo-color-rgba-192-32-32-0-1: rgba(192,32,32,0.1);
+  --demo-color-rgba-192-32-32-0-5: rgba(192,32,32,0.5);
+  --demo-color-rgba-244-63-94-0-15: rgba(244,63,94,0.15);
+  --demo-color-rgba-248-113-113-0-2: rgba(248,113,113,0.2);
+  --demo-color-rgba-255-220-0-0-3: rgba(255, 220, 0, 0.3);
+  --demo-color-rgba-255-200-0-0-25: rgba(255,200,0,0.25);
+  --demo-color-rgba-255-200-100-0-12: rgba(255,200,100,0.12);
+  --demo-color-rgba-255-220-0-0-25: rgba(255,220,0,0.25);
+  --demo-color-rgba-37-99-235-0-15: rgba(37,99,235,0.15);
+  --demo-color-rgba-40-85-173-0-2: rgba(40, 85, 173, 0.2);
+  --demo-color-rgba-52-211-153-0-08: rgba(52,211,153,0.08);
+  --demo-color-rgba-52-211-153-0-25: rgba(52,211,153,0.25);
+  --demo-color-rgba-59-130-246-0-08: rgba(59,130,246,0.08);
+  --demo-color-rgba-59-130-246-0-4: rgba(59,130,246,0.4);
+  /* End demo-local color aliases. */
+
+  /* Typography */
+  --font-serif: "Lora", Georgia, "Times New Roman", serif;
+  --font-display: "Joan", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Editorial shadows (hard, offset, no blur) */
+  --flat-shadow: 4px 4px 0px var(--border-black);
+  --flat-shadow-hover: 6px 6px 0px var(--border-black);
+  --flat-shadow-active: 1px 1px 0px var(--border-black);
+  --thin-shadow: 2px 2px 0px var(--border-black);
+
+  /* Scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --transition: all 0.15s ease-in-out;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-ivory);
+  color: var(--text-black);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5) var(--space-8);
+}
+
+/* ----- Type ----- */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--text-black);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 12px;
+  margin: 0 0 var(--space-5);
+}
+h2 {
+  font-size: 1.8rem;
+  margin: var(--space-7) 0 var(--space-4);
+  border-bottom: 1px solid var(--border-black);
+  padding-bottom: var(--space-2);
+}
+h3 {
+  font-size: 1.3rem;
+  margin: var(--space-5) 0 var(--space-3);
+  font-family: var(--font-display);
+}
+
+p {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--text-charcoal);
+  margin: 0 0 var(--space-4);
+}
+a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: var(--transition);
+}
+a:hover { color: var(--text-black); }
+
+code, pre { font-family: var(--font-mono); font-size: 0.9rem; }
+code {
+  background-color: var(--bg-stone);
+  border: 1px solid var(--border-black);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.85em;
+}
+pre {
+  background-color: var(--bg-paper);
+  border: 2px solid var(--border-black);
+  box-shadow: var(--thin-shadow);
+  padding: var(--space-4);
+  overflow-x: auto;
+  line-height: 1.55;
+  margin: var(--space-4) 0;
+}
+pre code { background: transparent; border: none; padding: 0; }
+
+/* ----- Lede ----- */
+
+.lede-block { margin-bottom: var(--space-7); }
+.eyebrow {
+  font-family: var(--font-mono);
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border-black);
+}
+.lede {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--text-charcoal);
+  max-width: 56ch;
+}
+
+/* ----- Crumbs ----- */
+
+.crumbs {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-5);
+}
+.crumbs a { color: var(--text-muted); text-decoration: underline; }
+.crumbs a:hover { color: var(--text-black); }
+
+/* ----- Cards (used for releases on index and demos on a release page) ----- */
+
+.release-list,
+.demo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+}
+
+.release-card,
+.demo-card {
+  background: var(--bg-paper);
+  border: 2px solid var(--border-black);
+  box-shadow: var(--flat-shadow);
+  padding: var(--space-5);
+  transition: var(--transition);
+}
+.release-card:hover,
+.demo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--flat-shadow-hover);
+}
+.release-card-link {
+  display: block;
+  text-decoration: none;
+  color: var(--text-black);
+}
+.release-card-link:hover { color: var(--accent-blue); }
+.release-card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.release-label {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+.release-status {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--text-black);
+  color: var(--bg-ivory);
+  padding: 0.2rem 0.5rem;
+}
+.release-note {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: var(--space-3) 0 0;
+  font-size: 0.78rem;
+}
+
+.updated-line {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: calc(-1 * var(--space-3)) 0 var(--space-5);
+}
+.updated-line code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.95em;
+  color: var(--text-black);
+}
+.updated-line a { color: var(--text-black); text-decoration: underline; }
+.updated-line a:hover { color: var(--accent-blue); }
+.updated-line .updated-abs { color: var(--text-muted); opacity: 0.7; }
+
+.demo-card h3 {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+.demo-card h3 a {
+  color: var(--text-black);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.demo-card h3 a:hover { color: var(--accent-blue); }
+.demo-card p {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-charcoal);
+  margin: 0 0 var(--space-3);
+}
+.demo-card .demo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.demo-card .tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-black);
+  background: var(--bg-paper);
+  border: 1px solid var(--border-black);
+  padding: 0.15rem 0.5rem;
+  text-decoration: none;
+}
+.demo-card .tag-live {
+  background: var(--text-black);
+  color: var(--bg-ivory);
+  border-color: var(--text-black);
+}
+.demo-card .tag-live:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: var(--bg-ivory);
+}
+.demo-card .tag-pending {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+  border-style: dashed;
+}
+
+/* ----- Group title (within a release page) ----- */
+
+.group-title {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: var(--space-7) 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-black);
+  border-radius: 0;
+  border-top: none;
+}
+.group-count { color: var(--text-muted); font-weight: 400; }
+
+/* ----- How-it-works section ----- */
+
+.how ol {
+  padding-left: 1.4rem;
+  font-family: var(--font-serif);
+  color: var(--text-charcoal);
+  font-size: 1.05rem;
+}
+.how li { margin-bottom: var(--space-2); }
+.how .note {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: var(--space-4);
+}
+.note {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ----- Buttons ----- */
+
+button, .btn {
+  font: inherit;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: var(--text-black);
+  color: var(--bg-ivory);
+  border: 2px solid var(--border-black);
+  padding: 0.55rem 1.1rem;
+  box-shadow: var(--flat-shadow);
+  cursor: pointer;
+  transition: var(--transition);
+}
+button:hover, .btn:hover {
+  background: var(--bg-paper);
+  color: var(--text-black);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--flat-shadow-hover);
+}
+button:active, .btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: var(--flat-shadow-active);
+}
+
+/* ----- Live probe panels ----- */
+
+.live-probe-panel {
+  margin: var(--space-5) 0;
+}
+.live-probe-panel.is-compared {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 4px;
+}
+.live-probe-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.live-probe-output {
+  border: 1px solid var(--border-black);
+  background: var(--bg-stone);
+  color: var(--text-charcoal);
+  padding: var(--space-3);
+  min-height: 3rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+}
+
+/* ----- Skeleton (used inside demos) ----- */
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-stone) 0px, var(--bg-paper) 40px, var(--bg-stone) 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border: 1px solid var(--border-black);
+  height: 1rem;
+  margin: var(--space-2) 0;
+}
+.skeleton.lg { height: 1.6rem; width: 70%; }
+.skeleton.sm { width: 40%; }
+@keyframes shimmer {
+  0% { background-position: -100px 0; }
+  100% { background-position: 200px 0; }
+}
+
+/* ----- Byline footer ----- */
+
+.byline {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-black);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+.byline a {
+  color: var(--text-black);
+  text-decoration: underline;
+}
+.byline a:hover { color: var(--accent-blue); }
