@@ -875,6 +875,21 @@ function triggerFireworkBurst(position, colorHex, count = 25) {
 const animate = (time = 0) => {
   timer.update(time);
   const elapsed = timer.getElapsed();
+
+  // Check for inactivity (1 minute = 60,000 ms) to trigger the Windows Pipes screensaver
+  if (!isScreensaverActive && (Date.now() - lastActivityTime > 60000)) {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe && window.isComputerOn !== false && !iframe.src.includes('/demos/pipes-screensaver/')) {
+      isScreensaverActive = true;
+      const currentUrl = iframe.getAttribute('src') || '/demos/new-tab/';
+      // Don't save transient/blank pages as restore targets
+      if (!currentUrl.includes('/demos/boot/') && currentUrl !== 'about:blank') {
+        previousMonitorUrl = currentUrl;
+      }
+      console.log('Inactivity detected. Launching Pipes screensaver. Restore URL:', previousMonitorUrl);
+      iframe.src = '/demos/pipes-screensaver/';
+    }
+  }
   
   // Update fireworks particles
   for (let i = activeParticles.length - 1; i >= 0; i--) {
