@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Pipes Screensaver</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000000;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <script type="module">
+    import * as THREE from '/vendor/three/three.module.js';
+
+    const scene = new THREE.Scene();
+    
+    // Camera
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 40);
+    camera.lookAt(0, 0, 0);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x222222);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight1.position.set(1, 1, 1).normalize();
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x555555, 0.5);
+    dirLight2.position.set(-1, -1, 1).normalize();
+    scene.add(dirLight2);
+
+    // Grid Settings
+    const GRID_SIZE = 24;
+    const GRID_HALF = GRID_SIZE / 2;
+    const STEP = 2.0; // Distance between grid nodes
+    const occupied = new Set(); // Stores "x,y,z" strings
+
+    function getKey(x, y, z) {
+      return `${x},${y},${z}`;
+    }
+
+    // Colors
+    const COLORS = [
+      0xff0000, 0x00ff00, 0x0000ff, 
+      0xffff00, 0xff00ff, 0x00ffff,
+      0xff7700, 0xff0077, 0x77ff00,
+      0x00ff77, 0x7700ff, 0x0077ff
+    ];
+
+    const pipeGroup = new THREE.Group();
+    scene.add(pipeGroup);
+
+    // Geometries & Materials Cache
+    const sphereGeo = new THREE.SphereGeometry(0.8, 16, 16);
+    const cylGeoBase = new THREE.CylinderGeometry(0.6, 0.6, STEP, 16);
+    // Rotate cylinder geometry so it aligns along Y axis by default, but we'll orient it using quaternions
+    cylGeoBase.translate(0, STEP / 2, 0);
+
+    class Pipe {
+      constructor() {
+        this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.material = new THREE.MeshStandardMaterial({
+          color: this.color,
+          metalness: 0.2,
+          roughness: 0.3
+        });
+
+        // Find a random unoccupied starting point
+        let attempts = 0;
+        do {
+          this.x = Math.floor(Math.random() * (GRID_SIZE - 2) - GRID_HALF + 1);
+          this.y = Math.floor(Math.random() * (GRID_SIZE - 2) - GRID_HALF + 1);
+          this.z = Math.floor(Math.random() * (GRID_SIZE - 2) - GRID_HALF + 1);
+          attempts++;
+        } while (occupied.has(getKey(this.x, this.y, this.z)) && attempts < 100);
+
+        occupied.add(getKey(this.x, this.y, this.z));
+
+        // Start with a joint
+        const startJoint = new THREE.Mesh(sphereGeo, this.material);
+        startJoint.position.set(this.x * STEP, this.y * STEP, this.z * STEP);
+        pipeGroup.add(startJoint);
+
+        // Directions: [x, y, z]
+        this.dirs = [
+          [1, 0, 0], [-1, 0, 0],
+          [0, 1, 0], [0, -1, 0],
+          [0, 0, 1], [0, 0, -1]
+        ];
+        this.currentDir = this.dirs[Math.floor(Math.random() * this.dirs.length)];
+        this.active = true;
+        this.age = 0;
+        this.maxAge = 40 + Math.random() * 40;
+      }
+
+      step() {
+        if (!this.active) return;
+
+        this.age++;
+        if (this.age > this.maxAge) {
+          this.active = false;
+          return;
+        }
+
+        // Decide whether to turn (25% chance) or keep going
+        let nextDir = this.currentDir;
+        if (Math.random() < 0.25) {
+          // Find valid turns (90 degrees to current)
+          const validTurns = this.dirs.filter(d => {
+            // Dot product = 0 means orthogonal (90 deg)
+            const dot = d[0]*this.currentDir[0] + d[1]*this.currentDir[1] + d[2]*this.currentDir[2];
+            if (dot !== 0) return false;
+            
+            // Check if target node is in bounds and free
+            const tx = this.x + d[0];
+            const ty = this.y + d[1];
+            const tz = this.z + d[2];
+            return (
+              tx >= -GRID_HALF && tx <= GRID_HALF &&
+              ty >= -GRID_HALF && ty <= GRID_HALF &&
+              tz >= -GRID_HALF && tz <= GRID_HALF &&
+              !occupied.has(getKey(tx, ty, tz))
+            );
+          });
+
+          if (validTurns.length > 0) {
+            nextDir = validTurns[Math.floor(Math.random() * validTurns.length)];
+          }
+        }
+
+        // If we didn't turn, check if we can continue straight
+        const sx = this.x + nextDir[0];
+        const sy = this.y + nextDir[1];
+        const sz = this.z + nextDir[2];
+        const canGoStraight = (
+          sx >= -GRID_HALF && sx <= GRID_HALF &&
+          sy >= -GRID_HALF && sy <= GRID_HALF &&
+          sz >= -GRID_HALF && sz <= GRID_HALF &&
+          !occupied.has(getKey(sx, sy, sz))
+        );
+
+        if (!canGoStraight) {
+          // Try ANY valid direction
+          const anyValid = this.dirs.filter(d => {
+            const tx = this.x + d[0];
+            const ty = this.y + d[1];
+            const tz = this.z + d[2];
+            return (
+              tx >= -GRID_HALF && tx <= GRID_HALF &&
+              ty >= -GRID_HALF && ty <= GRID_HALF &&
+              tz >= -GRID_HALF && tz <= GRID_HALF &&
+              !occupied.has(getKey(tx, ty, tz))
+            );
+          });
+
+          if (anyValid.length > 0) {
+            nextDir = anyValid[Math.floor(Math.random() * anyValid.length)];
+          } else {
+            // Totally blocked
+            this.active = false;
+            // Add end cap
+            const endJoint = new THREE.Mesh(sphereGeo, this.material);
+            endJoint.position.set(this.x * STEP, this.y * STEP, this.z * STEP);
+            pipeGroup.add(endJoint);
+            return;
+          }
+        }
+
+        // Draw segment from current to next
+        const startX = this.x * STEP;
+        const startY = this.y * STEP;
+        const startZ = this.z * STEP;
+
+        // Update position
+        this.x += nextDir[0];
+        this.y += nextDir[1];
+        this.z += nextDir[2];
+        occupied.add(getKey(this.x, this.y, this.z));
+
+        // Create cylinder segment
+        const segment = new THREE.Mesh(cylGeoBase, this.material);
+        segment.position.set(startX, startY, startZ);
+
+        // Align cylinder to direction vector
+        const dirVec = new THREE.Vector3(nextDir[0], nextDir[1], nextDir[2]);
+        const alignAxis = new THREE.Vector3(0, 1, 0); // cylinder base is along Y
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(alignAxis, dirVec);
+        segment.quaternion.copy(quaternion);
+        
+        pipeGroup.add(segment);
+
+        // If we turned, add a joint at the turn point
+        if (nextDir !== this.currentDir) {
+          const joint = new THREE.Mesh(sphereGeo, this.material);
+          joint.position.set(startX, startY, startZ);
+          pipeGroup.add(joint);
+        }
+
+        this.currentDir = nextDir;
+      }
+    }
+
+    const pipes = [];
+    const maxPipes = 4;
+
+    function resetScene() {
+      // Clear 3D objects
+      while (pipeGroup.children.length > 0) {
+        const obj = pipeGroup.children[0];
+        pipeGroup.remove(obj);
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      }
+      occupied.clear();
+      pipes.length = 0;
+      
+      // Spawn initial pipes
+      for (let i = 0; i < 2; i++) {
+        pipes.push(new Pipe());
+      }
+    }
+
+    resetScene();
+
+    // Animation Loop
+    let lastStep = 0;
+    const stepInterval = 80; // ms per segment growth
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+
+      // Rotate the camera slowly around the scene for a dynamic 3D screensaver feel
+      const angle = time * 0.0001;
+      camera.position.x = Math.sin(angle) * 38;
+      camera.position.z = Math.cos(angle) * 38;
+      camera.position.y = Math.sin(angle * 0.5) * 10;
+      camera.lookAt(0, 0, 0);
+
+      // Grow pipes at discrete intervals
+      if (time - lastStep > stepInterval) {
+        lastStep = time;
+
+        let activeCount = 0;
+        for (const pipe of pipes) {
+          if (pipe.active) {
+            pipe.step();
+            activeCount++;
+          }
+        }
+
+        // If a pipe died, spawn a new one (up to maxPipes)
+        if (activeCount < maxPipes && occupied.size < (GRID_SIZE * GRID_SIZE * GRID_SIZE) * 0.3) {
+          if (Math.random() < 0.3) {
+            pipes.push(new Pipe());
+          }
+        }
+
+        // If grid is getting full or all pipes are dead, reset
+        if (occupied.size > (GRID_SIZE * GRID_SIZE * GRID_SIZE) * 0.4 || (activeCount === 0 && pipes.length >= maxPipes)) {
+          resetScene();
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
