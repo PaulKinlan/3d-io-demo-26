@@ -931,7 +931,7 @@ const toggleIndianVersion = () => {
       ];
     }
     if (bedPillow) {
-      const pillowSideMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }); // Plain white sides
+      const pillowSideMaterial = new THREE.MeshLambertMaterial({ color: 0x12a4a7 }); // Matching teal sides
       const pillowTopMaterial = new THREE.MeshLambertMaterial({
         map: loadTexture('fabric-cricket-pillow', { repeat: [1, 1] }),
         color: 0xffffff
