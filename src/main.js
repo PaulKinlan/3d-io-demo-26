@@ -727,6 +727,10 @@ htmlFrame.addEventListener('load', () => {
 
   try {
     htmlFrame.contentWindow.addEventListener('keydown', (e) => {
+       // Do not forward key events if the user is actively typing in an input field
+       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+         return;
+       }
        window.dispatchEvent(new KeyboardEvent('keydown', {
           key: e.key,
           keyCode: e.keyCode,
