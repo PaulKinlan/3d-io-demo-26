@@ -893,10 +893,12 @@ const toggleIndianVersion = () => {
   const posterB = scene.getObjectByName('posterB');
   const posterCat = scene.getObjectByName('posterCat');
   const posterKitten = scene.getObjectByName('posterKitten');
+  const posterC = scene.getObjectByName('posterC');
   const cricketBlade = scene.getObjectByName('cricketBlade');
   const cricketHandle = scene.getObjectByName('cricketHandle');
   const cricketBall = scene.getObjectByName('cricketBall');
   const cricketLabel = scene.getObjectByName('cricketLabel');
+  const bedDuvet = scene.getObjectByName('bedDuvet');
 
   if (window.isIndianVersion) {
     if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
@@ -907,10 +909,16 @@ const toggleIndianVersion = () => {
       // Scale down X to change from landscape (2.8 x 1.8) to portrait aspect ratio
       posterKitten.scale.set(1.2 / 2.8, 1, 1);
     }
+    if (posterC) posterC.material.map = loadTexture('poster-bollywood4');
     if (cricketBlade) cricketBlade.visible = true;
     if (cricketHandle) cricketHandle.visible = true;
     if (cricketBall) cricketBall.visible = true;
     if (cricketLabel) cricketLabel.visible = true;
+    if (bedDuvet) {
+      bedDuvet.material.map = loadTexture('fabric-cricket-bedsheet', { repeat: [4, 4] });
+      bedDuvet.material.color.setHex(0xffffff); // Ensure base color doesn't tint it too darkly
+      bedDuvet.material.needsUpdate = true;
+    }
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
@@ -920,10 +928,16 @@ const toggleIndianVersion = () => {
       // Reset scale to landscape
       posterKitten.scale.set(1, 1, 1);
     }
+    if (posterC) posterC.material.map = loadTexture('poster-skate');
     if (cricketBlade) cricketBlade.visible = false;
     if (cricketHandle) cricketHandle.visible = false;
     if (cricketBall) cricketBall.visible = false;
     if (cricketLabel) cricketLabel.visible = false;
+    if (bedDuvet) {
+      bedDuvet.material.map = null; // Remove texture
+      bedDuvet.material.color.set('#587091'); // Restore original color
+      bedDuvet.material.needsUpdate = true;
+    }
   }
 };
 

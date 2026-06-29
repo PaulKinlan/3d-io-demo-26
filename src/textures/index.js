@@ -33,4 +33,5 @@ export const textures = {
   'cd-pirated': { generator: () => createCDTexture('Pirated Software', '#e8e8e8', '#222222') },
   'cd-blank': { generator: () => createCDTexture('', '#e8e8e8', '#222222') },
   'cd-stack-label': { generator: createCDStackLabelTexture },
+  'fabric-cricket-bedsheet': { file: '/textures/fabric/cricket-bedsheet.png' },
 };

@@ -22,13 +22,14 @@ export const buildBed = ({ addMesh }) => {
     },
   );
 
-  addMesh(
+  const duvet = addMesh(
     new THREE.BoxGeometry(2.9, 0.85, 5.7),
     duvetMaterial,
     {
       position: new THREE.Vector3(4.45, 1.15, -2.2),
     },
   );
+  if (duvet) duvet.name = 'bedDuvet';
 
   addMesh(
     new THREE.BoxGeometry(2.6, 0.35, 1.2),
