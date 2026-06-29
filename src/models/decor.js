@@ -33,6 +33,7 @@ export const buildDecor = ({ scene, addMesh }) => {
     }),
   );
   posterCat.position.set(-4.2, 4.6, -6.28);
+  posterCat.name = 'posterCat';
   scene.add(posterCat);
 
   const posterKitten = new THREE.Mesh(
@@ -44,6 +45,7 @@ export const buildDecor = ({ scene, addMesh }) => {
   );
   posterKitten.position.set(-7.8, 4.5, -3.8);
   posterKitten.rotation.y = Math.PI / 2;
+  posterKitten.name = 'posterKitten';
   scene.add(posterKitten);
 
   const cricketProps = new THREE.Group();
@@ -67,11 +69,11 @@ export const buildDecor = ({ scene, addMesh }) => {
   ball.castShadow = true;
   cricketProps.add(ball);
 
-  // Position next to the table (table is at X=6.45, Z=1.45)
-  cricketProps.position.set(5.5, 0, 1.45);
-  // Lean it slightly against the table/wall
+  // Position in front of the table (table is at X=6.45, Z=1.45 to 2.02)
+  cricketProps.position.set(6.0, 0, 2.2);
+  // Lean it slightly backwards against the table
   cricketProps.rotation.z = -0.15;
-  cricketProps.rotation.x = 0.1;
+  cricketProps.rotation.x = -0.15;
   cricketProps.name = 'cricketProps';
   cricketProps.visible = false;
   scene.add(cricketProps);

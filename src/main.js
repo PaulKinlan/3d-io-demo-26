@@ -891,15 +891,21 @@ const toggleIndianVersion = () => {
   
   const posterA = scene.getObjectByName('posterA');
   const posterB = scene.getObjectByName('posterB');
+  const posterCat = scene.getObjectByName('posterCat');
+  const posterKitten = scene.getObjectByName('posterKitten');
   const cricketProps = scene.getObjectByName('cricketProps');
 
   if (window.isIndianVersion) {
     if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
-    if (posterB) posterB.material.map = loadTexture('poster-bollywood');
+    if (posterB) posterB.material.map = loadTexture('poster-bollywood1');
+    if (posterCat) posterCat.material.map = loadTexture('poster-bollywood2');
+    if (posterKitten) posterKitten.material.map = loadTexture('poster-bollywood3');
     if (cricketProps) cricketProps.visible = true;
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
+    if (posterCat) posterCat.material.map = loadTexture('poster-cat');
+    if (posterKitten) posterKitten.material.map = loadTexture('poster-kitten-washing-line');
     if (cricketProps) cricketProps.visible = false;
   }
 };
