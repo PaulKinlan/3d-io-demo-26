@@ -1189,6 +1189,8 @@ const setupMCP = () => {
         // Every demo now carries its own browser chrome (injected at build/dev
         // time by demos/_frame/wrap.js), so navigate to it directly.
         iframe.src = url;
+        previousMonitorUrl = url;
+        resetInactivityTimer();
       }
     },
     name: "navigateComputerScreen",
@@ -1256,6 +1258,7 @@ const setupMCP = () => {
         if (iframe) {
           iframe.src = '/demos/boot/index.html';
         }
+        resetInactivityTimer();
       }
       return { success: true, state: window.isComputerOn ? 'ON' : 'OFF' };
     },
