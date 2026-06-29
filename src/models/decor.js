@@ -48,21 +48,34 @@ export const buildDecor = ({ scene, addMesh }) => {
   posterKitten.name = 'posterKitten';
   scene.add(posterKitten);
 
+  const posterC = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.0, 3.0),
+    new THREE.MeshStandardMaterial({
+      map: loadTexture('poster-skate'), // Default poster
+      roughness: 1,
+    }),
+  );
+  posterC.position.set(5.0, 4.6, -6.28); // Back wall, right side
+  posterC.name = 'posterC';
+  scene.add(posterC);
+
   const woodMaterial = new THREE.MeshStandardMaterial({ color: '#d2b48c', roughness: 0.8 });
   const gripMaterial = new THREE.MeshStandardMaterial({ color: '#2a2a2a', roughness: 0.9 });
   const ballMaterial = new THREE.MeshStandardMaterial({ color: '#8b0000', roughness: 0.6 });
 
-  // Add parts directly to the scene to avoid THREE.Group issues
-  const batX = 2.0;
-  const batY = 0;
-  const batZ = 0;
+  // Re-use a group for the bat so the blade, label, and handle stay perfectly aligned.
+  const batGroup = new THREE.Group();
+  batGroup.position.set(-1.5, 0, -4.0);
+  batGroup.rotation.z = 0.2; // Lean left towards desk
+  batGroup.scale.set(2.5, 2.5, 2.5);
+  scene.add(batGroup);
 
   const blade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.2, 0.05), woodMaterial);
-  blade.position.set(batX, batY + 0.6, batZ);
+  blade.position.set(0, 0.6, 0);
   blade.castShadow = true;
   blade.name = 'cricketBlade';
   blade.visible = false;
-  scene.add(blade);
+  batGroup.add(blade);
 
   // Create MRF Label
   const mrfCanvas = document.createElement('canvas');
@@ -86,20 +99,22 @@ export const buildDecor = ({ scene, addMesh }) => {
     new THREE.PlaneGeometry(0.18, 0.6),
     new THREE.MeshStandardMaterial({ map: mrfTexture, roughness: 0.7 })
   );
-  mrfLabel.position.set(batX, batY + 0.6, batZ + 0.026);
+  mrfLabel.position.set(0, 0.6, 0.026);
   mrfLabel.name = 'cricketLabel';
   mrfLabel.visible = false;
-  scene.add(mrfLabel);
+  batGroup.add(mrfLabel);
 
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 12), gripMaterial);
-  handle.position.set(batX, batY + 1.5, batZ);
+  handle.position.set(0, 1.5, 0);
   handle.castShadow = true;
   handle.name = 'cricketHandle';
   handle.visible = false;
-  scene.add(handle);
+  batGroup.add(handle);
 
+  // Ball sits on the floor separately so it doesn't lean with the bat
   const ball = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), ballMaterial);
-  ball.position.set(batX + 0.25, batY + 0.06, batZ + 0.15);
+  ball.position.set(-1.0, 0.15, -3.8); // On floor near bat
+  ball.scale.set(2.5, 2.5, 2.5);
   ball.castShadow = true;
   ball.name = 'cricketBall';
   ball.visible = false;
