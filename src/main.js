@@ -893,20 +893,37 @@ const toggleIndianVersion = () => {
   const posterB = scene.getObjectByName('posterB');
   const posterCat = scene.getObjectByName('posterCat');
   const posterKitten = scene.getObjectByName('posterKitten');
-  const cricketProps = scene.getObjectByName('cricketProps');
+  const cricketBlade = scene.getObjectByName('cricketBlade');
+  const cricketHandle = scene.getObjectByName('cricketHandle');
+  const cricketBall = scene.getObjectByName('cricketBall');
+  const cricketLabel = scene.getObjectByName('cricketLabel');
 
   if (window.isIndianVersion) {
     if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
     if (posterB) posterB.material.map = loadTexture('poster-bollywood1');
     if (posterCat) posterCat.material.map = loadTexture('poster-bollywood2');
-    if (posterKitten) posterKitten.material.map = loadTexture('poster-bollywood3');
-    if (cricketProps) cricketProps.visible = true;
+    if (posterKitten) {
+      posterKitten.material.map = loadTexture('poster-bollywood3');
+      // Scale down X to change from landscape (2.8 x 1.8) to portrait aspect ratio
+      posterKitten.scale.set(1.2 / 2.8, 1, 1);
+    }
+    if (cricketBlade) cricketBlade.visible = true;
+    if (cricketHandle) cricketHandle.visible = true;
+    if (cricketBall) cricketBall.visible = true;
+    if (cricketLabel) cricketLabel.visible = true;
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
     if (posterCat) posterCat.material.map = loadTexture('poster-cat');
-    if (posterKitten) posterKitten.material.map = loadTexture('poster-kitten-washing-line');
-    if (cricketProps) cricketProps.visible = false;
+    if (posterKitten) {
+      posterKitten.material.map = loadTexture('poster-kitten-washing-line');
+      // Reset scale to landscape
+      posterKitten.scale.set(1, 1, 1);
+    }
+    if (cricketBlade) cricketBlade.visible = false;
+    if (cricketHandle) cricketHandle.visible = false;
+    if (cricketBall) cricketBall.visible = false;
+    if (cricketLabel) cricketLabel.visible = false;
   }
 };
 

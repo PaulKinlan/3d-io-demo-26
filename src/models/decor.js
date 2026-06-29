@@ -48,35 +48,62 @@ export const buildDecor = ({ scene, addMesh }) => {
   posterKitten.name = 'posterKitten';
   scene.add(posterKitten);
 
-  const cricketProps = new THREE.Group();
-  
   const woodMaterial = new THREE.MeshStandardMaterial({ color: '#d2b48c', roughness: 0.8 });
   const gripMaterial = new THREE.MeshStandardMaterial({ color: '#2a2a2a', roughness: 0.9 });
   const ballMaterial = new THREE.MeshStandardMaterial({ color: '#8b0000', roughness: 0.6 });
 
+  // Add parts directly to the scene to avoid THREE.Group issues
+  const batX = 2.0;
+  const batY = 0;
+  const batZ = 0;
+
   const blade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.2, 0.05), woodMaterial);
-  blade.position.set(0, 0.6, 0);
+  blade.position.set(batX, batY + 0.6, batZ);
   blade.castShadow = true;
-  cricketProps.add(blade);
+  blade.name = 'cricketBlade';
+  blade.visible = false;
+  scene.add(blade);
+
+  // Create MRF Label
+  const mrfCanvas = document.createElement('canvas');
+  mrfCanvas.width = 128;
+  mrfCanvas.height = 384;
+  const ctx = mrfCanvas.getContext('2d');
+  ctx.fillStyle = '#e32636'; // MRF Red
+  ctx.fillRect(0, 0, 128, 384);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 72px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.translate(64, 192);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('MRF', 0, 0);
+  
+  const mrfTexture = new THREE.CanvasTexture(mrfCanvas);
+  mrfTexture.colorSpace = THREE.SRGBColorSpace;
+  
+  const mrfLabel = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.18, 0.6),
+    new THREE.MeshStandardMaterial({ map: mrfTexture, roughness: 0.7 })
+  );
+  mrfLabel.position.set(batX, batY + 0.6, batZ + 0.026);
+  mrfLabel.name = 'cricketLabel';
+  mrfLabel.visible = false;
+  scene.add(mrfLabel);
 
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 12), gripMaterial);
-  handle.position.set(0, 1.5, 0);
+  handle.position.set(batX, batY + 1.5, batZ);
   handle.castShadow = true;
-  cricketProps.add(handle);
+  handle.name = 'cricketHandle';
+  handle.visible = false;
+  scene.add(handle);
 
   const ball = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), ballMaterial);
-  ball.position.set(0.2, 0.06, 0.1);
+  ball.position.set(batX + 0.25, batY + 0.06, batZ + 0.15);
   ball.castShadow = true;
-  cricketProps.add(ball);
-
-  // Position in front of the table (table is at X=6.45, Z=1.45 to 2.02)
-  cricketProps.position.set(6.0, 0, 2.2);
-  // Lean it slightly backwards against the table
-  cricketProps.rotation.z = -0.15;
-  cricketProps.rotation.x = -0.15;
-  cricketProps.name = 'cricketProps';
-  cricketProps.visible = false;
-  scene.add(cricketProps);
+  ball.name = 'cricketBall';
+  ball.visible = false;
+  scene.add(ball);
 
   addMesh(
     new THREE.BoxGeometry(2.8, 2.2, 0.18),
