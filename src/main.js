@@ -595,11 +595,46 @@ window.addEventListener('keydown', (e) => {
     if (iframe) {
       iframe.src = '/demos/bengaluru-io-connect/index.html';
       iframe.focus();
+      previousMonitorUrl = '/demos/bengaluru-io-connect/index.html';
+      resetInactivityTimer();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'r') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/redbus/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/redbus/';
+      resetInactivityTimer();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'm') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/makemytrip/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/makemytrip/';
+      resetInactivityTimer();
     }
   }
 
   if (e.key.toLowerCase() === 'i') {
     toggleIndianVersion();
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      if (window.isIndianVersion) {
+        iframe.src = '/demos/times-internet/';
+        previousMonitorUrl = '/demos/times-internet/';
+      } else {
+        // If turning off Indian version, go back to the New Tab page
+        iframe.src = '/demos/new-tab/index.html';
+        previousMonitorUrl = '/demos/new-tab/index.html';
+      }
+      iframe.focus();
+      resetInactivityTimer();
+    }
   }
 
   if (e.key.toLowerCase() === 'h') {
@@ -607,6 +642,8 @@ window.addEventListener('keydown', (e) => {
     if (iframe) {
       iframe.src = '/demos/new-tab/index.html';
       iframe.focus();
+      previousMonitorUrl = '/demos/new-tab/index.html';
+      resetInactivityTimer();
     }
   }
 
