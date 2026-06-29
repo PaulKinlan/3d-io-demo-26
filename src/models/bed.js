@@ -31,13 +31,14 @@ export const buildBed = ({ addMesh }) => {
   );
   if (duvet) duvet.name = 'bedDuvet';
 
-  addMesh(
+  const pillow = addMesh(
     new THREE.BoxGeometry(2.6, 0.35, 1.2),
     pillowMaterial,
     {
       position: new THREE.Vector3(4.45, 1.55, -4.25),
     },
   );
+  if (pillow) pillow.name = 'bedPillow';
 
   const legGeometry = new THREE.BoxGeometry(0.2, 0.4, 0.2);
   const legPositions = [
