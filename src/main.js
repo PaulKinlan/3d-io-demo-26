@@ -799,6 +799,48 @@ const activeParticles = [];
 let isBatAnimating = false;
 let batAnimationTime = 0;
 
+// Screensaver state and inactivity tracking
+let lastActivityTime = Date.now();
+let isScreensaverActive = false;
+let previousMonitorUrl = '/demos/new-tab/';
+
+function resetInactivityTimer() {
+  lastActivityTime = Date.now();
+  if (isScreensaverActive) {
+    isScreensaverActive = false;
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      console.log('Activity detected, restoring screen to:', previousMonitorUrl);
+      iframe.src = previousMonitorUrl;
+    }
+  }
+}
+
+// Listen for activity on the parent window
+['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart'].forEach(eventName => {
+  window.addEventListener(eventName, resetInactivityTimer, { passive: true });
+});
+
+// Setup iframe activity listener once the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  const iframe = document.querySelector('.monitor-html-frame');
+  if (iframe) {
+    iframe.addEventListener('load', () => {
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDoc) {
+          ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart'].forEach(eventName => {
+            iframeDoc.addEventListener(eventName, resetInactivityTimer, { passive: true });
+          });
+        }
+      } catch (e) {
+        // Suppress cross-origin warnings if any demo navigates away, though all are local
+        console.warn('Could not attach inactivity listeners to iframe:', e);
+      }
+    });
+  }
+});
+
 function triggerFireworkBurst(position, colorHex, count = 25) {
   const colors = [colorHex, 0xffffff, 0xffd700, 0xff4500]; // Mix of main color, white, gold, orange
   const particleGeo = new THREE.SphereGeometry(0.04, 8, 8);
