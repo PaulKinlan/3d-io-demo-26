@@ -794,10 +794,87 @@ const updateMonitorTransform = () => {
   element.style.transform = cssTransform;
 };
 
+// Animation state for cricket bat and fireworks
+const activeParticles = [];
+let isBatAnimating = false;
+let batAnimationTime = 0;
+
+function triggerFireworkBurst(position, colorHex, count = 25) {
+  const colors = [colorHex, 0xffffff, 0xffd700, 0xff4500]; // Mix of main color, white, gold, orange
+  const particleGeo = new THREE.SphereGeometry(0.04, 8, 8);
+  
+  for (let i = 0; i < count; i++) {
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const mat = new THREE.MeshBasicMaterial({ color: color });
+    const mesh = new THREE.Mesh(particleGeo, mat);
+    mesh.position.copy(position);
+    scene.add(mesh);
+    
+    // Random velocity in a hemisphere (facing upwards/outwards)
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos((Math.random() * 1.6) - 0.8); // bias upwards
+    const speed = 0.03 + Math.random() * 0.06;
+    
+    const velocity = new THREE.Vector3(
+      Math.sin(phi) * Math.cos(theta) * speed,
+      Math.abs(Math.cos(phi)) * speed * 1.5 + 0.02, // extra upward kick
+      Math.sin(phi) * Math.sin(theta) * speed
+    );
+    
+    activeParticles.push({
+      mesh,
+      velocity,
+      life: 1.0,
+      decay: 0.015 + Math.random() * 0.015
+    });
+  }
+}
+
 const animate = (time = 0) => {
   timer.update(time);
   const elapsed = timer.getElapsed();
   
+  // Update fireworks particles
+  for (let i = activeParticles.length - 1; i >= 0; i--) {
+    const p = activeParticles[i];
+    p.mesh.position.add(p.velocity);
+    p.velocity.y -= 0.0025; // gravity
+    p.life -= p.decay;
+    p.mesh.scale.setScalar(p.life);
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      activeParticles.splice(i, 1);
+    }
+  }
+
+  // Update cricket bat wobble and pop-in
+  if (isBatAnimating) {
+    const batGroup = scene.getObjectByName('cricketBatGroup');
+    if (batGroup) {
+      batAnimationTime += 0.035;
+      const t = batAnimationTime;
+      // Elastic scale up from 0 to 1.0 (since group local scale is 1, wait!
+      // In decor.js, we set batGroup.scale.set(0,0,0) and in main.js we want it to reach 1.0?
+      // Wait! In decor.js, the original batGroup had scale.set(2.5, 2.5, 2.5).
+      // Since we changed it to scale.set(0,0,0) in decor.js, we want it to animate up to 2.5!
+      // Yes, scaleVal = 2.5 * (spring equation)
+      const scaleVal = 2.5 * (1 - Math.exp(-4 * t) * Math.cos(12 * t));
+      
+      if (t < 1.5) {
+        batGroup.scale.set(scaleVal, scaleVal, scaleVal);
+        // Wobble rotation.z around its default 0.2
+        const wobble = Math.sin(22 * t) * Math.exp(-2.5 * t) * 0.35;
+        batGroup.rotation.z = 0.2 + wobble;
+      } else {
+        batGroup.scale.set(2.5, 2.5, 2.5);
+        batGroup.rotation.z = 0.2;
+        isBatAnimating = false;
+      }
+    }
+  }
+
   if (renderer.domElement.onpaint) {
     renderer.domElement.onpaint();
   }
@@ -894,10 +971,8 @@ const toggleIndianVersion = () => {
   const posterCat = scene.getObjectByName('posterCat');
   const posterKitten = scene.getObjectByName('posterKitten');
   const posterC = scene.getObjectByName('posterC');
-  const cricketBlade = scene.getObjectByName('cricketBlade');
-  const cricketHandle = scene.getObjectByName('cricketHandle');
+  const cricketBatGroup = scene.getObjectByName('cricketBatGroup');
   const cricketBall = scene.getObjectByName('cricketBall');
-  const cricketLabel = scene.getObjectByName('cricketLabel');
   const bedDuvet = scene.getObjectByName('bedDuvet');
   const bedPillow = scene.getObjectByName('bedPillow');
 
@@ -911,10 +986,12 @@ const toggleIndianVersion = () => {
       posterKitten.scale.set(1.2 / 2.8, 1, 1);
     }
     if (posterC) posterC.material.map = loadTexture('poster-bollywood4');
-    if (cricketBlade) cricketBlade.visible = true;
-    if (cricketHandle) cricketHandle.visible = true;
+    if (cricketBatGroup) {
+      cricketBatGroup.visible = true;
+      isBatAnimating = true;
+      batAnimationTime = 0;
+    }
     if (cricketBall) cricketBall.visible = true;
-    if (cricketLabel) cricketLabel.visible = true;
     if (bedDuvet) {
       const duvetSideMaterial = new THREE.MeshLambertMaterial({ color: 0x12a4a7 }); // Matching teal background
       const duvetTopMaterial = new THREE.MeshLambertMaterial({
@@ -945,6 +1022,14 @@ const toggleIndianVersion = () => {
         pillowSideMaterial  // -Z
       ];
     }
+
+    // Trigger fireworks bursts to highlight the room transition
+    triggerFireworkBurst(new THREE.Vector3(4.45, 1.3, -2.2), 0x12a4a7, 30); // Bed (teal)
+    triggerFireworkBurst(new THREE.Vector3(4.45, 1.7, -4.25), 0xffffff, 25); // Pillow (white)
+    triggerFireworkBurst(new THREE.Vector3(-1.1, 5.0, -6.1), 0x12a4a7, 20); // Poster A
+    triggerFireworkBurst(new THREE.Vector3(1.9, 5.0, -6.1), 0xe32636, 20); // Poster B
+    triggerFireworkBurst(new THREE.Vector3(5.0, 4.6, -6.2), 0xffd700, 20); // Poster C
+    triggerFireworkBurst(new THREE.Vector3(-1.5, 1.0, -4.0), 0xe32636, 25); // Cricket bat (red)
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
@@ -955,10 +1040,12 @@ const toggleIndianVersion = () => {
       posterKitten.scale.set(1, 1, 1);
     }
     if (posterC) posterC.material.map = loadTexture('poster-skate');
-    if (cricketBlade) cricketBlade.visible = false;
-    if (cricketHandle) cricketHandle.visible = false;
+    if (cricketBatGroup) {
+      cricketBatGroup.visible = false;
+      cricketBatGroup.scale.set(0, 0, 0);
+    }
     if (cricketBall) cricketBall.visible = false;
-    if (cricketLabel) cricketLabel.visible = false;
+    isBatAnimating = false;
     if (bedDuvet) {
       bedDuvet.material = new THREE.MeshLambertMaterial({ color: '#587091' });
     }
@@ -1148,5 +1235,14 @@ window.addEventListener('message', (e) => {
     }
   }
 });
+
+// Preload Indian version textures to prevent black flashes during toggle transitions
+loadTexture('poster-bengaluru');
+loadTexture('poster-bollywood1');
+loadTexture('poster-bollywood2');
+loadTexture('poster-bollywood3');
+loadTexture('poster-bollywood4');
+loadTexture('fabric-cricket-bedsheet', { repeat: [1, 1] });
+loadTexture('fabric-cricket-pillow', { repeat: [1, 1] });
 
 animate();

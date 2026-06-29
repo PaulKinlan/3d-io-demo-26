@@ -65,16 +65,17 @@ export const buildDecor = ({ scene, addMesh }) => {
 
   // Re-use a group for the bat so the blade, label, and handle stay perfectly aligned.
   const batGroup = new THREE.Group();
+  batGroup.name = 'cricketBatGroup';
   batGroup.position.set(-1.5, 0, -4.0);
   batGroup.rotation.z = 0.2; // Lean left towards desk
-  batGroup.scale.set(2.5, 2.5, 2.5);
+  batGroup.scale.set(0, 0, 0);
+  batGroup.visible = false;
   scene.add(batGroup);
 
   const blade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.2, 0.05), woodMaterial);
   blade.position.set(0, 0.6, 0);
   blade.castShadow = true;
   blade.name = 'cricketBlade';
-  blade.visible = false;
   batGroup.add(blade);
 
   // Create MRF Label
@@ -101,14 +102,12 @@ export const buildDecor = ({ scene, addMesh }) => {
   );
   mrfLabel.position.set(0, 0.6, 0.026);
   mrfLabel.name = 'cricketLabel';
-  mrfLabel.visible = false;
   batGroup.add(mrfLabel);
 
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 12), gripMaterial);
   handle.position.set(0, 1.5, 0);
   handle.castShadow = true;
   handle.name = 'cricketHandle';
-  handle.visible = false;
   batGroup.add(handle);
 
   // Ball sits on the floor separately so it doesn't lean with the bat

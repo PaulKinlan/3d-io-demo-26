@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { textures } from '../textures/index.js';
 
 const fileLoader = new THREE.TextureLoader();
+const textureCache = new Map();
 
 /**
  * Load a texture by registry name or file path.
@@ -20,6 +21,12 @@ const fileLoader = new THREE.TextureLoader();
  * @returns {THREE.Texture}
  */
 export function loadTexture(name, options = {}) {
+  // Create a unique cache key based on the name and options
+  const cacheKey = `${name}_${JSON.stringify(options)}`;
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey);
+  }
+
   const entry = textures[name];
   let texture;
 
@@ -56,5 +63,6 @@ export function loadTexture(name, options = {}) {
     texture.colorSpace = options.colorSpace;
   }
 
+  textureCache.set(cacheKey, texture);
   return texture;
 }
