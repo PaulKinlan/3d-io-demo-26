@@ -324,6 +324,20 @@
       slides[current].classList.add('active');
     }
 
+    function checkHash() {
+      const match = window.location.hash.match(/#slide-(\d+)/);
+      if (match) {
+        const slideIndex = parseInt(match[1], 10) - 1;
+        if (slideIndex >= 0 && slideIndex < slides.length) {
+          showSlide(slideIndex);
+        }
+      }
+    }
+
+    window.addEventListener('hashchange', checkHash);
+    window.addEventListener('load', checkHash);
+    checkHash();
+
     document.getElementById('prev').addEventListener('click', () => showSlide(current - 1));
     document.getElementById('next').addEventListener('click', () => showSlide(current + 1));
 

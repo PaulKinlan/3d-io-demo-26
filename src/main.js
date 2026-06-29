@@ -620,19 +620,27 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key.toLowerCase() === 'i') {
-    toggleIndianVersion();
+  if (e.key.toLowerCase() === 'o') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      if (window.isIndianVersion) {
-        iframe.src = '/demos/times-internet/';
-        previousMonitorUrl = '/demos/times-internet/';
-      } else {
-        // If turning off Indian version, go back to the New Tab page
-        iframe.src = '/demos/new-tab/index.html';
-        previousMonitorUrl = '/demos/new-tab/index.html';
-      }
+      iframe.src = '/demos/times-internet/';
       iframe.focus();
+      previousMonitorUrl = '/demos/times-internet/';
+      resetInactivityTimer();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'i') {
+    toggleIndianVersion();
+  }
+
+  if (e.key >= '0' && e.key <= '9') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      const slideNum = e.key === '0' ? 10 : e.key;
+      iframe.src = `/demos/bengaluru-io-connect/index.html#slide-${slideNum}`;
+      iframe.focus();
+      previousMonitorUrl = `/demos/bengaluru-io-connect/index.html#slide-${slideNum}`;
       resetInactivityTimer();
     }
   }
