@@ -34,4 +34,5 @@ export const textures = {
   'cd-blank': { generator: () => createCDTexture('', '#e8e8e8', '#222222') },
   'cd-stack-label': { generator: createCDStackLabelTexture },
   'fabric-cricket-bedsheet': { file: '/textures/fabric/cricket-bedsheet.png' },
+  'fabric-cricket-pillow': { file: '/textures/fabric/cricket-pillow.png' },
 };

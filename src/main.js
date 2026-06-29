@@ -899,6 +899,7 @@ const toggleIndianVersion = () => {
   const cricketBall = scene.getObjectByName('cricketBall');
   const cricketLabel = scene.getObjectByName('cricketLabel');
   const bedDuvet = scene.getObjectByName('bedDuvet');
+  const bedPillow = scene.getObjectByName('bedPillow');
 
   if (window.isIndianVersion) {
     if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
@@ -915,9 +916,34 @@ const toggleIndianVersion = () => {
     if (cricketBall) cricketBall.visible = true;
     if (cricketLabel) cricketLabel.visible = true;
     if (bedDuvet) {
-      bedDuvet.material.map = loadTexture('fabric-cricket-bedsheet', { repeat: [4, 4] });
-      bedDuvet.material.color.setHex(0xffffff); // Ensure base color doesn't tint it too darkly
-      bedDuvet.material.needsUpdate = true;
+      const duvetSideMaterial = new THREE.MeshLambertMaterial({ color: 0x12a4a7 }); // Matching teal background
+      const duvetTopMaterial = new THREE.MeshLambertMaterial({
+        map: loadTexture('fabric-cricket-bedsheet', { repeat: [1, 1] }),
+        color: 0xffffff
+      });
+      bedDuvet.material = [
+        duvetSideMaterial, // +X
+        duvetSideMaterial, // -X
+        duvetTopMaterial,  // +Y (top)
+        duvetSideMaterial, // -Y
+        duvetSideMaterial, // +Z
+        duvetSideMaterial  // -Z
+      ];
+    }
+    if (bedPillow) {
+      const pillowSideMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }); // Plain white sides
+      const pillowTopMaterial = new THREE.MeshLambertMaterial({
+        map: loadTexture('fabric-cricket-pillow', { repeat: [1, 1] }),
+        color: 0xffffff
+      });
+      bedPillow.material = [
+        pillowSideMaterial, // +X
+        pillowSideMaterial, // -X
+        pillowTopMaterial,  // +Y (top)
+        pillowSideMaterial, // -Y
+        pillowSideMaterial, // +Z
+        pillowSideMaterial  // -Z
+      ];
     }
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
@@ -934,9 +960,10 @@ const toggleIndianVersion = () => {
     if (cricketBall) cricketBall.visible = false;
     if (cricketLabel) cricketLabel.visible = false;
     if (bedDuvet) {
-      bedDuvet.material.map = null; // Remove texture
-      bedDuvet.material.color.set('#587091'); // Restore original color
-      bedDuvet.material.needsUpdate = true;
+      bedDuvet.material = new THREE.MeshLambertMaterial({ color: '#587091' });
+    }
+    if (bedPillow) {
+      bedPillow.material = new THREE.MeshLambertMaterial({ color: '#e8d8c8' });
     }
   }
 };

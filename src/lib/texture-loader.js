@@ -35,6 +35,10 @@ export function loadTexture(name, options = {}) {
     texture.colorSpace = THREE.SRGBColorSpace;
   }
 
+  // Enable anisotropic filtering to prevent blurriness at oblique camera angles.
+  // Three.js will automatically clamp this to the GPU's maximum supported value.
+  texture.anisotropy = 16;
+
   if (options.repeat) {
     texture.wrapS = options.wrapS ?? THREE.RepeatWrapping;
     texture.wrapT = options.wrapT ?? THREE.RepeatWrapping;
