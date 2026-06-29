@@ -11,6 +11,7 @@ export const buildDecor = ({ scene, addMesh }) => {
   );
   posterA.position.set(-7.8, 4.8, -0.9);
   posterA.rotation.y = Math.PI / 2;
+  posterA.name = 'posterA';
   scene.add(posterA);
 
   const posterB = new THREE.Mesh(
@@ -21,6 +22,7 @@ export const buildDecor = ({ scene, addMesh }) => {
     }),
   );
   posterB.position.set(1.8, 4.5, -6.28);
+  posterB.name = 'posterB';
   scene.add(posterB);
 
   const posterCat = new THREE.Mesh(
@@ -43,6 +45,36 @@ export const buildDecor = ({ scene, addMesh }) => {
   posterKitten.position.set(-7.8, 4.5, -3.8);
   posterKitten.rotation.y = Math.PI / 2;
   scene.add(posterKitten);
+
+  const cricketProps = new THREE.Group();
+  
+  const woodMaterial = new THREE.MeshStandardMaterial({ color: '#d2b48c', roughness: 0.8 });
+  const gripMaterial = new THREE.MeshStandardMaterial({ color: '#2a2a2a', roughness: 0.9 });
+  const ballMaterial = new THREE.MeshStandardMaterial({ color: '#8b0000', roughness: 0.6 });
+
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.2, 0.05), woodMaterial);
+  blade.position.set(0, 0.6, 0);
+  blade.castShadow = true;
+  cricketProps.add(blade);
+
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 12), gripMaterial);
+  handle.position.set(0, 1.5, 0);
+  handle.castShadow = true;
+  cricketProps.add(handle);
+
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), ballMaterial);
+  ball.position.set(0.2, 0.06, 0.1);
+  ball.castShadow = true;
+  cricketProps.add(ball);
+
+  // Position next to the table (table is at X=6.45, Z=1.45)
+  cricketProps.position.set(5.5, 0, 1.45);
+  // Lean it slightly against the table/wall
+  cricketProps.rotation.z = -0.15;
+  cricketProps.rotation.x = 0.1;
+  cricketProps.name = 'cricketProps';
+  cricketProps.visible = false;
+  scene.add(cricketProps);
 
   addMesh(
     new THREE.BoxGeometry(2.8, 2.2, 0.18),

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Bengaluru IO Connect</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .slides {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
+    }
+
+    /* Fullscreen image styles */
+    .slide.image-slide {
+      padding: 0;
+    }
+
+    .slide.image-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* Ensures the whole image is visible and scaled to max size */
+    }
+
+    /* Title slide */
+    .title-slide {
+      text-align: center;
+      background: #fff;
+    }
+
+    .title-slide h1 {
+      font-size: 64px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin: 0 0 16px 0;
+    }
+
+    .title-slide p {
+      font-size: 24px;
+      font-weight: 300;
+      color: #888;
+      margin: 0;
+    }
+
+    /* Link overlay */
+    .slide-link {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 400;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+      z-index: 20;
+    }
+
+    .slide-link:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Invisible navigation areas */
+    .nav-area {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 25%;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    .nav-left {
+      left: 0;
+    }
+
+    .nav-right {
+      right: 0;
+    }
+
+    /* Custom 96% Slide */
+    .custom-slide {
+      background: #fff;
+      padding: 40px !important;
+      box-sizing: border-box;
+    }
+
+    .big-number {
+      font-size: 220px;
+      font-weight: 800;
+      color: #000;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .active .big-number::before {
+      animation:
+        fade-in-rainbow 0.5s 1s ease forwards,
+        slide-rainbow 2s 1s linear infinite;
+    }
+
+    .big-number::before {
+      content: "96%";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      color: transparent;
+      background: linear-gradient(to right in oklch longer hue, oklch(65% 0.3 0), oklch(65% 0.3 0));
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: blur(15px);
+      background-size: 200% 100%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes fade-in-rainbow {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-rainbow {
+      from {
+        background-position: 0% center;
+      }
+
+      to {
+        background-position: -200% center;
+      }
+    }
+
+    .subtitle-text {
+      font-size: 28px;
+      font-weight: 400;
+      color: #333;
+      max-width: 800px;
+      text-align: center;
+      margin-top: 80px;
+      line-height: 1.5;
+      opacity: 0;
+    }
+
+    .active .subtitle-text {
+      animation: fade-in 1s 2.5s ease forwards;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ken-burns-slide {
+      overflow: hidden;
+    }
+
+    .ken-burns-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: left top;
+    }
+
+    .active.ken-burns-slide img {
+      animation: ken-burns-pan 20s ease-in-out forwards;
+    }
+
+    @keyframes ken-burns-pan {
+      0% {
+        transform: scale(2.5) translate(0%, 0%);
+      }
+      100% {
+        transform: scale(1.5) translate(-30%, 0%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Invisible click areas for clean navigation without visible buttons -->
+  <div class="nav-area nav-left" id="prev" title="Previous Slide"></div>
+  <div class="nav-area nav-right" id="next" title="Next Slide"></div>
+
+  <div class="slides">
+    <div class="slide image-slide active">
+      <img src="dom-structure.png" alt="DOM Structure">
+    </div>
+
+    <div class="slide image-slide">
+      <img src="mcp-flow.png" alt="DOM Structure">
+    </div>
+
+    <div class="slide image-slide">
+      <img src="slide2.png" alt="AI Tool Growth">
+    </div>
+
+    <div class="slide image-slide ken-burns-slide">
+      <img src="slide1.png" alt="Model Gap">
+      <a class="slide-link" href="https://aifoc.us/model-gap" target="_blank">View on aifoc.us</a>
+    </div>
+    <div class="slide image-slide">
+      <img src="skills.png" alt="Skills">
+    </div>
+    <div class="slide image-slide">
+      <img src="install-mwg.png" alt="Install MWG">
+      <a class="slide-link" href="https://goo.gle/mwg" target="_blank">goo.gle/mwg</a>
+    </div>
+    <div class="slide custom-slide">
+      <img src="modernize.gif" alt="Modernize MWG" style="margin: 1em; width: 100%; border-radius: 1em;
+    box-shadow: black 0 0 1em;">
+    </div>
+    <div class="slide custom-slide">
+      <video autoplay loop muted playsinline style="margin: 1em; width: 100%; border-radius: 1em;
+    box-shadow: black 0 0 1em;">
+        <source src="gemini-cli-2.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="slide image-slide">
+      <img src="closed-loop.svg" alt="Closed Loop Debugging Flowchart"
+        style="width: 80%; max-height: 80vh; object-fit: contain;">
+    </div>
+    <div class="slide custom-slide">
+      <div class="big-number">96%</div>
+      <div class="subtitle-text">
+        LY Corporation deployed this closed-loop testing framework and cut their manual performance auditing workloads
+        by at least 96%.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    window.focus(); // Ensure keyboard events go here immediately upon load
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+
+    function showSlide(index) {
+      slides[current].classList.remove('active');
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('active');
+    }
+
+    document.getElementById('prev').addEventListener('click', () => showSlide(current - 1));
+    document.getElementById('next').addEventListener('click', () => showSlide(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.code === 'Space') {
+        showSlide(current + 1);
+      } else if (e.key === 'ArrowLeft') {
+        showSlide(current - 1);
+      } else if (e.key >= '1' && e.key <= '9') {
+        const targetIndex = parseInt(e.key, 10) - 1;
+        if (targetIndex < slides.length) {
+          showSlide(targetIndex);
+        }
+      } else if (e.key === '0') {
+        if (9 < slides.length) {
+          showSlide(9);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -593,8 +593,29 @@ window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 't') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      iframe.src = '/demos/berlin-io-connect/index.html';
+      iframe.src = '/demos/bengaluru-io-connect/index.html';
       iframe.focus();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'i') {
+    window.isIndianVersion = !window.isIndianVersion;
+    console.log('Indian Version:', window.isIndianVersion ? 'ON' : 'OFF');
+    
+    // We need loadTexture from somewhere, but it's not exported to main.js maybe?
+    // Wait, loadTexture is imported in main.js
+    const posterA = scene.getObjectByName('posterA');
+    const posterB = scene.getObjectByName('posterB');
+    const cricketProps = scene.getObjectByName('cricketProps');
+
+    if (window.isIndianVersion) {
+      if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
+      if (posterB) posterB.material.map = loadTexture('poster-bollywood');
+      if (cricketProps) cricketProps.visible = true;
+    } else {
+      if (posterA) posterA.material.map = loadTexture('poster-rc10');
+      if (posterB) posterB.material.map = loadTexture('poster-doom');
+      if (cricketProps) cricketProps.visible = false;
     }
   }
 
