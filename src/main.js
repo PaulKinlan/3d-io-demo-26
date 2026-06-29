@@ -599,24 +599,7 @@ window.addEventListener('keydown', (e) => {
   }
 
   if (e.key.toLowerCase() === 'i') {
-    window.isIndianVersion = !window.isIndianVersion;
-    console.log('Indian Version:', window.isIndianVersion ? 'ON' : 'OFF');
-    
-    // We need loadTexture from somewhere, but it's not exported to main.js maybe?
-    // Wait, loadTexture is imported in main.js
-    const posterA = scene.getObjectByName('posterA');
-    const posterB = scene.getObjectByName('posterB');
-    const cricketProps = scene.getObjectByName('cricketProps');
-
-    if (window.isIndianVersion) {
-      if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
-      if (posterB) posterB.material.map = loadTexture('poster-bollywood');
-      if (cricketProps) cricketProps.visible = true;
-    } else {
-      if (posterA) posterA.material.map = loadTexture('poster-rc10');
-      if (posterB) posterB.material.map = loadTexture('poster-doom');
-      if (cricketProps) cricketProps.visible = false;
-    }
+    toggleIndianVersion();
   }
 
   if (e.key.toLowerCase() === 'h') {
@@ -902,6 +885,24 @@ const toggleNightMode = () => {
     console.log('Night mode toggled:', !active);
   }
 };
+const toggleIndianVersion = () => {
+  window.isIndianVersion = !window.isIndianVersion;
+  console.log('Indian Version:', window.isIndianVersion ? 'ON' : 'OFF');
+  
+  const posterA = scene.getObjectByName('posterA');
+  const posterB = scene.getObjectByName('posterB');
+  const cricketProps = scene.getObjectByName('cricketProps');
+
+  if (window.isIndianVersion) {
+    if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
+    if (posterB) posterB.material.map = loadTexture('poster-bollywood');
+    if (cricketProps) cricketProps.visible = true;
+  } else {
+    if (posterA) posterA.material.map = loadTexture('poster-rc10');
+    if (posterB) posterB.material.map = loadTexture('poster-doom');
+    if (cricketProps) cricketProps.visible = false;
+  }
+};
 
 const setupMCP = () => {
   // The Web MCP entry point moved from navigator.modelContext to
@@ -913,6 +914,13 @@ const setupMCP = () => {
   if (!modelContext) {
     return;
   }
+
+  modelContext.registerTool({
+    execute: () => { toggleIndianVersion(); },
+    name: "toggleIndianVersion",
+    description: "Toggles the Indian version of the bedroom, featuring a Bengaluru travel poster, a Bollywood poster, and cricket gear.",
+    inputSchema: { type: "object", properties: {} }
+  });
 
   modelContext.registerTool({
     execute: () => { toggleLamp(); },
