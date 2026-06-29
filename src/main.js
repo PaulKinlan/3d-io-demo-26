@@ -925,8 +925,8 @@ const animate = (time = 0) => {
   timer.update(time);
   const elapsed = timer.getElapsed();
 
-  // Check for inactivity (1 minute = 60,000 ms) to trigger the Windows Pipes screensaver
-  if (!isScreensaverActive && (Date.now() - lastActivityTime > 60000)) {
+  // Check for inactivity (30 seconds = 30,000 ms) to trigger the Windows Pipes screensaver
+  if (!isScreensaverActive && (Date.now() - lastActivityTime > 30000)) {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe && window.isComputerOn !== false && !iframe.src.includes('/demos/pipes-screensaver/')) {
       isScreensaverActive = true;
