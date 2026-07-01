@@ -1277,6 +1277,9 @@ const setupMCP = () => {
             "/demos/redbus/",
             "/demos/times-internet/",
             "/demos/makemytrip/",
+            "/demos/flipkart/",
+            "/demos/policybazaar/",
+            "/demos/nykaa/",
             "/demos/pipes-screensaver/"
           ],
           description: "The URL of the demo to navigate to."
