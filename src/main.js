@@ -566,7 +566,7 @@ window.addEventListener('keydown', (e) => {
     }
   }
   
-  if (e.key.toLowerCase() === 'p') {
+  if (e.key.toLowerCase() === 'u') {
     if (typeof window.isComputerOn === 'undefined') window.isComputerOn = true;
     window.isComputerOn = !window.isComputerOn;
     console.log('Computer Power:', window.isComputerOn ? 'ON' : 'OFF');
@@ -587,6 +587,36 @@ window.addEventListener('keydown', (e) => {
       if (iframe) {
         iframe.src = '/demos/boot/index.html';
       }
+    }
+  }
+
+  if (e.key.toLowerCase() === 'f') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/flipkart/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/flipkart/';
+      resetInactivityTimer();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'p') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/policybazaar/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/policybazaar/';
+      resetInactivityTimer();
+    }
+  }
+
+  if (e.key.toLowerCase() === 'n') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/nykaa/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/nykaa/';
+      resetInactivityTimer();
     }
   }
 
