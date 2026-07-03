@@ -130,22 +130,30 @@ export const buildDesk = ({
   frontFrameShape.lineTo(-0.675, -0.525);
 
   const frontFrameHole = new THREE.Path();
-  frontFrameHole.moveTo(-0.5, -0.39);
-  frontFrameHole.lineTo(-0.5, 0.39);
-  frontFrameHole.lineTo(0.5, 0.39);
-  frontFrameHole.lineTo(0.5, -0.39);
-  frontFrameHole.lineTo(-0.5, -0.39);
+  frontFrameHole.moveTo(-0.61, -0.4575);
+  frontFrameHole.lineTo(-0.61, 0.4575);
+  frontFrameHole.lineTo(0.61, 0.4575);
+  frontFrameHole.lineTo(0.61, -0.4575);
+  frontFrameHole.lineTo(-0.61, -0.4575);
   frontFrameShape.holes.push(frontFrameHole);
 
+  const extrudeSettings = {
+    depth: 0.02,
+    bevelEnabled: true,
+    bevelSegments: 3,
+    steps: 1,
+    bevelSize: 0.008,
+    bevelThickness: 0.008,
+  };
+
   const frontFrame = new THREE.Mesh(
-    new THREE.ShapeGeometry(frontFrameShape),
+    new THREE.ExtrudeGeometry(frontFrameShape, extrudeSettings),
     new THREE.MeshStandardMaterial({
       color: '#b4a99b',
       roughness: 0.82,
-      side: THREE.DoubleSide,
     }),
   );
-  frontFrame.position.set(-5.1, 4.05, -3.86);
+  frontFrame.position.set(-5.1, 4.05, -3.888);
   frontFrame.renderOrder = 3;
   deskGroup.add(frontFrame);
 
@@ -170,22 +178,22 @@ export const buildDesk = ({
 
   monitorState.material = screenMaterial; // Store for power toggling
 
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.72), screenMaterial);
-  screen.position.set(-5.1, 4.05, -3.86);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 0.885), screenMaterial);
+  screen.position.set(-5.1, 4.05, -3.88);
   screen.material.side = THREE.DoubleSide;
   screen.renderOrder = 2;
   deskGroup.add(screen);
   monitorState.screenMesh = screen; // Store for transform sync
 
   const bezel = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.02, 0.8),
+    new THREE.PlaneGeometry(1.24, 0.93),
     new THREE.MeshStandardMaterial({
       color: '#2a2a2f',
       roughness: 0.78,
       metalness: 0.12,
     }),
   );
-  bezel.position.set(-5.1, 4.05, -3.865);
+  bezel.position.set(-5.1, 4.05, -3.882);
   bezel.material.side = THREE.DoubleSide;
   bezel.renderOrder = 1;
   deskGroup.add(bezel);
@@ -242,7 +250,7 @@ export const buildDesk = ({
         position: tempCenter.clone()
           .add(tempDirection.multiplyScalar(3.1))
           .add(focusLift),
-        zoom: computeFocusZoom([frontFrame], 1.15),
+        zoom: computeFocusZoom([frontFrame], 1.0),
         controlLimits: focusControlLimits,
       };
     },

@@ -858,8 +858,8 @@ const updateMonitorTransform = () => {
 
   const E_W = monitorViewport.width;
   const E_H = monitorViewport.height;
-  const M_W = 0.92;
-  const M_H = 0.72;
+  const M_W = 1.18;
+  const M_H = 0.885;
 
   const localMatrix = new THREE.Matrix4().set(
     M_W / E_W, 0, 0, -M_W / 2,
