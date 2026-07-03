@@ -39,7 +39,7 @@ app.innerHTML = `
     <div class="help-panel">
       <h2>Keyboard Shortcuts</h2>
       <ul>
-        <li><kbd>C</kbd> - Focus / Unfocus Monitor</li>
+        <li><kbd>Z</kbd> - Focus / Unfocus Monitor</li>
         <li><kbd>B</kbd> - Focus / Unfocus Books</li>
         <li><kbd>L</kbd> - Toggle Desk Lamp</li>
         <li><kbd>D</kbd> - Toggle Night Mode</li>
@@ -706,11 +706,20 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key.toLowerCase() === 'c') {
+  if (e.key.toLowerCase() === 'z') {
     if (typeof activeFocusTargetId !== 'undefined' && activeFocusTargetId === 'monitor') {
       if (typeof resetCameraFocus === 'function') resetCameraFocus();
     } else {
       if (typeof focusTarget === 'function') focusTarget('monitor');
+    }
+  }
+  if (e.key.toLowerCase() === 'c') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/patching-clock/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/patching-clock/';
+      resetInactivityTimer();
     }
   }
   if (e.key.toLowerCase() === 'b') {
