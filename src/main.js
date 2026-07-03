@@ -556,6 +556,9 @@ const renderMonitorFallback = (time = performance.now()) => {
 };
 
 window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) {
+    return;
+  }
   console.log('Key pressed:', e.key);
   
   if (e.code === 'Space') {
@@ -600,7 +603,7 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key.toLowerCase() === 'f') {
+  if (e.key.toLowerCase() === 'k') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
       iframe.src = '/demos/flipkart/';
