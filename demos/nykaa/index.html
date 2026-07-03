@@ -23,7 +23,7 @@
     }
     .video-container {
       position: relative;
-      width: 98vw;
+      width: 43vw; /* 98vw prev */
       height: 50.625vw; /* 16:9 aspect ratio */
       max-width: 900px;
       max-height: 600px;
@@ -66,31 +66,9 @@
 <body>
   <img src="nykaa-logo.webp" class="logo" alt="Nykaa">
   <div class="video-container">
-    <video autoplay loop muted playsinline src="../bengaluru-io-connect/mwg-nykaa-1.mp4">
+    <video autoplay loop muted playsinline src="../bengaluru-io-connect/element-vt-nykaa.mp4">
       Your browser does not support the video tag.
     </video>
     </div>
-<script>
-  const video = document.querySelector('video');
-  const videoSources = [
-    '../bengaluru-io-connect/mwg-nykaa-1.mp4',
-    '../bengaluru-io-connect/element-vt-nykaa.mp4'
-  ];
-  let currentIndex = 0;
-
-  window.focus(); // Ensure keyboard events go here immediately upon load
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' && currentIndex !== 1) {
-          currentIndex = 1;
-          video.src = videoSources[currentIndex];
-          video.play().catch(err => console.log("Playback failed:", err));
-        } else if (e.key === 'ArrowLeft' && currentIndex !== 0) {
-          currentIndex = 0;
-          video.src = videoSources[currentIndex];
-          video.play().catch(err => console.log("Playback failed:", err));
-        }
-      });
-    </script>
 </body>
 </html>

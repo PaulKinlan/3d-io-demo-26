@@ -590,6 +590,16 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
+  if (e.key.toLowerCase() === 'y') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      iframe.src = '/demos/devtools/';
+      iframe.focus();
+      previousMonitorUrl = '/demos/devtools/';
+      resetInactivityTimer();
+    }
+  }
+
   if (e.key.toLowerCase() === 'f') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
@@ -1310,7 +1320,8 @@ const setupMCP = () => {
             "/demos/flipkart/",
             "/demos/policybazaar/",
             "/demos/nykaa/",
-            "/demos/pipes-screensaver/"
+            "/demos/pipes-screensaver/",
+            "/demos/devtools/"
           ],
           description: "The URL of the demo to navigate to."
         }
