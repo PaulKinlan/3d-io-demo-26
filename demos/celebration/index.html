@@ -36,11 +36,20 @@
         }
         .subtitle {
             color: #80ffd9;
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 600;
             text-shadow: 0 0 15px rgba(128, 255, 217, 0.4);
             opacity: 0;
-            animation: fadeIn 1.5s ease-out 1s forwards;
+            margin-bottom: 12px;
+            animation: fadeIn 1.5s ease-out 2.5s forwards;
+        }
+        .tagline {
+            color: #e6f8ff;
+            font-size: 26px;
+            font-weight: 500;
+            text-shadow: 0 0 12px rgba(230, 248, 255, 0.3);
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 5.0s forwards;
         }
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
@@ -55,7 +64,8 @@
 <body>
     <div class="message-box">
         <div class="title">Woohoo! 🎉</div>
-        <div class="subtitle">The web is first class citizen</div>
+        <div class="subtitle">The web is a first-class citizen</div>
+        <div class="tagline">for users, agents and developers.</div>
     </div>
     <canvas id="canvas"></canvas>
     <script>
