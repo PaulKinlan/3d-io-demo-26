@@ -1127,14 +1127,14 @@ const toggleIndianVersion = () => {
 
   if (window.isIndianVersion) {
     if (posterA) posterA.material.map = loadTexture('poster-bengaluru');
-    if (posterB) posterB.material.map = loadTexture('poster-bollywood1');
-    if (posterCat) posterCat.material.map = loadTexture('poster-bollywood2');
+    if (posterB) posterB.material.map = loadTexture('poster-bryanadams'); // bollywood1 --> bryanadams
+    if (posterCat) posterCat.material.map = loadTexture('poster-bollywood5'); // bollywood2 --> bollywood5
     if (posterKitten) {
       posterKitten.material.map = loadTexture('poster-bollywood3');
       // Scale down X to change from landscape (2.8 x 1.8) to portrait aspect ratio
       posterKitten.scale.set(1.2 / 2.8, 1, 1);
     }
-    if (posterC) posterC.material.map = loadTexture('poster-bollywood4');
+    if (posterC) posterC.material.map = loadTexture('poster-bollywood6'); // bollywood4 --> bollywood6
     if (cricketBatGroup) {
       cricketBatGroup.visible = true;
       isBatAnimating = true;
@@ -1403,6 +1403,9 @@ loadTexture('poster-bollywood1');
 loadTexture('poster-bollywood2');
 loadTexture('poster-bollywood3');
 loadTexture('poster-bollywood4');
+loadTexture('poster-bollywood5');
+loadTexture('poster-bollywood6');
+loadTexture('poster-bryanadams');
 loadTexture('fabric-cricket-bedsheet', { repeat: [1, 1] });
 loadTexture('fabric-cricket-pillow', { repeat: [1, 1] });
 
