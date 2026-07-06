@@ -1,213 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PolicyBazaar Demo</title>
+  <title>Policybazaar Demo</title>
   <style>
-    :root {
-      --accent: #0d55e4;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
     body {
       margin: 0;
       padding: 0;
-      background: #0d0e12;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      background: #fff;
+      color: #000;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow: hidden;
+      width: 100vw;
+      height: 100vh;
     }
-    .video-container {
+
+    .slides {
       position: relative;
-      width: 90vw;
-      height: 50.625vw; /* 16:9 aspect ratio */
-      max-width: 800px;
-      max-height: 450px;
-      background: #15171e;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      height: 100%;
     }
-    /* Animated background simulating video play */
-    .video-bg {
+
+    .slide {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #0f1c3a 0%, #0d0e12 50%, #0e291b 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 8s ease infinite;
-      z-index: 1;
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    /* Ambient glow */
-    .glow {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background: var(--accent);
-      filter: blur(80px);
-      opacity: 0.3;
-      z-index: 2;
-      animation: pulse 4s ease-in-out infinite alternate;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 0.2; }
-      100% { transform: scale(1.4); opacity: 0.4; }
-    }
-    .player-ui {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-      background: linear-gradient(to top, rgba(13, 14, 18, 0.95) 0%, rgba(13, 14, 18, 0) 100%);
-      z-index: 3;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-    }
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .left-controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .play-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(13, 85, 228, 0.3);
     }
-    .play-btn svg {
-      width: 14px;
-      height: 14px;
-      fill: white;
-      margin-left: 2px;
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
     }
-    .title {
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    .progress-bar-container {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      border-radius: 2px;
-      animation: playProgress 15s linear infinite;
-    }
-    @keyframes playProgress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-    .duration {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.5);
-      font-variant-numeric: tabular-nums;
-    }
-    .badge {
+
+    /* Invisible navigation areas */
+    .nav-area {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      z-index: 3;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--accent);
+      top: 0;
+      height: 100%;
+      width: 25%;
+      z-index: 50;
+      cursor: pointer;
     }
-    .center-play {
-      z-index: 3;
-      width: 72px;
+
+    .nav-left {
+      left: 0;
+    }
+
+    .nav-right {
+      right: 0;
+    }
+
+    /* Custom Slide Layouts */
+    .custom-slide {
+      background: #fff;
+      padding: 40px !important;
+      box-sizing: border-box;
+    }
+
+    .slide-logo {
       height: 72px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    .video-container {
+      position: relative;
+      width: 98vw;
+      max-width: 900px;
+      aspect-ratio: 16 / 9;
+      background: #15171e;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
     }
-    .center-play:hover {
-      transform: scale(1.08);
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--accent);
+
+    .big-number {
+      font-size: 220px;
+      font-weight: 800;
+      color: #000;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      position: relative;
+      z-index: 1;
     }
-    .center-play svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--accent);
-      margin-left: 4px;
+
+    .active .big-number::before {
+      animation:
+        fade-in-rainbow 0.5s 1s ease forwards,
+        slide-rainbow 2s 1s linear infinite;
+    }
+
+    .big-number::before {
+      content: "92%";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      color: transparent;
+      background: linear-gradient(to right in oklch longer hue, oklch(65% 0.3 0), oklch(65% 0.3 0));
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: blur(15px);
+      background-size: 200% 100%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes fade-in-rainbow {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-rainbow {
+      from {
+        background-position: 0% center;
+      }
+
+      to {
+        background-position: -200% center;
+      }
+    }
+
+    .subtitle-text {
+      font-size: 28px;
+      font-weight: 400;
+      color: #333;
+      max-width: 800px;
+      text-align: center;
+      margin-top: 80px;
+      line-height: 1.5;
+      opacity: 0;
+    }
+
+    .active .subtitle-text {
+      animation: fade-in 1s 0.5s ease forwards;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
-<body>
-  <div class="badge">PolicyBazaar</div>
-  <div class="video-container">
-    <div class="video-bg"></div>
-    <div class="glow"></div>
-    
-    <div class="center-play">
-      <svg viewBox="0 0 24 24">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
-    </div>
 
-    <div class="player-ui">
-      <div class="progress-bar-container">
-        <div class="progress-bar"></div>
-      </div>
-      <div class="controls">
-        <div class="left-controls">
-          <div class="play-btn">
-            <svg viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-          <div class="title">PolicyBazaar - Compare & Save Insurance</div>
-        </div>
-        <div class="duration">0:06 / 2:00</div>
+<body>
+  <!-- Invisible click areas for clean navigation without visible buttons -->
+  <div class="nav-area nav-left" id="prev" title="Previous Slide"></div>
+  <div class="nav-area nav-right" id="next" title="Next Slide"></div>
+  <div class="slides">
+    <!-- Slide 3: PolicyBazaar Case Study -->
+    <div class="slide custom-slide active">
+      <img src="../policybazaar/policybazaar-logo.png" class="slide-logo" alt="PolicyBazaar Logo">
+      <div class="big-number">92%</div>
+      <div class="subtitle-text">
+        Policybazaar incorporated this closed-loop testing framework and reduced their manual performance auditing
+        workloads
+        by 92%.
       </div>
     </div>
   </div>
+<script>
+  window.focus(); // Ensure keyboard events go here immediately upon load
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function showSlide(index) {
+    slides[current].classList.remove('active');
+    current = (index + slides.length) % slides.length;
+    slides[current].classList.add('active');
+  }
+
+  document.getElementById('prev').addEventListener('click', () => showSlide(current - 1));
+  document.getElementById('next').addEventListener('click', () => showSlide(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.code === 'Space') {
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft') {
+      showSlide(current - 1);
+    } else if (e.key >= '1' && e.key <= '9') {
+      const targetIndex = parseInt(e.key, 10) - 1;
+      if (targetIndex < slides.length) {
+        showSlide(targetIndex);
+      }
+    }
+  });
+</script>
 </body>
+
 </html>
