@@ -61,6 +61,9 @@
       object-fit: cover;
       display: block;
     }
+    video[data-fit="contain"] {
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
@@ -74,7 +77,7 @@
   const video = document.querySelector('video');
   const videoSources = [
     '../bengaluru-io-connect/soft-navs-flipkart.mov',
-    '../bengaluru-io-connect/dpu-flipkart.mov'
+    '../bengaluru-io-connect/dpu-flipkart.mp4'
   ];
   let currentIndex = 0;
 
@@ -84,10 +87,12 @@
           if (e.key === 'ArrowRight' && currentIndex !== 1) {
             currentIndex = 1;
             video.src = videoSources[currentIndex];
+            video.setAttribute('data-fit', 'contain');
             video.play().catch(err => console.log("Playback failed:", err));
           } else if (e.key === 'ArrowLeft' && currentIndex !== 0) {
             currentIndex = 0;
             video.src = videoSources[currentIndex];
+            video.setAttribute('data-fit', 'cover');
             video.play().catch(err => console.log("Playback failed:", err));
           }
         });
