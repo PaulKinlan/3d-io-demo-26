@@ -643,15 +643,6 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  if (e.key.toLowerCase() === 'r') {
-    const iframe = document.querySelector('.monitor-html-frame');
-    if (iframe) {
-      iframe.src = '/demos/redbus/';
-      iframe.focus();
-      previousMonitorUrl = '/demos/redbus/';
-      resetInactivityTimer();
-    }
-  }
 
   if (e.key.toLowerCase() === 'm') {
     const iframe = document.querySelector('.monitor-html-frame');
