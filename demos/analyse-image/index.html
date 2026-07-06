@@ -32,28 +32,28 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 32px 20px 60px;
+            padding: 12px 20px 16px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 12px;
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         header p {
             margin: 0;
-            color: var(--text-dim);
+            color: #e6e8ec;
             font-size: 14px;
         }
 
@@ -65,7 +65,8 @@
             display: inline-block;
             background: var(--panel-2);
             border: 1px solid var(--border);
-            color: var(--text-dim);
+            color: #ffffff;
+            font-weight: 500;
         }
 
         .status.ok { color: var(--good); border-color: rgba(52, 211, 153, 0.4); }
@@ -240,6 +241,7 @@
 
 <body>
     <header>
+        <h1>Analyse Image <span style="font-size: 0.65em; font-weight: 600; color: #ffffff; background: rgba(124, 92, 255, 0.35); border: 1px solid #9e86ff; padding: 2px 10px; border-radius: 999px;">Powered by Chrome Prompt API</span></h1>
         <div class="status" id="status">Checking model availability…</div>
     </header>
 
