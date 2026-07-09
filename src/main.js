@@ -569,6 +569,14 @@ window.addEventListener('keydown', (e) => {
     }
   }
   
+  if (e.key.toLowerCase() === 'j') {
+    const iframe = document.querySelector('.monitor-html-frame');
+    if (iframe) {
+      console.log('Parent: Sent j key to iframe');
+      iframe.contentWindow.postMessage({ type: 'keydown', key: 'j' }, '*');
+    }
+  }
+  
   if (e.key.toLowerCase() === 'u') {
     if (typeof window.isComputerOn === 'undefined') window.isComputerOn = true;
     window.isComputerOn = !window.isComputerOn;

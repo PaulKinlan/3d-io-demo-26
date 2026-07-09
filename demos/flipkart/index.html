@@ -80,17 +80,35 @@
 
   window.focus(); // Ensure keyboard events go here immediately upon load
 
-        window.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowRight' && currentIndex !== 1) {
-            currentIndex = 1;
-            video.src = videoSources[currentIndex];
-            video.play().catch(err => console.log("Playback failed:", err));
-          } else if (e.key === 'ArrowLeft' && currentIndex !== 0) {
-            currentIndex = 0;
-            video.src = videoSources[currentIndex];
-            video.play().catch(err => console.log("Playback failed:", err));
-          }
-        });
+  function nextSlide() {
+    if (currentIndex !== 1) {
+      currentIndex = 1;
+      video.src = videoSources[currentIndex];
+      video.play().catch(err => console.log("Playback failed:", err));
+    }
+  }
+
+  function prevSlide() {
+    if (currentIndex !== 0) {
+      currentIndex = 0;
+      video.src = videoSources[currentIndex];
+      video.play().catch(err => console.log("Playback failed:", err));
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'j' || e.code === 'Space') {
+      nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'h') {
+      prevSlide();
+    }
+  });
+
+  window.addEventListener('message', (e) => {
+    if (e.data && (e.data.type === 'click' || (e.data.type === 'keydown' && (e.data.key === 'j' || e.data.key === 'ArrowRight' || e.data.code === 'Space')))) {
+      nextSlide();
+    }
+  });
       </script>
 </body>
 </html>
