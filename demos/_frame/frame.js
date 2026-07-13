@@ -65,5 +65,31 @@
     }
   });
 
+  // Forward keyboard events to parent window if same-origin and not typing in an input
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+      return;
+    }
+    if (e.forwarded) return;
+    e.forwarded = true;
+    try {
+      if (window.parent && window.parent !== window) {
+        const evt = new window.parent.KeyboardEvent('keydown', {
+          key: e.key,
+          keyCode: e.keyCode,
+          code: e.code,
+          ctrlKey: e.ctrlKey,
+          altKey: e.altKey,
+          shiftKey: e.shiftKey,
+          metaKey: e.metaKey
+        });
+        evt.forwarded = true;
+        window.parent.dispatchEvent(evt);
+      }
+    } catch (err) {
+      // Ignore cross-origin issues
+    }
+  });
+
   syncToLocation();
 })();

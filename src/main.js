@@ -572,8 +572,16 @@ window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'j') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      console.log('Parent: Sent j key to iframe');
-      iframe.contentWindow.postMessage({ type: 'keydown', key: 'j' }, '*');
+      const currentUrl = iframe.src || '';
+      if (!currentUrl.includes('/demos/flipkart/')) {
+        iframe.src = '/demos/flipkart/#slide-2';
+        iframe.focus();
+        previousMonitorUrl = '/demos/flipkart/#slide-2';
+        resetInactivityTimer();
+      } else {
+        console.log('Parent: Sent j key to iframe');
+        iframe.contentWindow.postMessage({ type: 'keydown', key: 'j' }, '*');
+      }
     }
   }
   
@@ -782,7 +790,9 @@ htmlFrame.addEventListener('load', () => {
        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
          return;
        }
-       window.dispatchEvent(new KeyboardEvent('keydown', {
+       if (e.forwarded) return;
+       e.forwarded = true;
+       const evt = new KeyboardEvent('keydown', {
           key: e.key,
           keyCode: e.keyCode,
           code: e.code,
@@ -790,7 +800,9 @@ htmlFrame.addEventListener('load', () => {
           altKey: e.altKey,
           shiftKey: e.shiftKey,
           metaKey: e.metaKey
-       }));
+       });
+       evt.forwarded = true;
+       window.dispatchEvent(evt);
     });
   } catch (e) {
      console.warn('Forward overlays trigger restrictions:', e);

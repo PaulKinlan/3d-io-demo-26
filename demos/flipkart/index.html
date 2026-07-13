@@ -109,6 +109,22 @@
       nextSlide();
     }
   });
+
+  function handleHash() {
+    if (window.location.hash === '#slide-2') {
+      currentIndex = 1;
+    } else {
+      currentIndex = 0;
+    }
+    video.src = videoSources[currentIndex];
+    video.play().catch(err => console.log("Playback failed:", err));
+  }
+
+  if (window.location.hash) {
+    handleHash();
+  }
+
+  window.addEventListener('hashchange', handleHash);
       </script>
 </body>
 </html>
