@@ -4,15 +4,6 @@ import createCatPosterTexture from './generators/poster-cat.js';
 import { createCDTexture } from './generators/cd.js';
 import { createCDStackLabelTexture } from './generators/stack-label.js';
 import createGraffitiTexture from './generators/graffiti.js';
-import {
-  createShanghaiSkylinePoster,
-  createBundPanoramaPoster,
-  createContraPoster,
-  createTankPoster,
-  createPingPongPoster,
-  createShanghaiBedsheet,
-  createShanghaiPillow,
-} from './generators/shanghai.js';
 
 /**
  * Texture registry. Each entry maps a name to either:
@@ -47,11 +38,14 @@ export const textures = {
   'cd-stack-label': { generator: createCDStackLabelTexture },
   'fabric-cricket-bedsheet': { file: '/textures/fabric/cricket-bedsheet.png' },
   'fabric-cricket-pillow': { file: '/textures/fabric/cricket-pillow.png' },
-  'poster-shanghai-skyline': { generator: createShanghaiSkylinePoster },
-  'poster-bund': { generator: createBundPanoramaPoster },
-  'poster-contra': { generator: createContraPoster },
-  'poster-tank': { generator: createTankPoster },
-  'poster-pingpong': { generator: createPingPongPoster },
-  'fabric-shanghai-bedsheet': { generator: createShanghaiBedsheet },
-  'fabric-shanghai-pillow': { generator: createShanghaiPillow },
+  // Shanghai textures were authored procedurally (generators/shanghai.js) and
+  // baked to PNGs so every load renders identically. Flip an entry back to its
+  // generator to iterate on the art, then re-bake.
+  'poster-shanghai-skyline': { file: '/textures/posters/shanghai-skyline.png' },
+  'poster-bund': { file: '/textures/posters/bund.png' },
+  'poster-contra': { file: '/textures/posters/contra.png' },
+  'poster-tank': { file: '/textures/posters/tank.png' },
+  'poster-pingpong': { file: '/textures/posters/pingpong.png' },
+  'fabric-shanghai-bedsheet': { file: '/textures/fabric/shanghai-bedsheet.png' },
+  'fabric-shanghai-pillow': { file: '/textures/fabric/shanghai-pillow.png' },
 };

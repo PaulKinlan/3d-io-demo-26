@@ -1068,17 +1068,16 @@ const animate = (time = 0) => {
     // Same elastic spring as the cricket bat, but these props are built at
     // natural size so they settle at scale 1.0.
     const scaleVal = Math.max(0, 1 - Math.exp(-4 * t) * Math.cos(12 * t));
-    const suborScale = scaleVal * 1.3; // console settles slightly larger for floor visibility
 
     if (t < 1.5) {
-      if (suborGroup) suborGroup.scale.set(suborScale, suborScale, suborScale);
+      if (suborGroup) suborGroup.scale.set(scaleVal, scaleVal, scaleVal);
       if (pingpongGroup) {
         pingpongGroup.scale.set(scaleVal, scaleVal, scaleVal);
         const wobble = Math.sin(22 * t) * Math.exp(-2.5 * t) * 0.3;
         pingpongGroup.rotation.y = 0.6 + wobble;
       }
     } else {
-      if (suborGroup) suborGroup.scale.set(1.3, 1.3, 1.3);
+      if (suborGroup) suborGroup.scale.set(1, 1, 1);
       if (pingpongGroup) {
         pingpongGroup.scale.set(1, 1, 1);
         pingpongGroup.rotation.y = 0.6;
@@ -1287,6 +1286,7 @@ const toggleShanghaiVersion = () => {
   const suborGroup = scene.getObjectByName('suborGroup');
   const pingpongGroup = scene.getObjectByName('pingpongGroup');
   const pingpongBall = scene.getObjectByName('pingpongBall');
+  const cdGroup = scene.getObjectByName('cdGroup');
   const bedDuvet = scene.getObjectByName('bedDuvet');
   const bedPillow = scene.getObjectByName('bedPillow');
 
@@ -1299,6 +1299,7 @@ const toggleShanghaiVersion = () => {
     if (suborGroup) suborGroup.visible = true;
     if (pingpongGroup) pingpongGroup.visible = true;
     if (pingpongBall) pingpongBall.visible = true;
+    if (cdGroup) cdGroup.visible = false; // the console takes the CDs' desk spot
     isShanghaiPropsAnimating = true;
     shanghaiAnimationTime = 0;
     if (bedDuvet) {
@@ -1338,7 +1339,7 @@ const toggleShanghaiVersion = () => {
     triggerFireworkBurst(new THREE.Vector3(-7.6, 4.8, -0.9), 0xc8102e, 20); // Skyline poster
     triggerFireworkBurst(new THREE.Vector3(1.9, 5.0, -6.1), 0xffd700, 20); // Contra poster
     triggerFireworkBurst(new THREE.Vector3(5.0, 4.6, -6.2), 0xc8102e, 20); // Ping pong poster
-    triggerFireworkBurst(new THREE.Vector3(-4.9, 0.6, -1.3), 0xffd700, 25); // Subor console (gold)
+    triggerFireworkBurst(new THREE.Vector3(-3.55, 3.6, -4.55), 0xffd700, 25); // Subor console (gold)
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
@@ -1357,6 +1358,7 @@ const toggleShanghaiVersion = () => {
       pingpongGroup.scale.set(0, 0, 0);
     }
     if (pingpongBall) pingpongBall.visible = false;
+    if (cdGroup) cdGroup.visible = true;
     isShanghaiPropsAnimating = false;
     if (bedDuvet) {
       bedDuvet.material = new THREE.MeshLambertMaterial({ color: '#587091' });

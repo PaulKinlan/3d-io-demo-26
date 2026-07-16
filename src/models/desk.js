@@ -407,6 +407,12 @@ export const buildDesk = ({
   deskGroup.add(mouseCableMesh);
 
   // --- CD Stack and loose CDs ---
+  // Grouped so the Shanghai theme can hide them (the Subor console takes this
+  // desk spot when that mode is active).
+  const cdGroup = new THREE.Group();
+  cdGroup.name = 'cdGroup';
+  deskGroup.add(cdGroup);
+
   const cdRadius = 0.16;
   const cdGeometry = new THREE.CylinderGeometry(cdRadius, cdRadius, 0.005, 32);
   const cdMaterialPhotoshop = new THREE.MeshStandardMaterial({
@@ -451,7 +457,7 @@ export const buildDesk = ({
   cdStack.position.set(-4.0, 3.27 + stackHeight / 2, -4.8); 
   cdStack.castShadow = true;
   cdStack.receiveShadow = true;
-  deskGroup.add(cdStack);
+  cdGroup.add(cdStack);
 
   const cdLabelGeometry = new THREE.PlaneGeometry(0.24, 0.12);
   const cdLabelMaterial = new THREE.MeshStandardMaterial({
@@ -463,21 +469,21 @@ export const buildDesk = ({
   cdLabel.position.set(-4.0, 3.27 + stackHeight + 0.002, -4.8);
   cdLabel.rotation.x = -Math.PI / 2;
   cdLabel.rotation.z = Math.PI / 6;
-  deskGroup.add(cdLabel);
+  cdGroup.add(cdLabel);
 
   const cd1 = new THREE.Mesh(cdGeometry, getCDMaterials(cdMaterialPhotoshop));
   cd1.position.set(-3.5, 3.27 + 0.0025, -4.2);
   cd1.rotation.y = Math.PI / 3;
   cd1.castShadow = true;
   cd1.receiveShadow = true;
-  deskGroup.add(cd1);
+  cdGroup.add(cd1);
 
   const cd2 = new THREE.Mesh(cdGeometry, getCDMaterials(cdMaterialPirated));
   cd2.position.set(-4.2, 3.27 + 0.0025, -3.95);
   cd2.rotation.y = -Math.PI / 8;
   cd2.castShadow = true;
   cd2.receiveShadow = true;
-  deskGroup.add(cd2);
+  cdGroup.add(cd2);
 
   // --- End CDs ---
 

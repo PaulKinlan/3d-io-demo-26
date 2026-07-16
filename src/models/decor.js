@@ -190,12 +190,12 @@ export const buildDecor = ({ scene, addMesh }) => {
   };
 
   // Subor 小霸王 learning machine — the keyboard-shaped Famicom clone that
-  // defined '90s Chinese childhood gaming. On the floor in front of the desk,
-  // where it stays visible (the desk itself is fully occupied by the PC).
+  // defined '90s Chinese childhood gaming. Sits on the right side of the desk,
+  // in the spot the CD stack occupies (the Shanghai toggle swaps them).
   const suborGroup = new THREE.Group();
   suborGroup.name = 'suborGroup';
-  suborGroup.position.set(-4.9, 0, -1.3);
-  suborGroup.rotation.y = 0.35;
+  suborGroup.position.set(-3.55, 3.27, -4.55);
+  suborGroup.rotation.y = 0.2;
   suborGroup.scale.set(0, 0, 0);
   suborGroup.visible = false;
   scene.add(suborGroup);
@@ -262,13 +262,13 @@ export const buildDecor = ({ scene, addMesh }) => {
   suborGroup.add(contraCart);
 
   const tankCart = buildCartridge('坦克大战', 'BATTLE CITY');
-  tankCart.position.set(0.72, 0.035, -0.1);
+  tankCart.position.set(0.62, 0.035, 0.15);
   tankCart.rotation.y = -0.5;
   suborGroup.add(tankCart);
 
   // Gamepad in front of the console with a curled cable
   const gamepad = new THREE.Group();
-  gamepad.position.set(-0.25, 0.02, 0.62);
+  gamepad.position.set(0.05, 0.02, 0.55);
   gamepad.rotation.y = -0.3;
   suborGroup.add(gamepad);
 
@@ -289,10 +289,10 @@ export const buildDecor = ({ scene, addMesh }) => {
   const padCable = new THREE.Mesh(
     new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-0.25, 0.03, 0.53),
-        new THREE.Vector3(-0.35, 0.03, 0.4),
-        new THREE.Vector3(-0.3, 0.05, 0.28),
-        new THREE.Vector3(-0.2, 0.05, 0.3),
+        new THREE.Vector3(0.05, 0.03, 0.46),
+        new THREE.Vector3(-0.08, 0.03, 0.42),
+        new THREE.Vector3(-0.12, 0.05, 0.34),
+        new THREE.Vector3(-0.02, 0.05, 0.3),
       ]),
       10, 0.012, 6,
     ),
