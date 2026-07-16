@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Shanghai IO Connect</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .slides {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
+    }
+
+    /* Fullscreen image styles */
+    .slide.image-slide {
+      padding: 0;
+    }
+
+    .slide.image-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* Ensures the whole image is visible and scaled to max size */
+    }
+
+    /* Title slide */
+    .title-slide {
+      text-align: center;
+      background: #fff;
+    }
+
+    .title-slide h1 {
+      font-size: 64px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin: 0 0 16px 0;
+    }
+
+    .title-slide p {
+      font-size: 24px;
+      font-weight: 300;
+      color: #888;
+      margin: 0;
+    }
+
+    /* Link overlay */
+    .slide-link {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 400;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+      z-index: 20;
+    }
+
+    .slide-link:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Invisible navigation areas */
+    .nav-area {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 25%;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    .nav-left {
+      left: 0;
+    }
+
+    .nav-right {
+      right: 0;
+    }
+
+    /* Custom 96% Slide */
+    .custom-slide {
+      background: #fff;
+      padding: 40px !important;
+      box-sizing: border-box;
+    }
+
+    .big-number {
+      font-size: 220px;
+      font-weight: 800;
+      color: #000;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transform: scale(0.1) rotate(-10deg);
+      filter: blur(20px);
+    }
+
+    .active .big-number {
+      animation: flashy-pop 0.9s 3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes flashy-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.1) translateY(100px) rotate(-10deg);
+        filter: blur(20px);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.25) translateY(-15px) rotate(2deg);
+        filter: blur(0px);
+      }
+      75% {
+        transform: scale(0.92) translateY(5px) rotate(-1deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotate(0deg);
+        filter: blur(0px);
+      }
+    }
+
+    .active .big-number::before {
+      animation:
+        fade-in-rainbow 0.6s 3.2s ease forwards,
+        slide-rainbow 2s 3.2s linear infinite;
+    }
+
+    .big-number::before {
+      content: "96%";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      color: transparent;
+      background: linear-gradient(to right in oklch longer hue, oklch(65% 0.3 0), oklch(65% 0.3 0));
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: blur(15px);
+      background-size: 200% 100%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes fade-in-rainbow {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-rainbow {
+      from {
+        background-position: 0% center;
+      }
+
+      to {
+        background-position: -200% center;
+      }
+    }
+
+    .subtitle-text {
+      font-size: 28px;
+      font-weight: 400;
+      color: #333;
+      max-width: 800px;
+      text-align: center;
+      margin-top: 80px;
+      line-height: 1.5;
+      opacity: 0;
+    }
+
+    .slide-logo {
+      height: 80px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    .active .subtitle-text {
+      animation: fade-in 1s 1s ease forwards;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Chinese caption strip — translates each slide's key message */
+    .slide-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-family: 'Noto Sans SC', 'Inter', sans-serif;
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+      padding: 18px 48px;
+      box-sizing: border-box;
+      z-index: 15;
+    }
+
+    .slide-caption .en {
+      display: block;
+      font-size: 16px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 4px;
+    }
+
+    /* Bilingual title slide */
+    .title-slide h1 .zh {
+      display: block;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 72px;
+      margin-bottom: 12px;
+    }
+
+    .ken-burns-slide {
+      overflow: hidden;
+    }
+
+    .ken-burns-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: left top;
+    }
+
+    .active.ken-burns-slide img {
+      animation: ken-burns-pan 20s ease-in-out forwards;
+    }
+
+    @keyframes ken-burns-pan {
+      0% {
+        transform: scale(2.5) translate(0%, 0%);
+      }
+      100% {
+        transform: scale(1.5) translate(-30%, 0%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Invisible click areas for clean navigation without visible buttons -->
+  <div class="nav-area nav-left" id="prev" title="Previous Slide"></div>
+  <div class="nav-area nav-right" id="next" title="Next Slide"></div>
+
+  <div class="slides">
+    <div class="slide title-slide active">
+      <h1><span class="zh">智能体与 Web 平台</span>Agents &amp; the Web Platform</h1>
+      <p>Google I/O Connect · 上海 Shanghai</p>
+    </div>
+
+    <div class="slide image-slide">
+      <img src="webmcp-logowall.png" alt="WebMCP Logo Wall">
+      <div class="slide-caption">WebMCP：让你的网站成为 AI 智能体可以调用的工具
+        <span class="en">WebMCP: make your website a tool that AI agents can call</span>
+      </div>
+    </div>
+
+    <div class="slide image-slide">
+      <img src="slide2.png" alt="Weekly commits on GitHub">
+      <div class="slide-caption">GitHub 每周提交量 — AI 辅助开发正在爆发式增长
+        <span class="en">Weekly commits on GitHub — AI-assisted development is growing explosively</span>
+      </div>
+    </div>
+
+    <div class="slide image-slide ken-burns-slide">
+      <img src="slide1.png" alt="Model Gap">
+      <div class="slide-caption">模型差距：模型的知识停留在训练截止日 — 之后发布的每个 Chrome 特性它都不了解
+        <span class="en">The model gap: a model's knowledge stops at its cutoff — it misses every Chrome release after that</span>
+      </div>
+      <a class="slide-link" href="https://aifoc.us/model-gap" target="_blank">在 aifoc.us 查看 · aifoc.us/model-gap</a>
+    </div>
+
+    <div class="slide image-slide">
+      <img src="skills.png" alt="Unguided vs Guided agents">
+      <div class="slide-caption">无引导 vs 有引导 — 有了最新的指导，智能体才能写出现代 Web 代码
+        <span class="en">Unguided vs guided — with up-to-date guidance, agents write modern web code</span>
+      </div>
+    </div>
+
+    <div class="slide image-slide">
+      <img src="install-mwg.png" alt="Install Modern Web Guidance">
+      <div class="slide-caption">推荐安装方式：npx modern-web-guidance install</div>
+      <a class="slide-link" href="https://goo.gle/mwg" target="_blank">goo.gle/mwg</a>
+    </div>
+
+    <div class="slide custom-slide">
+      <img src="modernize.gif" alt="Modernize with MWG" style="margin: 1em; width: 100%; border-radius: 1em;
+    box-shadow: black 0 0 1em;">
+      <div class="slide-caption">使用 Modern Web Guidance 现代化你的网站
+        <span class="en">Modernise your site with Modern Web Guidance</span>
+      </div>
+    </div>
+
+    <div class="slide image-slide">
+      <img src="closed-loop.svg" alt="Closed Loop Debugging Flowchart"
+        style="width: 80%; max-height: 80vh; object-fit: contain;">
+      <div class="slide-caption">闭环调试：智能体自行验证每一次修改
+        <span class="en">Closed-loop debugging: the agent verifies every change it makes</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    window.focus(); // Ensure keyboard events go here immediately upon load
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+
+    function showSlide(index) {
+      slides[current].classList.remove('active');
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('active');
+    }
+
+    function checkHash() {
+      const match = window.location.hash.match(/#slide-(\d+)/);
+      if (match) {
+        const slideIndex = parseInt(match[1], 10) - 1;
+        if (slideIndex >= 0 && slideIndex < slides.length) {
+          showSlide(slideIndex);
+        }
+      }
+    }
+
+    window.addEventListener('hashchange', checkHash);
+    window.addEventListener('load', checkHash);
+    checkHash();
+
+    document.getElementById('prev').addEventListener('click', () => showSlide(current - 1));
+    document.getElementById('next').addEventListener('click', () => showSlide(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.code === 'Space') {
+        showSlide(current + 1);
+      } else if (e.key === 'ArrowLeft') {
+        showSlide(current - 1);
+      } else if (e.key >= '1' && e.key <= '9') {
+        const targetIndex = parseInt(e.key, 10) - 1;
+        if (targetIndex < slides.length) {
+          showSlide(targetIndex);
+        }
+      } else if (e.key === '0') {
+        if (9 < slides.length) {
+          showSlide(9);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

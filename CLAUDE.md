@@ -125,6 +125,9 @@ The project exposes interactive controls to Claude via the browser-native Web MC
 |------|-------------|
 | `toggleDeskLamp` | Toggle the desk lamp on/off |
 | `toggleNightMode` | Toggle room ceiling lights on/off |
+| `toggleIndianVersion` | Toggle the Indian room theme (Bengaluru poster, Bollywood posters, cricket gear, cricket bedsheet). Keyboard: `i`. Mutually exclusive with the Shanghai theme. |
+| `toggleShanghaiVersion` | Toggle the Shanghai room theme (skyline poster with Shanghai Tower + Oriental Pearl, 魂斗罗/坦克大战 pixel posters, Subor 小霸王 console with yellow carts on the desk, ping pong paddle, "I ❤ 上海" bedsheet). Keyboard: `s`. Mutually exclusive with the Indian theme. |
+| `toggleComputerPower` | Toggle the monitor power (boot sequence on power-on) |
 | `focusMonitor` | Zoom camera to focus on the computer monitor |
 | `focusBooks` | Zoom camera to focus on the bookshelf |
 | `resetCameraFocus` | Reset camera to default room view |

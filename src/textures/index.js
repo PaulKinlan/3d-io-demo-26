@@ -4,6 +4,15 @@ import createCatPosterTexture from './generators/poster-cat.js';
 import { createCDTexture } from './generators/cd.js';
 import { createCDStackLabelTexture } from './generators/stack-label.js';
 import createGraffitiTexture from './generators/graffiti.js';
+import {
+  createShanghaiSkylinePoster,
+  createBundPanoramaPoster,
+  createContraPoster,
+  createTankPoster,
+  createPingPongPoster,
+  createShanghaiBedsheet,
+  createShanghaiPillow,
+} from './generators/shanghai.js';
 
 /**
  * Texture registry. Each entry maps a name to either:
@@ -38,4 +47,11 @@ export const textures = {
   'cd-stack-label': { generator: createCDStackLabelTexture },
   'fabric-cricket-bedsheet': { file: '/textures/fabric/cricket-bedsheet.png' },
   'fabric-cricket-pillow': { file: '/textures/fabric/cricket-pillow.png' },
+  'poster-shanghai-skyline': { generator: createShanghaiSkylinePoster },
+  'poster-bund': { generator: createBundPanoramaPoster },
+  'poster-contra': { generator: createContraPoster },
+  'poster-tank': { generator: createTankPoster },
+  'poster-pingpong': { generator: createPingPongPoster },
+  'fabric-shanghai-bedsheet': { generator: createShanghaiBedsheet },
+  'fabric-shanghai-pillow': { generator: createShanghaiPillow },
 };

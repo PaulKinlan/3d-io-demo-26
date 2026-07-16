@@ -145,6 +145,204 @@ export const buildDecor = ({ scene, addMesh }) => {
     },
   );
 
+  // --- Shanghai version props ---
+
+  // Small canvas label helper for the game cartridges (黄卡 / yellow carts).
+  const makeCartLabelTexture = (title, subtitle) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#e8c83a'; // cartridge yellow
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(12, 20, 104, 88);
+    ctx.strokeStyle = '#c8102e';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(12, 20, 104, 88);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#c8102e';
+    ctx.font = '900 30px "Noto Sans SC", sans-serif';
+    ctx.fillText(title, 64, 62);
+    ctx.fillStyle = '#333333';
+    ctx.font = '700 14px monospace';
+    ctx.fillText(subtitle, 64, 92);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  };
+
+  const cartYellowMaterial = new THREE.MeshStandardMaterial({ color: '#e8c83a', roughness: 0.6 });
+  const buildCartridge = (title, subtitle) => {
+    const cart = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.07, 0.42), cartYellowMaterial);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    cart.add(body);
+    const label = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.28, 0.3),
+      new THREE.MeshStandardMaterial({ map: makeCartLabelTexture(title, subtitle), roughness: 0.8 }),
+    );
+    label.rotation.x = -Math.PI / 2;
+    label.position.set(0, 0.036, 0.02);
+    cart.add(label);
+    return cart;
+  };
+
+  // Subor 小霸王 learning machine — the keyboard-shaped Famicom clone that
+  // defined '90s Chinese childhood gaming. On the floor in front of the desk,
+  // where it stays visible (the desk itself is fully occupied by the PC).
+  const suborGroup = new THREE.Group();
+  suborGroup.name = 'suborGroup';
+  suborGroup.position.set(-4.9, 0, -1.3);
+  suborGroup.rotation.y = 0.35;
+  suborGroup.scale.set(0, 0, 0);
+  suborGroup.visible = false;
+  scene.add(suborGroup);
+
+  const suborBodyMaterial = new THREE.MeshStandardMaterial({ color: '#ddd6c8', roughness: 0.7 });
+  const suborDarkMaterial = new THREE.MeshStandardMaterial({ color: '#4a4a52', roughness: 0.8 });
+  const suborRedMaterial = new THREE.MeshStandardMaterial({ color: '#c8102e', roughness: 0.6 });
+
+  // Wedge-shaped keyboard body
+  const suborBody = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.1, 0.5), suborBodyMaterial);
+  suborBody.position.set(0, 0.05, 0.05);
+  suborBody.rotation.x = 0.06;
+  suborBody.castShadow = true;
+  suborBody.receiveShadow = true;
+  suborGroup.add(suborBody);
+
+  // Key block (dark keys)
+  const suborKeys = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.03, 0.3), suborDarkMaterial);
+  suborKeys.position.set(0, 0.11, 0.09);
+  suborKeys.rotation.x = 0.06;
+  suborGroup.add(suborKeys);
+
+  // Raised cartridge slot housing at the back
+  const suborSlot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.2), suborBodyMaterial);
+  suborSlot.position.set(0, 0.14, -0.22);
+  suborSlot.castShadow = true;
+  suborGroup.add(suborSlot);
+
+  // 小霸王 badge
+  const badgeCanvas = document.createElement('canvas');
+  badgeCanvas.width = 256;
+  badgeCanvas.height = 64;
+  const badgeCtx = badgeCanvas.getContext('2d');
+  badgeCtx.fillStyle = '#ddd6c8';
+  badgeCtx.fillRect(0, 0, 256, 64);
+  badgeCtx.textAlign = 'center';
+  badgeCtx.fillStyle = '#c8102e';
+  badgeCtx.font = '900 40px "Noto Sans SC", sans-serif';
+  badgeCtx.fillText('小霸王', 100, 46);
+  badgeCtx.fillStyle = '#333333';
+  badgeCtx.font = '700 22px sans-serif';
+  badgeCtx.fillText('SUBOR', 205, 42);
+  const badgeTexture = new THREE.CanvasTexture(badgeCanvas);
+  badgeTexture.colorSpace = THREE.SRGBColorSpace;
+  const suborBadge = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.44, 0.11),
+    new THREE.MeshStandardMaterial({ map: badgeTexture, roughness: 0.8 }),
+  );
+  suborBadge.rotation.x = -Math.PI / 2 + 0.06;
+  suborBadge.position.set(-0.22, 0.105, 0.28);
+  suborGroup.add(suborBadge);
+
+  // Red power/reset buttons
+  for (const [bx, bz] of [[0.32, 0.28], [0.42, 0.28]]) {
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.02, 10), suborRedMaterial);
+    btn.position.set(bx, 0.105, bz);
+    suborGroup.add(btn);
+  }
+
+  // Contra cart inserted in the slot, Tank Battle cart lying beside the console
+  const contraCart = buildCartridge('魂斗罗', 'CONTRA');
+  contraCart.position.set(0, 0.22, -0.22);
+  contraCart.rotation.x = -0.12;
+  suborGroup.add(contraCart);
+
+  const tankCart = buildCartridge('坦克大战', 'BATTLE CITY');
+  tankCart.position.set(0.72, 0.035, -0.1);
+  tankCart.rotation.y = -0.5;
+  suborGroup.add(tankCart);
+
+  // Gamepad in front of the console with a curled cable
+  const gamepad = new THREE.Group();
+  gamepad.position.set(-0.25, 0.02, 0.62);
+  gamepad.rotation.y = -0.3;
+  suborGroup.add(gamepad);
+
+  const padBody = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.05, 0.18), suborDarkMaterial);
+  padBody.castShadow = true;
+  gamepad.add(padBody);
+  const dpadV = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.02, 0.09), suborBodyMaterial);
+  dpadV.position.set(-0.11, 0.03, 0);
+  gamepad.add(dpadV);
+  const dpadH = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.02, 0.03), suborBodyMaterial);
+  dpadH.position.set(-0.11, 0.03, 0);
+  gamepad.add(dpadH);
+  for (const [bx] of [[0.06], [0.12]]) {
+    const abBtn = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.02, 10), suborRedMaterial);
+    abBtn.position.set(bx, 0.03, 0.02);
+    gamepad.add(abBtn);
+  }
+  const padCable = new THREE.Mesh(
+    new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.25, 0.03, 0.53),
+        new THREE.Vector3(-0.35, 0.03, 0.4),
+        new THREE.Vector3(-0.3, 0.05, 0.28),
+        new THREE.Vector3(-0.2, 0.05, 0.3),
+      ]),
+      10, 0.012, 6,
+    ),
+    new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 0.9 }),
+  );
+  suborGroup.add(padCable);
+
+  // Ping pong paddle + ball on the floor (table tennis is the national sport —
+  // the Shanghai counterpart to the cricket bat).
+  const pingpongGroup = new THREE.Group();
+  pingpongGroup.name = 'pingpongGroup';
+  pingpongGroup.position.set(-1.5, 0.04, -4.0);
+  pingpongGroup.rotation.y = 0.6;
+  pingpongGroup.scale.set(0, 0, 0);
+  pingpongGroup.visible = false;
+  scene.add(pingpongGroup);
+
+  const paddleFace = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.35, 0.35, 0.05, 24),
+    [
+      new THREE.MeshStandardMaterial({ color: '#d2a56b', roughness: 0.7 }), // edge (plywood)
+      new THREE.MeshStandardMaterial({ color: '#e5341a', roughness: 0.85 }), // top rubber (red)
+      new THREE.MeshStandardMaterial({ color: '#1a1a1a', roughness: 0.85 }), // bottom rubber (black)
+    ],
+  );
+  paddleFace.scale.set(1, 1, 1.12);
+  paddleFace.castShadow = true;
+  paddleFace.receiveShadow = true;
+  pingpongGroup.add(paddleFace);
+
+  const paddleHandle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.06, 0.4),
+    new THREE.MeshStandardMaterial({ color: '#d2a56b', roughness: 0.7 }),
+  );
+  paddleHandle.position.set(0, 0, 0.52);
+  paddleHandle.castShadow = true;
+  pingpongGroup.add(paddleHandle);
+
+  const pingpongBall = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 16, 16),
+    new THREE.MeshStandardMaterial({ color: '#fff8e8', roughness: 0.4 }),
+  );
+  pingpongBall.position.set(-1.0, 0.1, -3.5);
+  pingpongBall.castShadow = true;
+  pingpongBall.name = 'pingpongBall';
+  pingpongBall.visible = false;
+  scene.add(pingpongBall);
+
+  // --- End Shanghai props ---
+
   // RC10 Car Model on the floor
   const rcGroup = new THREE.Group();
   rcGroup.position.set(-6, 0, 1); // Left side of the room

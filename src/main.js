@@ -652,9 +652,12 @@ window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 't') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      iframe.src = '/demos/bengaluru-io-connect/index.html';
+      const deck = window.isShanghaiVersion
+        ? '/demos/shanghai-io-connect/index.html'
+        : '/demos/bengaluru-io-connect/index.html';
+      iframe.src = deck;
       iframe.focus();
-      previousMonitorUrl = '/demos/bengaluru-io-connect/index.html';
+      previousMonitorUrl = deck;
       resetInactivityTimer();
     }
   }
@@ -684,13 +687,21 @@ window.addEventListener('keydown', (e) => {
     toggleIndianVersion();
   }
 
+  if (e.key.toLowerCase() === 's') {
+    toggleShanghaiVersion();
+  }
+
   if (e.key >= '0' && e.key <= '9') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
       const slideNum = e.key === '0' ? 10 : e.key;
-      iframe.src = `/demos/bengaluru-io-connect/index.html#slide-${slideNum}`;
+      // Number keys target whichever city deck is active
+      const deck = window.isShanghaiVersion
+        ? '/demos/shanghai-io-connect/index.html'
+        : '/demos/bengaluru-io-connect/index.html';
+      iframe.src = `${deck}#slide-${slideNum}`;
       iframe.focus();
-      previousMonitorUrl = `/demos/bengaluru-io-connect/index.html#slide-${slideNum}`;
+      previousMonitorUrl = `${deck}#slide-${slideNum}`;
       resetInactivityTimer();
     }
   }
@@ -911,6 +922,10 @@ const activeParticles = [];
 let isBatAnimating = false;
 let batAnimationTime = 0;
 
+// Animation state for the Shanghai props (Subor console + ping pong paddle)
+let isShanghaiPropsAnimating = false;
+let shanghaiAnimationTime = 0;
+
 // Screensaver state and inactivity tracking
 let lastActivityTime = Date.now();
 let isScreensaverActive = false;
@@ -1044,6 +1059,34 @@ const animate = (time = 0) => {
     }
   }
 
+  // Update Shanghai props pop-in (Subor console on the desk + ping pong paddle)
+  if (isShanghaiPropsAnimating) {
+    const suborGroup = scene.getObjectByName('suborGroup');
+    const pingpongGroup = scene.getObjectByName('pingpongGroup');
+    shanghaiAnimationTime += 0.035;
+    const t = shanghaiAnimationTime;
+    // Same elastic spring as the cricket bat, but these props are built at
+    // natural size so they settle at scale 1.0.
+    const scaleVal = Math.max(0, 1 - Math.exp(-4 * t) * Math.cos(12 * t));
+    const suborScale = scaleVal * 1.3; // console settles slightly larger for floor visibility
+
+    if (t < 1.5) {
+      if (suborGroup) suborGroup.scale.set(suborScale, suborScale, suborScale);
+      if (pingpongGroup) {
+        pingpongGroup.scale.set(scaleVal, scaleVal, scaleVal);
+        const wobble = Math.sin(22 * t) * Math.exp(-2.5 * t) * 0.3;
+        pingpongGroup.rotation.y = 0.6 + wobble;
+      }
+    } else {
+      if (suborGroup) suborGroup.scale.set(1.3, 1.3, 1.3);
+      if (pingpongGroup) {
+        pingpongGroup.scale.set(1, 1, 1);
+        pingpongGroup.rotation.y = 0.6;
+      }
+      isShanghaiPropsAnimating = false;
+    }
+  }
+
   if (renderer.domElement.onpaint) {
     renderer.domElement.onpaint();
   }
@@ -1132,6 +1175,10 @@ const toggleNightMode = () => {
   }
 };
 const toggleIndianVersion = () => {
+  // The city themes are mutually exclusive — switch Shanghai off first.
+  if (!window.isIndianVersion && window.isShanghaiVersion) {
+    toggleShanghaiVersion();
+  }
   window.isIndianVersion = !window.isIndianVersion;
   console.log('Indian Version:', window.isIndianVersion ? 'ON' : 'OFF');
   
@@ -1224,6 +1271,102 @@ const toggleIndianVersion = () => {
   }
 };
 
+const toggleShanghaiVersion = () => {
+  // The city themes are mutually exclusive — switch India off first.
+  if (!window.isShanghaiVersion && window.isIndianVersion) {
+    toggleIndianVersion();
+  }
+  window.isShanghaiVersion = !window.isShanghaiVersion;
+  console.log('Shanghai Version:', window.isShanghaiVersion ? 'ON' : 'OFF');
+
+  const posterA = scene.getObjectByName('posterA');
+  const posterB = scene.getObjectByName('posterB');
+  const posterCat = scene.getObjectByName('posterCat');
+  const posterKitten = scene.getObjectByName('posterKitten');
+  const posterC = scene.getObjectByName('posterC');
+  const suborGroup = scene.getObjectByName('suborGroup');
+  const pingpongGroup = scene.getObjectByName('pingpongGroup');
+  const pingpongBall = scene.getObjectByName('pingpongBall');
+  const bedDuvet = scene.getObjectByName('bedDuvet');
+  const bedPillow = scene.getObjectByName('bedPillow');
+
+  if (window.isShanghaiVersion) {
+    if (posterA) posterA.material.map = loadTexture('poster-shanghai-skyline'); // Shanghai Tower + Oriental Pearl
+    if (posterB) posterB.material.map = loadTexture('poster-contra'); // 魂斗罗
+    if (posterCat) posterCat.material.map = loadTexture('poster-tank'); // 坦克大战
+    if (posterKitten) posterKitten.material.map = loadTexture('poster-bund'); // landscape Bund panorama
+    if (posterC) posterC.material.map = loadTexture('poster-pingpong'); // 乒乓
+    if (suborGroup) suborGroup.visible = true;
+    if (pingpongGroup) pingpongGroup.visible = true;
+    if (pingpongBall) pingpongBall.visible = true;
+    isShanghaiPropsAnimating = true;
+    shanghaiAnimationTime = 0;
+    if (bedDuvet) {
+      const duvetSideMaterial = new THREE.MeshLambertMaterial({ color: 0xc8102e }); // Matching red sides
+      const duvetTopMaterial = new THREE.MeshLambertMaterial({
+        map: loadTexture('fabric-shanghai-bedsheet', { repeat: [1, 1] }),
+        color: 0xffffff
+      });
+      bedDuvet.material = [
+        duvetSideMaterial, // +X
+        duvetSideMaterial, // -X
+        duvetTopMaterial,  // +Y (top)
+        duvetSideMaterial, // -Y
+        duvetSideMaterial, // +Z
+        duvetSideMaterial  // -Z
+      ];
+    }
+    if (bedPillow) {
+      const pillowSideMaterial = new THREE.MeshLambertMaterial({ color: 0xffd88a }); // Gold sides
+      const pillowTopMaterial = new THREE.MeshLambertMaterial({
+        map: loadTexture('fabric-shanghai-pillow', { repeat: [1, 1] }),
+        color: 0xffffff
+      });
+      bedPillow.material = [
+        pillowSideMaterial, // +X
+        pillowSideMaterial, // -X
+        pillowTopMaterial,  // +Y (top)
+        pillowSideMaterial, // -Y
+        pillowSideMaterial, // +Z
+        pillowSideMaterial  // -Z
+      ];
+    }
+
+    // Red-and-gold firework bursts to highlight the room transition
+    triggerFireworkBurst(new THREE.Vector3(4.45, 1.3, -2.2), 0xc8102e, 30); // Bed (red)
+    triggerFireworkBurst(new THREE.Vector3(4.45, 1.7, -4.25), 0xffd700, 25); // Pillow (gold)
+    triggerFireworkBurst(new THREE.Vector3(-7.6, 4.8, -0.9), 0xc8102e, 20); // Skyline poster
+    triggerFireworkBurst(new THREE.Vector3(1.9, 5.0, -6.1), 0xffd700, 20); // Contra poster
+    triggerFireworkBurst(new THREE.Vector3(5.0, 4.6, -6.2), 0xc8102e, 20); // Ping pong poster
+    triggerFireworkBurst(new THREE.Vector3(-4.9, 0.6, -1.3), 0xffd700, 25); // Subor console (gold)
+  } else {
+    if (posterA) posterA.material.map = loadTexture('poster-rc10');
+    if (posterB) posterB.material.map = loadTexture('poster-doom');
+    if (posterCat) posterCat.material.map = loadTexture('poster-cat');
+    if (posterKitten) {
+      posterKitten.material.map = loadTexture('poster-kitten-washing-line');
+      posterKitten.scale.set(1, 1, 1);
+    }
+    if (posterC) posterC.material.map = loadTexture('poster-skate');
+    if (suborGroup) {
+      suborGroup.visible = false;
+      suborGroup.scale.set(0, 0, 0);
+    }
+    if (pingpongGroup) {
+      pingpongGroup.visible = false;
+      pingpongGroup.scale.set(0, 0, 0);
+    }
+    if (pingpongBall) pingpongBall.visible = false;
+    isShanghaiPropsAnimating = false;
+    if (bedDuvet) {
+      bedDuvet.material = new THREE.MeshLambertMaterial({ color: '#587091' });
+    }
+    if (bedPillow) {
+      bedPillow.material = new THREE.MeshLambertMaterial({ color: '#e8d8c8' });
+    }
+  }
+};
+
 const setupMCP = () => {
   // The Web MCP entry point moved from navigator.modelContext to
   // document.modelContext; prefer the new location and fall back for older Chrome.
@@ -1239,6 +1382,13 @@ const setupMCP = () => {
     execute: () => { toggleIndianVersion(); },
     name: "toggleIndianVersion",
     description: "Toggles the Indian version of the bedroom, featuring a Bengaluru travel poster, a Bollywood poster, and cricket gear.",
+    inputSchema: { type: "object", properties: {} }
+  });
+
+  modelContext.registerTool({
+    execute: () => { toggleShanghaiVersion(); },
+    name: "toggleShanghaiVersion",
+    description: "Toggles the Shanghai version of the bedroom, featuring a Shanghai skyline poster (Shanghai Tower and Oriental Pearl Tower), an 'I love Shanghai' bedspread, a Subor (小霸王) games console with Contra and Battle City cartridges, and a ping pong paddle.",
     inputSchema: { type: "object", properties: {} }
   });
 
@@ -1337,6 +1487,7 @@ const setupMCP = () => {
             "/demos/immediate-ui-mode/",
             "/demos/celebration/",
             "/demos/bengaluru-io-connect/",
+            "/demos/shanghai-io-connect/",
             "/demos/redbus/",
             "/demos/times-internet/",
             "/demos/makemytrip/",
@@ -1428,5 +1579,14 @@ loadTexture('poster-bollywood6');
 loadTexture('poster-bryanadams');
 loadTexture('fabric-cricket-bedsheet', { repeat: [1, 1] });
 loadTexture('fabric-cricket-pillow', { repeat: [1, 1] });
+
+// Preload Shanghai version textures to prevent black flashes during toggle transitions
+loadTexture('poster-shanghai-skyline');
+loadTexture('poster-bund');
+loadTexture('poster-contra');
+loadTexture('poster-tank');
+loadTexture('poster-pingpong');
+loadTexture('fabric-shanghai-bedsheet', { repeat: [1, 1] });
+loadTexture('fabric-shanghai-pillow', { repeat: [1, 1] });
 
 animate();
