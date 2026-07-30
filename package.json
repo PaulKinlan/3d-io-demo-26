@@ -8,7 +8,8 @@
     "dev": "node server.js",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "bake:textures": "node scripts/bake.js"
   },
   "dependencies": {
     "@typegpu/sdf": "^0.11.1",

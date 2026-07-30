@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bake Shanghai Textures</title>
+</head>
+<body>
+  <h1>Baking Textures...</h1>
+  <script type="module">
+    import {
+      createShanghaiSkylinePosterCanvas,
+      createBundPanoramaPosterCanvas,
+      createContraPosterCanvas,
+      createTankPosterCanvas,
+      createPingPongPosterCanvas,
+      createShanghaiBedsheetCanvas,
+      createShanghaiPillowCanvas,
+      createMimiSnackTextureCanvas
+    } from '../src/textures/generators/shanghai.js';
+
+    async function run() {
+      // Ensure fonts have loaded
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+
+      const textures = {
+        'textures/posters/shanghai-skyline.png': createShanghaiSkylinePosterCanvas().toDataURL('image/png'),
+        'textures/posters/bund.png': createBundPanoramaPosterCanvas().toDataURL('image/png'),
+        'textures/posters/contra.png': createContraPosterCanvas().toDataURL('image/png'),
+        'textures/posters/tank.png': createTankPosterCanvas().toDataURL('image/png'),
+        'textures/posters/pingpong.png': createPingPongPosterCanvas().toDataURL('image/png'),
+        'textures/fabric/shanghai-bedsheet.png': createShanghaiBedsheetCanvas().toDataURL('image/png'),
+        'textures/fabric/shanghai-pillow.png': createShanghaiPillowCanvas().toDataURL('image/png'),
+        'textures/misc/mimi-snack.png': createMimiSnackTextureCanvas().toDataURL('image/png'),
+      };
+
+      await fetch('http://localhost:5200', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(textures)
+      });
+      console.log('Done posting textures!');
+    }
+
+    run().catch(console.error);
+  </script>
+</body>
+</html>

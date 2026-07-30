@@ -1059,10 +1059,11 @@ const animate = (time = 0) => {
     }
   }
 
-  // Update Shanghai props pop-in (Subor console on the desk + ping pong paddle)
+  // Update Shanghai props pop-in (Subor console, Mimi snack pouch on the desk + ping pong paddle)
   if (isShanghaiPropsAnimating) {
     const suborGroup = scene.getObjectByName('suborGroup');
     const pingpongGroup = scene.getObjectByName('pingpongGroup');
+    const mimiSnackGroup = scene.getObjectByName('mimiSnackGroup');
     shanghaiAnimationTime += 0.035;
     const t = shanghaiAnimationTime;
     // Same elastic spring as the cricket bat, but these props are built at
@@ -1071,6 +1072,7 @@ const animate = (time = 0) => {
 
     if (t < 1.5) {
       if (suborGroup) suborGroup.scale.set(scaleVal, scaleVal, scaleVal);
+      if (mimiSnackGroup) mimiSnackGroup.scale.set(scaleVal, scaleVal, scaleVal);
       if (pingpongGroup) {
         pingpongGroup.scale.set(scaleVal, scaleVal, scaleVal);
         const wobble = Math.sin(22 * t) * Math.exp(-2.5 * t) * 0.3;
@@ -1078,6 +1080,7 @@ const animate = (time = 0) => {
       }
     } else {
       if (suborGroup) suborGroup.scale.set(1, 1, 1);
+      if (mimiSnackGroup) mimiSnackGroup.scale.set(1, 1, 1);
       if (pingpongGroup) {
         pingpongGroup.scale.set(1, 1, 1);
         pingpongGroup.rotation.y = 0.6;
@@ -1286,12 +1289,13 @@ const toggleShanghaiVersion = () => {
   const suborGroup = scene.getObjectByName('suborGroup');
   const pingpongGroup = scene.getObjectByName('pingpongGroup');
   const pingpongBall = scene.getObjectByName('pingpongBall');
+  const mimiSnackGroup = scene.getObjectByName('mimiSnackGroup');
   const cdGroup = scene.getObjectByName('cdGroup');
   const bedDuvet = scene.getObjectByName('bedDuvet');
   const bedPillow = scene.getObjectByName('bedPillow');
 
   if (window.isShanghaiVersion) {
-    if (posterA) posterA.material.map = loadTexture('poster-shanghai-skyline'); // Shanghai Tower + Oriental Pearl
+    if (posterA) posterA.material.map = loadTexture('poster-shanghai-skyline'); // 90s Oriental Pearl skyline
     if (posterB) posterB.material.map = loadTexture('poster-contra'); // 魂斗罗
     if (posterCat) posterCat.material.map = loadTexture('poster-tank'); // 坦克大战
     if (posterKitten) posterKitten.material.map = loadTexture('poster-bund'); // landscape Bund panorama
@@ -1299,6 +1303,7 @@ const toggleShanghaiVersion = () => {
     if (suborGroup) suborGroup.visible = true;
     if (pingpongGroup) pingpongGroup.visible = true;
     if (pingpongBall) pingpongBall.visible = true;
+    if (mimiSnackGroup) mimiSnackGroup.visible = true;
     if (cdGroup) cdGroup.visible = false; // the console takes the CDs' desk spot
     isShanghaiPropsAnimating = true;
     shanghaiAnimationTime = 0;
@@ -1340,6 +1345,7 @@ const toggleShanghaiVersion = () => {
     triggerFireworkBurst(new THREE.Vector3(1.9, 5.0, -6.1), 0xffd700, 20); // Contra poster
     triggerFireworkBurst(new THREE.Vector3(5.0, 4.6, -6.2), 0xc8102e, 20); // Ping pong poster
     triggerFireworkBurst(new THREE.Vector3(-3.55, 3.6, -4.55), 0xffd700, 25); // Subor console (gold)
+    triggerFireworkBurst(new THREE.Vector3(-3.0, 3.4, -4.05), 0xffd700, 20); // Mimi snack
   } else {
     if (posterA) posterA.material.map = loadTexture('poster-rc10');
     if (posterB) posterB.material.map = loadTexture('poster-doom');
@@ -1358,6 +1364,10 @@ const toggleShanghaiVersion = () => {
       pingpongGroup.scale.set(0, 0, 0);
     }
     if (pingpongBall) pingpongBall.visible = false;
+    if (mimiSnackGroup) {
+      mimiSnackGroup.visible = false;
+      mimiSnackGroup.scale.set(0, 0, 0);
+    }
     if (cdGroup) cdGroup.visible = true;
     isShanghaiPropsAnimating = false;
     if (bedDuvet) {
@@ -1590,5 +1600,6 @@ loadTexture('poster-tank');
 loadTexture('poster-pingpong');
 loadTexture('fabric-shanghai-bedsheet', { repeat: [1, 1] });
 loadTexture('fabric-shanghai-pillow', { repeat: [1, 1] });
+loadTexture('misc-mimi-snack');
 
 animate();

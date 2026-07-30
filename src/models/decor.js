@@ -341,6 +341,67 @@ export const buildDecor = ({ scene, addMesh }) => {
   pingpongBall.visible = false;
   scene.add(pingpongBall);
 
+  // 咪咪虾条 (Mimi Shrimp Strips) — popular 90s childhood snack pouch on the desk
+  const mimiSnackGroup = new THREE.Group();
+  mimiSnackGroup.name = 'mimiSnackGroup';
+  mimiSnackGroup.position.set(-3.0, 3.28, -4.05);
+  mimiSnackGroup.rotation.y = 0.25;
+  mimiSnackGroup.rotation.z = -0.02;
+  mimiSnackGroup.scale.set(0, 0, 0);
+  mimiSnackGroup.visible = false;
+  scene.add(mimiSnackGroup);
+
+  const mimiSnackTexture = loadTexture('misc-mimi-snack');
+  const mimiFoilMaterial = new THREE.MeshStandardMaterial({
+    color: '#ffc800',
+    roughness: 0.35,
+    metalness: 0.15,
+  });
+  const mimiTopMaterial = new THREE.MeshStandardMaterial({
+    map: mimiSnackTexture,
+    roughness: 0.32,
+    metalness: 0.15,
+  });
+  const mimiCrimpMaterial = new THREE.MeshStandardMaterial({
+    color: '#c8102e',
+    roughness: 0.4,
+    metalness: 0.1,
+  });
+
+  // Puffed snack bag pillow body
+  const snackBag = new THREE.Mesh(
+    new THREE.BoxGeometry(0.38, 0.055, 0.48),
+    [
+      mimiFoilMaterial, // +X
+      mimiFoilMaterial, // -X
+      mimiTopMaterial, // +Y (top printed face)
+      mimiFoilMaterial, // -Y (back foil)
+      mimiFoilMaterial, // +Z
+      mimiFoilMaterial, // -Z
+    ],
+  );
+  snackBag.position.set(0, 0.028, 0);
+  snackBag.castShadow = true;
+  snackBag.receiveShadow = true;
+  mimiSnackGroup.add(snackBag);
+
+  // Top & bottom crimped foil seal tabs
+  const topCrimp = new THREE.Mesh(
+    new THREE.BoxGeometry(0.385, 0.012, 0.035),
+    mimiCrimpMaterial,
+  );
+  topCrimp.position.set(0, 0.015, -0.245);
+  topCrimp.castShadow = true;
+  mimiSnackGroup.add(topCrimp);
+
+  const bottomCrimp = new THREE.Mesh(
+    new THREE.BoxGeometry(0.385, 0.012, 0.035),
+    mimiCrimpMaterial,
+  );
+  bottomCrimp.position.set(0, 0.015, 0.245);
+  bottomCrimp.castShadow = true;
+  mimiSnackGroup.add(bottomCrimp);
+
   // --- End Shanghai props ---
 
   // RC10 Car Model on the floor

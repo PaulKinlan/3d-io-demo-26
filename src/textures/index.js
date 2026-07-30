@@ -48,4 +48,5 @@ export const textures = {
   'poster-pingpong': { file: '/textures/posters/pingpong.png' },
   'fabric-shanghai-bedsheet': { file: '/textures/fabric/shanghai-bedsheet.png' },
   'fabric-shanghai-pillow': { file: '/textures/fabric/shanghai-pillow.png' },
+  'misc-mimi-snack': { file: '/textures/misc/mimi-snack.png' },
 };

@@ -6,100 +6,106 @@ const asTexture = (canvas) => {
   return texture;
 };
 
-const makeCanvas = (width, height) => {
+export const makeCanvas = (width, height) => {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   return canvas;
 };
 
-// Shared skyline painter: Oriental Pearl Tower, Shanghai Tower, Jin Mao,
-// SWFC ("bottle opener") silhouettes above the Huangpu river.
+// 1990s Pudong skyline painter:
+// In the 1990s, the Oriental Pearl TV Tower (东方明珠, completed 1994) was the sole
+// towering landmark on the Pudong riverbank, surrounded by mid-rise 90s commercial
+// buildings, warehouses, and low-rise blocks along the Huangpu river.
+// Jin Mao (1999), SWFC (2008), and Shanghai Tower (2015) did not exist yet.
 // Coordinates are relative to a ground line `gy`, scaled by `s`.
-const drawSkyline = (ctx, gy, s, color) => {
+const drawSkyline = (ctx, gy, s, color, opXPos = -120) => {
   ctx.fillStyle = color;
 
-  // --- Background filler blocks (Pudong towers) ---
+  // --- 1990s Pudong mid-rise and commercial buildings ---
   const blocks = [
-    [-330, 90, 40], [-280, 130, 46], [110, 120, 42], [170, 90, 36],
-    [230, 150, 44], [290, 110, 40], [340, 70, 50],
+    [-340, 75, 45], [-290, 110, 48], [-235, 65, 38], [-185, 95, 42],
+    [-80, 85, 40], [-35, 120, 46], [20, 70, 36], [65, 130, 44],
+    [120, 90, 40], [170, 115, 48], [230, 80, 38], [275, 105, 44],
+    [325, 60, 50],
   ];
   for (const [x, h, w] of blocks) {
     ctx.fillRect(x * s, gy - h * s, w * s, h * s);
   }
 
-  // --- Oriental Pearl Tower (1994) at x ≈ -180 ---
-  const opX = -180 * s;
-  // Tripod legs
-  ctx.beginPath();
-  ctx.moveTo(opX - 60 * s, gy);
-  ctx.lineTo(opX, gy - 120 * s);
-  ctx.lineTo(opX - 44 * s, gy);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(opX + 60 * s, gy);
-  ctx.lineTo(opX, gy - 120 * s);
-  ctx.lineTo(opX + 44 * s, gy);
-  ctx.fill();
-  // Central column
-  ctx.fillRect(opX - 9 * s, gy - 330 * s, 18 * s, 330 * s);
-  // Lower big sphere
-  ctx.beginPath();
-  ctx.arc(opX, gy - 120 * s, 42 * s, 0, Math.PI * 2);
-  ctx.fill();
-  // Upper sphere
-  ctx.beginPath();
-  ctx.arc(opX, gy - 260 * s, 30 * s, 0, Math.PI * 2);
-  ctx.fill();
-  // Top small sphere + antenna
-  ctx.beginPath();
-  ctx.arc(opX, gy - 340 * s, 12 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillRect(opX - 2.5 * s, gy - 420 * s, 5 * s, 85 * s);
-
-  // --- Shanghai Tower (2015) at x ≈ 30 — smooth taper with a spire ---
-  const stX = 30 * s;
-  ctx.beginPath();
-  ctx.moveTo(stX - 52 * s, gy);
-  ctx.bezierCurveTo(stX - 44 * s, gy - 230 * s, stX - 26 * s, gy - 380 * s, stX - 8 * s, gy - 455 * s);
-  ctx.lineTo(stX + 16 * s, gy - 455 * s);
-  ctx.bezierCurveTo(stX + 30 * s, gy - 340 * s, stX + 44 * s, gy - 180 * s, stX + 52 * s, gy);
-  ctx.fill();
-  ctx.fillRect(stX - 1 * s, gy - 480 * s, 6 * s, 30 * s);
-
-  // --- Jin Mao Tower (1999) at x ≈ -70 — stepped pagoda tiers ---
-  const jmX = -70 * s;
-  const tiers = [
-    [46, 0, 150], [40, 150, 90], [34, 240, 70], [28, 310, 50], [20, 360, 34],
+  // A couple of stepped roof silhouettes typical of 90s architecture
+  const steppedBlocks = [
+    [-290, 110, 48, 20], [65, 130, 44, 18], [170, 115, 48, 15],
   ];
-  for (const [hw, from, h] of tiers) {
-    ctx.fillRect(jmX - hw * s, gy - (from + h) * s, hw * 2 * s, h * s);
+  for (const [x, h, w, sh] of steppedBlocks) {
+    ctx.fillRect((x + 8) * s, gy - (h + sh) * s, (w - 16) * s, sh * s);
+    // Small communication spires atop 90s rooftops
+    ctx.fillRect((x + w / 2 - 1.5) * s, gy - (h + sh + 22) * s, 3 * s, 22 * s);
   }
-  ctx.fillRect(jmX - 3 * s, gy - 430 * s, 6 * s, 40 * s);
 
-  // --- SWFC "bottle opener" (2008) at x ≈ 120 ---
-  const wfX = 120 * s;
+  // --- Oriental Pearl TV Tower (东方明珠, 1994) ---
+  const opX = opXPos * s;
+
+  // Tripod inclined support legs with base spherical anchor pods
   ctx.beginPath();
-  ctx.moveTo(wfX - 40 * s, gy);
-  ctx.lineTo(wfX - 16 * s, gy - 420 * s);
-  ctx.lineTo(wfX + 16 * s, gy - 420 * s);
-  ctx.lineTo(wfX + 40 * s, gy);
+  ctx.moveTo(opX - 68 * s, gy);
+  ctx.lineTo(opX - 48 * s, gy);
+  ctx.lineTo(opX - 10 * s, gy - 130 * s);
+  ctx.lineTo(opX - 22 * s, gy - 130 * s);
+  ctx.closePath();
   ctx.fill();
-  // The trapezoid aperture near the top (cut out with destination-out-ish overdraw
-  // is complex; draw sky-coloured hole instead via save/globalCompositeOperation)
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
+
   ctx.beginPath();
-  ctx.moveTo(wfX - 12 * s, gy - 400 * s);
-  ctx.lineTo(wfX + 12 * s, gy - 400 * s);
-  ctx.lineTo(wfX + 8 * s, gy - 330 * s);
-  ctx.lineTo(wfX - 8 * s, gy - 330 * s);
+  ctx.moveTo(opX + 68 * s, gy);
+  ctx.lineTo(opX + 48 * s, gy);
+  ctx.lineTo(opX + 10 * s, gy - 130 * s);
+  ctx.lineTo(opX + 22 * s, gy - 130 * s);
+  ctx.closePath();
   ctx.fill();
-  ctx.restore();
+
+  // Base spherical anchor pods
+  ctx.beginPath();
+  ctx.arc(opX - 58 * s, gy - 10 * s, 14 * s, 0, Math.PI * 2);
+  ctx.arc(opX + 58 * s, gy - 10 * s, 14 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Central column structure
+  ctx.fillRect(opX - 10 * s, gy - 340 * s, 20 * s, 340 * s);
+
+  // Vertical cylindrical outer column supports (between lower & upper spheres)
+  ctx.fillRect(opX - 26 * s, gy - 275 * s, 7 * s, 145 * s);
+  ctx.fillRect(opX + 19 * s, gy - 275 * s, 7 * s, 145 * s);
+
+  // Lower large sphere (50m diameter)
+  ctx.beginPath();
+  ctx.arc(opX, gy - 130 * s, 46 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Intermediate small decorative sphere
+  ctx.beginPath();
+  ctx.arc(opX, gy - 200 * s, 12 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Upper sphere (observation deck, 45m diameter)
+  ctx.beginPath();
+  ctx.arc(opX, gy - 275 * s, 32 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Space capsule (top small sphere, 14m diameter)
+  ctx.beginPath();
+  ctx.arc(opX, gy - 355 * s, 13 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Antenna mast & spire
+  ctx.fillRect(opX - 3 * s, gy - 440 * s, 6 * s, 85 * s);
+  ctx.fillRect(opX - 1.5 * s, gy - 475 * s, 3 * s, 35 * s);
+  // Antenna cross-bars
+  ctx.fillRect(opX - 12 * s, gy - 410 * s, 24 * s, 2.5 * s);
+  ctx.fillRect(opX - 9 * s, gy - 435 * s, 18 * s, 2 * s);
 };
 
-// Portrait travel poster: dusk gradient, skyline, 上海 / SHANGHAI.
-export function createShanghaiSkylinePoster() {
+// 1. Portrait travel poster: dusk gradient, 90s Oriental Pearl skyline, 上海 / SHANGHAI.
+export function createShanghaiSkylinePosterCanvas() {
   const canvas = makeCanvas(512, 768);
   const ctx = canvas.getContext('2d');
 
@@ -113,13 +119,13 @@ export function createShanghaiSkylinePoster() {
   // Sun low over the river
   ctx.fillStyle = '#ffd88a';
   ctx.beginPath();
-  ctx.arc(380, 520, 46, 0, Math.PI * 2);
+  ctx.arc(370, 500, 48, 0, Math.PI * 2);
   ctx.fill();
 
-  // Skyline (translated so x=0 is canvas centre)
+  // Skyline with Oriental Pearl Tower as the sole 90s Pudong landmark
   ctx.save();
   ctx.translate(256, 0);
-  drawSkyline(ctx, 600, 1.05, '#241b33');
+  drawSkyline(ctx, 600, 1.08, '#241b33', -20);
   ctx.restore();
 
   // Huangpu river
@@ -128,12 +134,13 @@ export function createShanghaiSkylinePoster() {
   river.addColorStop(1, '#191327');
   ctx.fillStyle = river;
   ctx.fillRect(0, 600, 512, 168);
-  // Light reflections
+
+  // Light reflections on the river
   ctx.fillStyle = 'rgba(255, 214, 140, 0.35)';
-  for (let i = 0; i < 26; i += 1) {
-    const rx = 40 + Math.random() * 432;
-    const ry = 612 + Math.random() * 130;
-    ctx.fillRect(rx, ry, 14 + Math.random() * 30, 3);
+  for (let i = 0; i < 28; i += 1) {
+    const rx = 30 + ((i * 37) % 450);
+    const ry = 608 + ((i * 23) % 135);
+    ctx.fillRect(rx, ry, 16 + ((i * 13) % 32), 3);
   }
 
   // Titles
@@ -150,11 +157,15 @@ export function createShanghaiSkylinePoster() {
   ctx.lineWidth = 10;
   ctx.strokeRect(18, 18, 476, 732);
 
-  return asTexture(canvas);
+  return canvas;
 }
 
-// Landscape Bund panorama for the side-wall frame.
-export function createBundPanoramaPoster() {
+export function createShanghaiSkylinePoster() {
+  return asTexture(createShanghaiSkylinePosterCanvas());
+}
+
+// 2. Landscape Bund panorama for the side-wall frame (90s Pudong skyline across the river).
+export function createBundPanoramaPosterCanvas() {
   const canvas = makeCanvas(768, 512);
   const ctx = canvas.getContext('2d');
 
@@ -165,9 +176,10 @@ export function createBundPanoramaPoster() {
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, 768, 512);
 
+  // 90s Skyline across the Bund
   ctx.save();
   ctx.translate(384, 0);
-  drawSkyline(ctx, 390, 0.78, '#101828');
+  drawSkyline(ctx, 390, 0.82, '#101828', -60);
   ctx.restore();
 
   // River
@@ -177,8 +189,10 @@ export function createBundPanoramaPoster() {
   ctx.fillStyle = river;
   ctx.fillRect(0, 390, 768, 122);
   ctx.fillStyle = 'rgba(255, 200, 120, 0.3)';
-  for (let i = 0; i < 30; i += 1) {
-    ctx.fillRect(20 + Math.random() * 728, 400 + Math.random() * 100, 12 + Math.random() * 26, 3);
+  for (let i = 0; i < 32; i += 1) {
+    const rx = 15 + ((i * 47) % 735);
+    const ry = 398 + ((i * 17) % 100);
+    ctx.fillRect(rx, ry, 14 + ((i * 11) % 28), 3);
   }
 
   ctx.textAlign = 'center';
@@ -190,7 +204,11 @@ export function createBundPanoramaPoster() {
   ctx.fillText('THE BUND', 389, 108);
   ctx.letterSpacing = '0px';
 
-  return asTexture(canvas);
+  return canvas;
+}
+
+export function createBundPanoramaPoster() {
+  return asTexture(createBundPanoramaPosterCanvas());
 }
 
 // Paint a sprite from an ASCII pixel map. `palette` maps characters to colours.
@@ -205,8 +223,8 @@ const drawSprite = (ctx, rows, palette, x, y, px) => {
   });
 };
 
-// 魂斗罗 (Contra) poster — the Subor-era classic, pixel commando style.
-export function createContraPoster() {
+// 3. 魂斗罗 (Contra) poster — the Subor-era classic, pixel commando style.
+export function createContraPosterCanvas() {
   const canvas = makeCanvas(512, 768);
   const ctx = canvas.getContext('2d');
 
@@ -269,11 +287,15 @@ export function createContraPoster() {
   ctx.lineWidth = 8;
   ctx.strokeRect(16, 16, 480, 736);
 
-  return asTexture(canvas);
+  return canvas;
 }
 
-// 坦克大战 (Battle City / Tank 1990) poster with the brick walls and eagle base.
-export function createTankPoster() {
+export function createContraPoster() {
+  return asTexture(createContraPosterCanvas());
+}
+
+// 4. 坦克大战 (Battle City / Tank 1990) poster with the brick walls and eagle base.
+export function createTankPosterCanvas() {
   const canvas = makeCanvas(512, 768);
   const ctx = canvas.getContext('2d');
 
@@ -324,11 +346,15 @@ export function createTankPoster() {
   ctx.font = '500 30px monospace';
   ctx.fillText('1 PLAYER  ·  2 PLAYERS', 256, 690);
 
-  return asTexture(canvas);
+  return canvas;
 }
 
-// 乒乓 ping pong poster — national sport, red & gold.
-export function createPingPongPoster() {
+export function createTankPoster() {
+  return asTexture(createTankPosterCanvas());
+}
+
+// 5. 乒乓 ping pong poster — national sport, red & gold.
+export function createPingPongPosterCanvas() {
   const canvas = makeCanvas(512, 768);
   const ctx = canvas.getContext('2d');
 
@@ -382,7 +408,11 @@ export function createPingPongPoster() {
   ctx.lineWidth = 10;
   ctx.strokeRect(18, 18, 476, 732);
 
-  return asTexture(canvas);
+  return canvas;
+}
+
+export function createPingPongPoster() {
+  return asTexture(createPingPongPosterCanvas());
 }
 
 // Vector heart — the ❤ glyph renders as a tofu box in some canvas font stacks,
@@ -397,26 +427,8 @@ const drawHeart = (ctx, x, y, size, color) => {
   ctx.fill();
 };
 
-// Vector five-point star (same tofu-glyph concern as the heart).
-const drawStar = (ctx, x, y, size, color) => {
-  const outer = size / 2;
-  const inner = outer * 0.42;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  for (let i = 0; i < 10; i += 1) {
-    const r = i % 2 === 0 ? outer : inner;
-    const a = -Math.PI / 2 + (i * Math.PI) / 5;
-    const px = x + Math.cos(a) * r;
-    const py = y + Math.sin(a) * r;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
-  }
-  ctx.closePath();
-  ctx.fill();
-};
-
-// "I ❤ 上海" duvet top — red base, alternating rows of hearts and characters.
-export function createShanghaiBedsheet() {
+// 6. "I ❤ 上海" duvet top — red base, central motif, decorated exclusively with hearts (no stars).
+export function createShanghaiBedsheetCanvas() {
   const canvas = makeCanvas(512, 512);
   const ctx = canvas.getContext('2d');
 
@@ -435,23 +447,32 @@ export function createShanghaiBedsheet() {
   ctx.font = '800 84px "Noto Sans SC", sans-serif';
   ctx.fillText('上海', 372, 252);
 
-  // Scatter small gold hearts and stars around the border
+  // Scatter cute gold and cream hearts around the border (all stars removed).
   const spots = [
-    [60, 60], [160, 90], [280, 55], [390, 85], [470, 60],
-    [50, 170], [460, 180], [55, 330], [465, 340],
-    [70, 450], [180, 425], [300, 460], [410, 430], [480, 470],
+    [60, 60], [160, 80], [260, 55], [360, 80], [455, 60],
+    [50, 165], [462, 165], [50, 335], [462, 335],
+    [60, 452], [160, 435], [260, 458], [360, 435], [455, 452],
+    // Inner accent hearts
+    [105, 115], [405, 115], [105, 385], [405, 385],
   ];
   spots.forEach(([x, y], i) => {
-    if (i % 2) drawStar(ctx, x, y, 34, '#ffd700');
-    else drawHeart(ctx, x, y, 34, 'rgba(255, 242, 204, 0.85)');
+    if (i % 2 === 0) {
+      drawHeart(ctx, x, y, 32, '#ffd700');
+    } else {
+      drawHeart(ctx, x, y, 28, 'rgba(255, 242, 204, 0.9)');
+    }
   });
 
   ctx.textBaseline = 'alphabetic';
-  return asTexture(canvas);
+  return canvas;
 }
 
-// Matching pillow top — gold base with 上海 and small hearts.
-export function createShanghaiPillow() {
+export function createShanghaiBedsheet() {
+  return asTexture(createShanghaiBedsheetCanvas());
+}
+
+// 7. Matching pillow top — gold base with 上海 and small hearts.
+export function createShanghaiPillowCanvas() {
   const canvas = makeCanvas(512, 512);
   const ctx = canvas.getContext('2d');
 
@@ -470,5 +491,262 @@ export function createShanghaiPillow() {
   });
 
   ctx.textBaseline = 'alphabetic';
-  return asTexture(canvas);
+  return canvas;
+}
+
+export function createShanghaiPillow() {
+  return asTexture(createShanghaiPillowCanvas());
+}
+
+// 8. 咪咪虾条 (Mimi Shrimp Strips) — iconic 1990s Chinese childhood snack packet.
+export function createMimiSnackTextureCanvas() {
+  const canvas = makeCanvas(512, 512);
+  const ctx = canvas.getContext('2d');
+
+  // Background: Sunny snack yellow with subtle glossy foil gradient
+  const bg = ctx.createLinearGradient(0, 0, 512, 512);
+  bg.addColorStop(0, '#ffd83b');
+  bg.addColorStop(0.3, '#ffca18');
+  bg.addColorStop(0.7, '#ffbe0b');
+  bg.addColorStop(1, '#ffa500');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Foil diagonal highlights / sheen
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+  ctx.beginPath();
+  ctx.moveTo(0, 120);
+  ctx.lineTo(260, 0);
+  ctx.lineTo(340, 0);
+  ctx.lineTo(0, 200);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(80, 512);
+  ctx.lineTo(512, 80);
+  ctx.lineTo(512, 160);
+  ctx.lineTo(160, 512);
+  ctx.fill();
+  ctx.restore();
+
+  // Top crimped seal band
+  ctx.fillStyle = '#c8102e';
+  ctx.fillRect(0, 0, 512, 42);
+  // Crimp serrations/ridges
+  for (let x = 0; x < 512; x += 8) {
+    ctx.fillStyle = x % 16 === 0 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.25)';
+    ctx.fillRect(x, 0, 4, 42);
+  }
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('MIMI · 经典休闲食品', 256, 28);
+  ctx.letterSpacing = '0px';
+
+  // Bottom crimped seal band
+  ctx.fillStyle = '#c8102e';
+  ctx.fillRect(0, 470, 512, 42);
+  for (let x = 0; x < 512; x += 8) {
+    ctx.fillStyle = x % 16 === 0 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.25)';
+    ctx.fillRect(x, 470, 4, 42);
+  }
+
+  // Top brand banner: Red ribbon badge with "咪咪"
+  ctx.fillStyle = '#c8102e';
+  ctx.beginPath();
+  ctx.roundRect(110, 58, 292, 70, [16, 16, 24, 24]);
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Chinese brand name: "咪咪"
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 52px "Noto Sans SC", sans-serif';
+  ctx.fillText('咪 咪', 256, 112);
+
+  // English cursive / retro logo: "Mimi"
+  ctx.fillStyle = '#1565c0';
+  ctx.font = 'italic 900 36px sans-serif';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 6;
+  ctx.strokeText('Mimi', 256, 168);
+  ctx.fillText('Mimi', 256, 168);
+
+  // Main product title: "虾 条" (Giant bold red with white stroke and drop shadow)
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.font = '900 84px "Noto Sans SC", sans-serif';
+  ctx.fillText('虾 条', 260, 260); // Drop shadow
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 12;
+  ctx.lineJoin = 'round';
+  ctx.strokeText('虾 条', 256, 254);
+  ctx.fillStyle = '#d32f2f';
+  ctx.fillText('虾 条', 256, 254);
+  ctx.restore();
+
+  // English subtitle: "PRAWN CRACKERS"
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#0d47a1';
+  ctx.font = '800 22px sans-serif';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('PRAWN CRACKERS', 256, 292);
+  ctx.letterSpacing = '0px';
+
+  // Mascot Illustration: Cute cartoon Mimi cat on the left
+  ctx.save();
+  ctx.translate(125, 375);
+  // Cat face (white circle)
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(0, 0, 48, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#333333';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Cat ears
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(-38, -25);
+  ctx.lineTo(-48, -62);
+  ctx.lineTo(-18, -44);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ff8da1';
+  ctx.beginPath();
+  ctx.moveTo(-36, -28);
+  ctx.lineTo(-44, -54);
+  ctx.lineTo(-22, -42);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(38, -25);
+  ctx.lineTo(48, -62);
+  ctx.lineTo(18, -44);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ff8da1';
+  ctx.beginPath();
+  ctx.moveTo(36, -28);
+  ctx.lineTo(44, -54);
+  ctx.lineTo(22, -42);
+  ctx.closePath();
+  ctx.fill();
+
+  // Sailor hat
+  ctx.fillStyle = '#1565c0';
+  ctx.beginPath();
+  ctx.ellipse(0, -42, 28, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(0, -42, 14, Math.PI, Math.PI * 2);
+  ctx.fill();
+
+  // Eyes (cute smiling arcs)
+  ctx.strokeStyle = '#222222';
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.arc(-18, -4, 8, Math.PI * 0.8, Math.PI * 2.2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(18, -4, 8, Math.PI * 0.8, Math.PI * 2.2);
+  ctx.stroke();
+
+  // Nose and mouth
+  ctx.fillStyle = '#ff4081';
+  ctx.beginPath();
+  ctx.arc(0, 8, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-7, 16, 7, 0, Math.PI * 0.9);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(7, 16, 7, 0.1 * Math.PI, Math.PI);
+  ctx.stroke();
+
+  // Whiskers
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-28, 6);
+  ctx.lineTo(-52, 2);
+  ctx.moveTo(-28, 14);
+  ctx.lineTo(-50, 18);
+  ctx.moveTo(28, 6);
+  ctx.lineTo(52, 2);
+  ctx.moveTo(28, 14);
+  ctx.lineTo(50, 18);
+  ctx.stroke();
+  ctx.restore();
+
+  // Crunchy fried shrimp strips illustration on the right
+  const drawShrimpStick = (sx, sy, angle, len) => {
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#e67e00';
+    ctx.beginPath();
+    ctx.roundRect(-len / 2, -10, len, 20, [8, 8, 8, 8]);
+    ctx.fill();
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.roundRect(-len / 2 + 3, -7, len - 6, 14, [6, 6, 6, 6]);
+    ctx.fill();
+    // Crunchy ridges
+    ctx.fillStyle = '#fff0b3';
+    for (let rx = -len / 2 + 12; rx < len / 2 - 10; rx += 14) {
+      ctx.fillRect(rx, -4, 5, 8);
+    }
+    ctx.restore();
+  };
+  drawShrimpStick(340, 350, -0.35, 110);
+  drawShrimpStick(390, 395, 0.25, 100);
+  drawShrimpStick(320, 420, -0.15, 95);
+
+  // Nostalgic 90s badge stamps
+  ctx.save();
+  ctx.translate(430, 165);
+  ctx.rotate(0.2);
+  ctx.fillStyle = '#c8102e';
+  ctx.beginPath();
+  ctx.arc(0, 0, 34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffd700';
+  ctx.font = '800 16px "Noto Sans SC", sans-serif';
+  ctx.fillText('经典', 0, -10);
+  ctx.fillText('香脆', 0, 10);
+  ctx.restore();
+
+  // Net weight & price tag details
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#333333';
+  ctx.font = '700 18px "Noto Sans SC", sans-serif';
+  ctx.fillText('净含量: 20克', 220, 450);
+
+  // Border outline
+  ctx.strokeStyle = '#e65100';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, 506, 506);
+
+  return canvas;
+}
+
+export function createMimiSnackTexture() {
+  return asTexture(createMimiSnackTextureCanvas());
 }
