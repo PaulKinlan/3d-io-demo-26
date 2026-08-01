@@ -226,6 +226,34 @@
       object-fit: contain;
     }
 
+    .video-container {
+      position: relative;
+      width: 89.8vw;
+      height: 50.625vw;
+      /* 16:9 aspect ratio */
+      max-width: 900px;
+      max-height: 600px;
+      background: #15171e;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .logo {
+      height: 60px;
+      margin-bottom: 24px;
+    }
+
     .active .subtitle-text {
       animation: fade-in 1s 1s ease forwards;
     }
@@ -310,9 +338,12 @@
   <div class="nav-area nav-right" id="next" title="Next Slide"></div>
 
   <div class="slides">
-    <div class="slide title-slide active">
-      <h1><span class="zh">智能体与 Web 平台</span>Agents &amp; the Web Platform</h1>
-      <p>Google I/O Connect · 上海 Shanghai</p>
+    <div class="slide image-slide active">
+      <img src="dom-structure.png" alt="DOM Structure">
+    </div>
+
+    <div class="slide image-slide">
+      <img src="mcp-flow.png" alt="MCP Flow">
     </div>
 
     <div class="slide image-slide">
@@ -352,10 +383,11 @@
     </div>
 
     <div class="slide custom-slide">
-      <img src="modernize.gif" alt="Modernize with MWG" style="margin: 1em; width: 100%; border-radius: 1em;
-    box-shadow: black 0 0 1em;">
-      <div class="slide-caption">使用 Modern Web Guidance 现代化你的网站
-        <span class="en">Modernise your site with Modern Web Guidance</span>
+      <img src="wetv-logo.webp" class="logo" alt="WeTV">
+      <div class="video-container">
+        <video autoplay loop muted playsinline src="devtools-mcp-wetv.mp4">
+          Your browser does not support the video tag.
+        </video>
       </div>
     </div>
 
@@ -378,6 +410,11 @@
       slides[current].classList.remove('active');
       current = (index + slides.length) % slides.length;
       slides[current].classList.add('active');
+      const vid = slides[current].querySelector('video');
+      if (vid) {
+        vid.currentTime = 0;
+        vid.play().catch(() => {});
+      }
     }
 
     function checkHash() {

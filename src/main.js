@@ -652,9 +652,7 @@ window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 't') {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
-      const deck = window.isShanghaiVersion
-        ? '/demos/shanghai-io-connect/index.html'
-        : '/demos/bengaluru-io-connect/index.html';
+      const deck = '/demos/shanghai-io-connect/index.html';
       iframe.src = deck;
       iframe.focus();
       previousMonitorUrl = deck;
@@ -695,10 +693,7 @@ window.addEventListener('keydown', (e) => {
     const iframe = document.querySelector('.monitor-html-frame');
     if (iframe) {
       const slideNum = e.key === '0' ? 10 : e.key;
-      // Number keys target whichever city deck is active
-      const deck = window.isShanghaiVersion
-        ? '/demos/shanghai-io-connect/index.html'
-        : '/demos/bengaluru-io-connect/index.html';
+      const deck = '/demos/shanghai-io-connect/index.html';
       iframe.src = `${deck}#slide-${slideNum}`;
       iframe.focus();
       previousMonitorUrl = `${deck}#slide-${slideNum}`;
